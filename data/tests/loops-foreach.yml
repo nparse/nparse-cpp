@@ -1,0 +1,16 @@
+script:
+    - loops-foreach.ng
+
+config:
+    entry_point:       S
+    grammar_pool:      1024
+    input_pool:        4
+
+C1:
+    config:
+        entry_point:    loops.C1
+    input:      ""
+    check:
+        result.May:         5
+        result.July:        7
+        result.September:   9

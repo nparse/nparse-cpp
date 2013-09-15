@@ -1,0 +1,5 @@
+include/nparse/_version.hpp
+source/nparse-port/php/*
+bin/*
+lib/*
+build/*

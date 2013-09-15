@@ -1,0 +1,39 @@
+script:
+    - port.ng
+
+config:
+    entry_point:       S
+    grammar_pool:      1024 # 1MB for grammar
+    input_pool:        4    # 4K for input
+
+case1:
+    input:             hello world
+    traces:            2
+    forest:
+        - (S (Greeting hello) (Object (Entity (Inanimate world))))
+        - (S (Greeting hello) (Object (Entity (Animate world))))
+    check:
+        z.U.x:         hello
+        z.U.y:         world
+        z.V:           -1
+
+case2:
+    input:             goodbye world
+    traces:            2
+    forest:
+        - (S (Greeting goodbye) (Object (Entity (Inanimate world))))
+        - (S (Greeting goodbye) (Object (Entity (Animate world))))
+    check:
+        x:             goodbye
+        y:             world
+        z.V:           -1
+
+case3:
+    input:             hello user
+    traces:            1
+    forest:
+        - (S (Greeting hello) (Object (Entity (Animate user))))
+    check:
+        x:             hello
+        y:             user
+        z.V:           -1

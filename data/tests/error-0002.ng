@@ -1,0 +1,5 @@
+// syntax error:
+// missing semicolon at the end of statement
+foo {
+	bar()
+};

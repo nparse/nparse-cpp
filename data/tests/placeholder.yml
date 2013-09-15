@@ -1,0 +1,53 @@
+script:
+    placeholder.ng
+
+config:
+    grammar_pool:      1024
+    input_pool:        16
+
+test1:
+    config:
+        entry_point:   S1
+    input:             10, 20, 30, 40, 50
+    check:
+        res:           504030
+
+test2:
+    config:
+        entry_point:   S2
+    input:             10, 20, 30, 40, 50
+    check:
+        res:           120
+
+test3:
+    config:
+        entry_point:   S3
+    input:             10, 20, 30, 40, 50
+    check:
+        res:           <50><40><30>
+
+test4:
+    config:
+        entry_point:   S4
+    input:             alpha beta gamma
+    check:
+        res:           gamma-beta-alpha
+
+test5.1:
+    config:
+        entry_point:   S5
+    input:             alpha beta gamma 1
+    check:
+        res:           gamma
+test5.2:
+    config:
+        entry_point:   S5
+    input:             alpha beta gamma 2
+    check:
+        res:           beta
+test5.3:
+    config:
+        entry_point:   S5
+    input:             alpha beta gamma 3
+    check:
+        res:           alpha

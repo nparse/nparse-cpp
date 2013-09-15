@@ -1,0 +1,27 @@
+script:
+    - if.ng
+
+config:
+    entry_point:       S
+    grammar_pool:      1024
+    input_pool:        4
+
+caseT:
+    config:
+        condition:     true
+    input:             ""
+    check:
+        result1:       T
+        result2:       T
+        result3:       F
+        result4:       T
+
+caseF:
+    config:
+        condition:     false
+    input:             ""
+    check:
+        result1:       F
+        result2:       F
+        result3:       T
+        result4:       F

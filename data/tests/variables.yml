@@ -1,0 +1,26 @@
+script:
+    - variables.ng
+
+config:
+    entry_point:       S
+    entry_label:       100
+    grammar_pool:      1024
+    input_pool:        4
+
+case1:
+    config:
+        entry_point: common-variable-operations
+    input:      ""
+    check:
+        v1:     true
+        v2:     false
+        v3:     123
+        v4:     -123
+        v5:     2.000000e-05 
+        v6:     -1.600000e+08
+        v7:     ""
+        v8:     hello
+        v9:     "{z: 123, y: false, x: true}"
+        v10:    "{v3: 123, v2: false, v1: true}"
+        v11:    false
+        v12:    true

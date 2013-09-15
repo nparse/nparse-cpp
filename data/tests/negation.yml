@@ -1,0 +1,161 @@
+script:
+    - negation.ng
+
+config:
+    grammar_pool:      1024
+    input_pool:        1024
+
+test1_1:
+    config: { entry_point: S1 }
+    input:             alpha
+    traces:            1
+
+test1_2:
+    config: { entry_point: S1 }
+    input:             alpha beta
+    traces:            1
+
+test1_3:
+    config: { entry_point: S1 }
+    input:             alpha beta gamma
+    traces:            0
+
+test1_4:
+    config: { entry_point: S1 }
+    input:             10
+    traces:            0
+
+test1_5:
+    config: { entry_point: S1 }
+    input:             10 20
+    traces:            0
+
+test1_5:
+    config: { entry_point: S1 }
+    input:             10 20 30
+    traces:            0
+
+test1_6:
+    config: { entry_point: S1 }
+    input:             a10 b20 c30
+    traces:            1
+
+test2_1:
+    config: { entry_point: S2 }
+    input:             alpha
+    traces:            0
+
+test2_2:
+    config: { entry_point: S2 }
+    input:             a l p h a
+    traces:            1
+    forest:
+        - (S2 (T2 a l p h a))
+
+test2_3:
+    config: { entry_point: S2 }
+    input:             beta
+    traces:            2
+    forest:
+        - (S2 (T1 beta))
+        - (S2 (T2 beta))
+
+test2_4:
+    config: { entry_point: S2 }
+    input:             b e t a
+    traces:            2
+    forest:
+        - (S2 (T1 b e t a))
+        - (S2 (T2 b e t a))
+
+test3_1:
+    config: { entry_point: S3 }
+    input:             alpha
+    traces:            0
+
+test3_2:
+    config: { entry_point: S3 }
+    input:             a l p h a
+    traces:            1
+    forest:
+        - (S3 (T2 a l p h a))
+
+test3_3:
+    config: { entry_point: S3 }
+    input:             beta
+    traces:            1
+    forest:
+        - (S3 (T1 beta))
+
+test3_4:
+    config: { entry_point: S3 }
+    input:             b e t a
+    traces:            1
+    forest:
+        - (S3 (T1 b e t a))
+
+test4_1:
+    config: { entry_point: S4 }
+    input:             alpha
+    traces:            0
+
+test4_2:
+    config: { entry_point: S4 }
+    input:             a l p h a
+    traces:            1
+    forest:
+        - (S4 (T2 a l p h a))
+
+test4_3:
+    config: { entry_point: S4 }
+    input:             beta
+    traces:            1
+    forest:
+        - (S4 (T2 beta))
+
+test4_4:
+    config: { entry_point: S4 }
+    input:             b e t a
+    traces:            1
+    forest:
+        - (S4 (T2 b e t a))
+
+test5_1:
+    config: { entry_point: S5 }
+    input:             alpha
+    traces:            0
+
+test5_2:
+    config: { entry_point: S5 }
+    input:             beta
+    traces:            0
+
+test6_1:
+    config: { entry_point: S6 }
+    input:             alpha
+    traces:            0
+
+test6_2:
+    config: { entry_point: S6 }
+    input:             beta
+    traces:            0
+
+test6_3:
+    config: { entry_point: S6 }
+    input:             gamma
+    traces:            1
+
+test7_1:
+    config: { entry_point: S7 }
+    input:             alpha
+    traces:            0
+
+test7_2:
+    config: { entry_point: S7 }
+    input:             beta
+    traces:            0
+
+test7_3:
+    config: { entry_point: S7 }
+    input:             gamma
+    traces:            1

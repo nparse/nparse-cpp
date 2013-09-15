@@ -1,0 +1,11 @@
+script:
+    cogito.ng
+
+config:
+    grammar_pool:      1024
+    input_pool:        10240
+
+test1:
+    input:             (true and false) is false
+    check:
+        result:        it is true, that "(true and false) is false"

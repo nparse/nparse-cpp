@@ -1,0 +1,42 @@
+S :=
+	<L1> (= ^-?\d+ :res)?
+	{
+		// choose accuracy for real value comparison
+		if (eps != null) {
+			eps = real(eps);
+		}
+		else {
+			eps = 1e-9;
+		}
+
+		// block all traces where result differs from expected
+		if (res != null) {
+			err = real(res) - real(L1.res);
+			stop( err < -eps | eps < err );
+		}
+		else {
+			res = L1.res;
+		}
+
+		// generate resolved expression
+		exp = L1.exp + " = $res";
+	}
+
+	^$;
+
+L1 :=
+	<L2>					{ res = L2.res; exp = L2.exp; }
+	(	'?' | '+' <L2>			{ res += L2.res; exp += ' + ' + L2.exp; }
+	||	'?' | '-' <L2>			{ res -= L2.res; exp += ' - ' + L2.exp; }
+	)*;
+
+L2 :=
+	<L3>					{ res = L3.res; exp = L3.exp; }
+	(	'?' | '*' <L3>			{ res *= L3.res; exp += ' * ' + L3.exp; }
+	||	'?' | '/' <L3>			{ res /= L3.res; exp += ' / ' + L3.exp; }
+	||	'?' | '%' <L3>			{ res %= L3.res; exp += ' % ' + L3.exp; }
+	)*;
+
+L3 :=
+		^\d+(?!\.)					{ res = integer($); exp = $; }
+	||	^\d+\.\d+([eE][-+]?\d+)?	{ res = real($);	exp = $; };

@@ -1,0 +1,36 @@
+script:
+    - acceptor-dict-red.ng
+#   - acceptor-dict-phf.ng
+
+config:
+    entry_point:       S1
+    grammar_pool:      1024
+    input_pool:        6
+
+case1: { input: "alpha", check: { res: "one" } }
+case2: { input: "test",  traces: 0 }
+case3: { input: "omega", check: { res: "twenty_four" } }
+case4: { input: "mark1", traces: 2 }
+case5: { input: "mark2", traces: 6 }
+
+case6:
+    config:
+        entry_point:   S2
+    input:             "iota, delta, epsilon"
+    check:
+        iota:          nine 
+        delta:         four 
+        epsilon:       five
+    forest:
+        - "(S2 (dict iota) , (dict delta) , (dict epsilon))"
+
+case7:
+    config:
+        entry_point:   S3
+    input:             "lambda , xi , kappa"
+    check:
+        eleven:        lambda
+        fourteen:      xi
+        ten:           kappa
+    forest:
+        - "(S3 (dict lambda) , (dict xi) , (dict kappa))"

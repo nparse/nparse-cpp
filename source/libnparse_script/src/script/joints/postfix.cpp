@@ -1,0 +1,149 @@
+/*
+ * @file $/source/libnparse_script/src/script/joints/postfix.cpp
+ *
+This file is a part of the "nParse" project -
+        a general purpose parsing framework, version 0.1.2
+
+The MIT License (MIT)
+Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+ 
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+ 
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+ 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+#include <nparse/nparse.hpp>
+#include <anta/sas/symbol.hpp>
+#include <anta/sas/test.hpp>
+#include <anta/sas/regex.hpp>
+#include "../_varname.hpp"
+#include "../_action_range.hpp"
+#include "../../static.hpp"
+#include "_priority.hpp"
+#include "_joints.hpp"
+
+namespace {
+
+using namespace nparse;
+
+class Operator: public IOperator
+{
+	bool kleene_star (const hnd_arg_t& arg)
+	{
+		const IStaging::joint_pointer joint0 = arg. staging. popJoint();
+		IStaging::joint_pointer joint(
+			* *fold_left(joint0)
+		);
+	//	joint -> set_flavor(0, 0);
+		joint -> set_flavor(1, joint0 -> get_flavor(1));
+		arg. staging. pushJoint(joint);
+		return true;
+	}
+
+	bool kleene_plus (const hnd_arg_t& arg)
+	{
+		const IStaging::joint_pointer joint0 = arg. staging. popJoint();
+		IStaging::joint_pointer joint(
+			+ *fold_left(joint0)
+		);
+	//	joint -> set_flavor(0, 0);
+		joint -> set_flavor(1, joint0 -> get_flavor(1));
+		arg. staging. pushJoint(joint);
+		return true;
+	}
+
+	bool omission (const hnd_arg_t& arg)
+	{
+		const IStaging::joint_pointer joint0 = arg. staging. popJoint();
+		IStaging::joint_pointer joint(
+			~ *joint0
+		);
+		joint -> set_flavor(0, joint0 -> get_flavor(0));
+		joint -> set_flavor(1, joint0 -> get_flavor(1));
+		arg. staging. pushJoint(joint);
+		return true;
+	}
+
+	bool assignment (const hnd_arg_t& arg)
+	{
+		action_pointer action(new ActionRange(get_accepted_str(arg)));
+
+		const IStaging::joint_pointer joint0 = arg. staging. popJoint();
+		IStaging::joint_pointer joint(
+			(*joint0) [ action ]
+		);
+		joint -> set_flavor(0, joint0 -> get_flavor(0));
+		joint -> set_flavor(1, joint0 -> get_flavor(1));
+		arg. staging. pushJoint(joint);
+		return true;
+	}
+
+	bool labelling (const hnd_arg_t& arg)
+	{
+		const int label = boost::lexical_cast<int>(
+			encode::wstring(get_accepted_str(arg)));
+		const IStaging::joint_pointer joint0 = arg. staging. popJoint();
+		IStaging::joint_pointer joint(
+			*joint0 * anta::Label<NLG>(label)
+		);
+		joint -> set_flavor(0, joint0 -> get_flavor(0));
+		joint -> set_flavor(1, joint0 -> get_flavor(1));
+		arg. staging. pushJoint(joint);
+		return true;
+	}
+
+	anta::Label<SG> m_kleene_star, m_kleene_plus, m_omission, m_assignment,
+		m_labelling;
+
+public:
+	Operator ()
+	{
+		m_kleene_star = hnd_t(this, &Operator::kleene_star);
+		m_kleene_plus = hnd_t(this, &Operator::kleene_plus);
+		m_omission = hnd_t(this, &Operator::omission);
+		m_assignment = hnd_t(this, &Operator::assignment);
+		m_labelling = hnd_t(this, &Operator::labelling);
+	}
+
+public:
+	int priority () const
+	{
+		return PRIORITY_POSTFIX;
+	}
+
+	void deploy (level_t a_current, level_t a_previous, level_t a_top) const
+	{
+		using namespace anta::ndl::terminals;
+		using boost::proto::lit;
+
+		// @todo: remove abusive negation operator
+		a_current =
+			a_previous
+		>  *(	space
+			>	(	lit('*') * m_kleene_star > !regex("\\A\\s*-?\\d+")
+				|	lit('+') * m_kleene_plus
+				|	lit('?') * m_omission
+				|	':' > space > varName * m_assignment
+				|	'*' > space > regex("\\A-?\\d+") * m_labelling
+				)
+			);
+	}
+
+};
+
+} // namespace
+
+PLUGIN_STATIC_EXPORT_SINGLETON(
+		Operator, joint_postfix, nparse.script.joints.Postfix, 1 )

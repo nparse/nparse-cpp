@@ -1,0 +1,43 @@
+script:
+    - mandelbrot1.ng
+    - mandelbrot2.ng
+    - mandelbrot3.ng
+
+config:
+    entry_point:    mandelbrot.S
+    entry_label:    100
+    grammar_pool:   1024
+    input_pool:     4
+
+case1:
+    config:
+        width:      100
+        height:     49
+    input:          ""
+    check:
+        iteration_count: 34651
+
+case2:
+    config:
+        width:      50
+        height:     24
+    input:          ""
+    check:
+        iteration_count: 8328
+
+case3:
+    config:
+        width:      20
+        height:     9
+    input:          ""
+    check:
+        s: |
+            %%%%%%%****=@##=**%%
+            %%%%***==@+:###:@@=*
+            **====@+##########:=
+            =@:################@
+            ##################+=
+            =@:################@
+            **====@+##########:=
+            %%%%***==@+:###:@@=*
+            %%%%%%%****=@##=**%%

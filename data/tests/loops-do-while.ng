@@ -1,0 +1,32 @@
+namespace loops;
+
+C1 {
+	counter = 0;
+	do ++ counter; while (counter < integer(repeat_number))
+};
+
+C2 {
+	_k = 0;
+	_n = integer(repeat_number);
+	do {
+		++ _k;
+	} while (test2(_k, _n))
+	counter = _k;
+};
+
+C3 {
+	counter = 0;
+	do {
+		increment2();
+	} while (test2(counter, integer(repeat_number)))
+};
+
+function test2 (_iter, _n)
+{
+	test2 = (_iter < _n);
+};
+
+procedure increment2 ()
+{
+	++ counter;
+};

@@ -1,0 +1,17 @@
+common-variable-operations {
+	v1  = true;					// boolean constant
+	v2  = false;				// boolean constant
+	v3  = 123;					// positive integer constant
+	v4  = -123;					// negative integer constant
+	v5  = +0.2e-4;				// real constant
+	v6  = -1.6e+8;				// real constant
+	v7  = '';					// empty string
+	v8  = 'hello';				// regular string
+	v9  = { x:v1, y:v2 };		// associative array
+	v9['z'] = v3;				// parametrized write access
+	v10 = { v1, v2 };			// associative array with key transferring
+	v10.v3 = v3;				// tokenized write access
+	_p = 'v2';					// temporary (scoped) variable
+	v11 = v10[_p];				// parametrized read access
+	v12 = v9.x;					// tokenized read access
+};

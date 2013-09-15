@@ -1,0 +1,27 @@
+S := (	boolean 	, ^.+ { value = boolean($); }
+	||	integer 	, ^.+ { value = integer($); }
+	||	real 		, ^.+ { value = real($); }
+	||	string		, ^.+ { value = string($); }
+	||	array		, ^.+ { value = array($); }
+	||	pass		, ^.+ :arg $testPass
+	||  stop		, ^.+ :arg $testStop
+	||	len			, ^.* :arg { value = len($); }
+	||	nth			, <R:testNth {n}>
+	) ^$;
+
+testPass {
+	skip = true;
+	pass( arg == exp );	// Passes the rest of the action
+						// if the condition is satisfied.
+	skip = false;
+};
+
+testStop {
+	stop( arg == exp );	// Interrups the action as well as any consequent
+						// iterations if the condition is satisfied.
+};
+
+testNth :=
+	{ items = {}; count = 0; }
+	(^[^,\s]+ { items[++count] = $; }) % ^\s*,\s*
+	{ self({value: items[n]}); };

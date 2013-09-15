@@ -1,0 +1,31 @@
+script:
+    - left-recursion.ng
+
+config:
+    entry_point:       S
+    grammar_pool:      1024
+    input_pool:        1024
+
+test1:
+    input:             alpha
+    traces:            1
+    forest:
+        - (S (X (Y alpha)))
+
+test2:
+    input:             alpha beta
+    traces:            1
+    forest:
+        - (S (X (X (Y alpha)) (Y beta)))
+
+test3:
+    input:             alpha beta gamma
+    traces:            1
+    forest:
+        - (S (X (X (X (Y alpha)) (Y beta)) (Y gamma)))
+
+test4:
+    input:             alpha beta gamma delta
+    traces:            1
+    forest:
+        - (S (X (X (X (X (Y alpha)) (Y beta)) (Y gamma)) (Y delta)))

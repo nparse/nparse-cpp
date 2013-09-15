@@ -1,0 +1,28 @@
+script:
+    - error-runtime.ng
+
+config:
+    entry_point:       S
+    grammar_pool:      1024
+    input_pool:        4
+
+cast-boolean:
+    config:
+        entry_point:   cast-boolean
+    input:             ""
+    error:
+        - [ "std::bad_cast", 2, 2 ]
+
+cast-integer:
+    config:
+        entry_point:   cast-integer
+    input:             ""
+    error:
+        - [ "bad lexical cast: source type value could not be interpreted as target", 6 ]
+
+cast-real:
+    config:
+        entry_point:   cast-real
+    input:             ""
+    error:
+        - [ "bad lexical cast: source type value could not be interpreted as target" ]

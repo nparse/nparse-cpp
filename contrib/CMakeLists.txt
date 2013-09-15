@@ -1,0 +1,6 @@
+include_directories(./utf8-cpp-2.3.4/include)
+add_subdirectory(./libencode-0.1.0)
+add_subdirectory(./libplugin-0.1.0)
+add_subdirectory(./gtest-1.6.0)
+add_subdirectory(./yaml-cpp-0.5.0)
+add_subdirectory(./cmph-2.0)
