@@ -1,8 +1,8 @@
 /*
- * @file $/source/libnparse_runtime/src/operators/assignment2.cpp
+ * @file $/source/libnparse_runtime/src/operators/assignment.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -29,6 +29,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "_priority.hpp"
 #include "../static.hpp"
 
+#include <anta/dsel/rt/equal_to.hpp>
+#include <anta/dsel/rt/not_equal_to.hpp>
+
 #include <anta/dsel/rt/plus.hpp>
 #include <anta/dsel/rt/minus.hpp>
 #include <anta/dsel/rt/multiplies.hpp>
@@ -42,6 +45,79 @@ using namespace nparse;
 using anta::dsel::ct;
 
 template <typename Func_> class Action;
+
+template <>
+class Action<equal_to>: public BinaryAction
+{
+public:
+	// Overridden from IAction:
+
+	result_type evalVal (IEnvironment& a_env) const
+	{
+		// NOTE: this is value derivation, and not just assignment
+		// return (m_left. evalRef(a_env) = m_right. evalVal(a_env));
+
+		result_type right = m_right. evalVal(a_env);
+		result_type& left = m_left. evalRef(a_env);
+		if (right. is_array())
+		{
+			// All intermediate instances should be stored in the environment,
+			// otherwise it will be impossible to store arrays in temporary
+			// variables and return them as function results.
+			result_type temp = a_env. create(& right. array());
+			left. swap(temp);
+		}
+		else
+		{
+			left. swap(right);
+		}
+		return left;
+	}
+
+public:
+	Action (const anta::range<SG>::type& a_range, IStaging& a_staging):
+		BinaryAction (a_range, a_staging)
+	{
+	}
+
+};
+
+template <>
+class Action<not_equal_to>: public BinaryAction
+{
+public:
+	// Overridden from IAction:
+
+	result_type evalVal (IEnvironment& a_env) const
+	{
+		using anta::dsel::ct;
+
+		const result_type left = m_left. evalVal(a_env);
+		const result_type right = m_right. evalVal(a_env);
+
+		if (left. is_null())
+		{
+			m_left. evalRef(a_env) = right;
+			return result_type(false);
+		}
+		else
+		if ((ct<NLG>(left) != right). fn(a_env). as_boolean())
+		{
+			throw flow_control(false);
+		}
+		else
+		{
+			return result_type(true);
+		}
+	}
+
+public:
+	Action (const anta::range<SG>::type& a_range, IStaging& a_staging):
+		BinaryAction (a_range, a_staging)
+	{
+	}
+
+};
 
 template <>
 class Action<plus>: public BinaryAction
@@ -160,7 +236,7 @@ public:
 
 	int priority () const
 	{
-		return PRIORITY_ASSIGNMENT2;
+		return PRIORITY_ASSIGNMENT;
 	}
 
 	void deploy (level_t a_current, level_t a_previous, level_t a_top) const
@@ -168,12 +244,14 @@ public:
 		using namespace anta::ndl::terminals;
 		a_current =
 			a_previous
-		>  *(	space
-			>	(	"+=" * M0 > space > a_previous > pass * M1 * m_plus
-				|	"-=" * M0 > space > a_previous > pass * M1 * m_minus
-				|	"*=" * M0 > space > a_previous > pass * M1 * m_multiplies
-				|	"/=" * M0 > space > a_previous > pass * M1 * m_divides
-				|	"%=" * M0 > space > a_previous > pass * M1 * m_modulus
+		>  ~(	space
+			>	(	"="  * M0 > space > a_current > pass * M1 * m_equal_to
+				|	"?=" * M0 > space > a_current > pass * M1 * m_not_equal_to
+				|	"+=" * M0 > space > a_current > pass * M1 * m_plus
+				|	"-=" * M0 > space > a_current > pass * M1 * m_minus
+				|	"*=" * M0 > space > a_current > pass * M1 * m_multiplies
+				|	"/=" * M0 > space > a_current > pass * M1 * m_divides
+				|	"%=" * M0 > space > a_current > pass * M1 * m_modulus
 				)
 			);
 	}
@@ -181,6 +259,8 @@ public:
 public:
 	Operator ()
 	{
+		m_equal_to = hnd_t(this, &Operator::push<equal_to>);
+		m_not_equal_to = hnd_t(this, &Operator::push<not_equal_to>);
 		m_plus = hnd_t(this, &Operator::push<plus>);
 		m_minus = hnd_t(this, &Operator::push<minus>);
 		m_multiplies = hnd_t(this, &Operator::push<multiplies>);
@@ -198,11 +278,12 @@ private:
 		return true;
 	}
 
-	anta::Label<SG> m_plus, m_minus, m_multiplies, m_divides, m_modulus;
+	anta::Label<SG> m_equal_to, m_not_equal_to, m_plus, m_minus, m_multiplies,
+		m_divides, m_modulus;
 
 };
 
 } // namespace
 
 PLUGIN_STATIC_EXPORT_SINGLETON(
-		Operator, operator_assignment2, nparse.script.operators.Assignment2, 1 )
+		Operator, operator_assignment, nparse.script.operators.Assignment, 1 )

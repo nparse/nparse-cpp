@@ -2,7 +2,7 @@
  * @file $/source/libnparse_runtime/src/operators/_binary_operator.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -55,20 +55,38 @@ public:
 			throw std::logic_error("operator designation cannot be empty");
 
 		case 1:
-			a_current = a_previous > *(space > m_designation[0] * M0 > space
-					> a_previous > pass * M1 * m_action);
+			if (m_left_associative)
+			{
+				a_current = a_previous > *(space > m_designation[0] * M0 > space
+						> a_top > pass * M1 * m_action);
+			}
+			else
+			{
+				a_current = a_previous > ~(space > m_designation[0] * M0 > space
+						> a_current > pass * M1 * m_action);
+			}
 			break;
 
 		default:
-			a_current = a_previous > *(space > m_designation * M0 > space
-					> a_previous > pass * M1 * m_action);
+			if (m_left_associative)
+			{
+				a_current = a_previous > *(space > m_designation * M0 > space
+						> a_top > pass * M1 * m_action);
+			}
+			else
+			{
+				a_current = a_previous > ~(space > m_designation * M0 > space
+						> a_current > pass * M1 * m_action);
+			}
 			break;
 		}
 	}
 
 public:
-	BinaryOperator (const int a_priority, const std::string a_designation):
-		m_priority (a_priority), m_designation (a_designation)
+	BinaryOperator (const int a_priority, const std::string a_designation,
+			const bool a_left_associative = true):
+		m_priority (a_priority), m_designation (a_designation),
+		m_left_associative (a_left_associative)
 	{
 		m_action = hnd_t(this, &BinaryOperator::push_action);
 	}
@@ -94,6 +112,7 @@ protected:
 
 	const int m_priority;
 	const std::string m_designation;
+	const bool m_left_associative;
 	anta::Label<SG> m_action;
 
 };

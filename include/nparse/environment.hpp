@@ -2,7 +2,7 @@
  * @file $/include/nparse/environment.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -80,6 +80,19 @@ IEnvironment::~IEnvironment ()
 anta::Traveller<NLG>& IEnvironment::get_traveller () const
 {
 	return m_traveller;
+}
+
+// Get the current context.
+anta::ndl::Context<NLG>* IEnvironment::self () const
+{
+	if (m_local_context. get() != NULL)
+	{
+		return m_local_context. get();
+	}
+	else
+	{
+		return m_traveller. get_state(). context(NULL);
+	}
 }
 
 // Get a mutable reference to a trace variable from the local context.

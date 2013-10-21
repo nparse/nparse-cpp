@@ -1,5 +1,5 @@
 script:
-    placeholder.ng
+    - placeholder.ng
 
 config:
     grammar_pool:      1024

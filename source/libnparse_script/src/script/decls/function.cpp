@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/script/decls/function.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -114,7 +114,7 @@ public:
 		// NOTE: factory-instance is the owner of itself
 		plugin::manager::instance(). install(
 			static_cast<plugin::IFactory*>(this), a_name, 1, false);
-		m_result = a_name. substr(a_name. find_last_of('.') + 1);
+		m_result = a_name. substr(a_name. find_last_of(".:") + 1);
 	}
 
 	~Function ()

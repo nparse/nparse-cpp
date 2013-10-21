@@ -2,7 +2,7 @@
  * @file $/source/libnparse_runtime/src/functions/self.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -46,8 +46,7 @@ public:
 				<< ex::message("invalid argument count");
 		}
 
-		const anta::ndl::Context<NLG>* self =
-			a_env. get_traveller(). get_state(). context(NULL);
+		const anta::ndl::Context<NLG>* self = a_env. self();
 
 		if (! a_arguments. empty())
 		{

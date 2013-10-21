@@ -2,7 +2,7 @@
  * @file $/source/libnparse_runtime/src/static.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -47,9 +47,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	operator_relational2,	\
 	operator_logical,		\
 	operator_conditional,	\
-	operator_assignment1,	\
-	operator_assignment2,	\
-	operator_assumption,	\
+	operator_assignment,	\
 	operator_comma,			\
 	function_boolean,		\
 	function_integer,		\
@@ -58,6 +56,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	function_array,			\
 	function_self,			\
 	function_ref,			\
+	function_call,			\
 	function_swap,			\
 	function_pass,			\
 	function_stop,			\

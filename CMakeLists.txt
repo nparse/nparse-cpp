@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.6.2)
 project(nParse)
 set(NPARSE_MAJOR 0)
 set(NPARSE_MINOR 1)
-set(NPARSE_PATCH 2)
+set(NPARSE_PATCH 3)
 
 #
 #	Build configuration.

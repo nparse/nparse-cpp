@@ -2,7 +2,7 @@
  * @file $/source/nparse/src/nparse_app.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -765,7 +765,6 @@ void nParseApp::print_variables (const anta::Traveller<NLG>& a_trav)
 			out << encode::string((*s) -> val(key). as_string())
 				<< '\n';
 		}
-		out << '\n';
 	}
 }
 

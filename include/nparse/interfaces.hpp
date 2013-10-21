@@ -2,7 +2,7 @@
  * @file $/include/nparse/interfaces.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -131,6 +131,11 @@ public:
 	 *	Get the traveller.
 	 */
 	inline anta::Traveller<NLG>& get_traveller () const;
+
+	/**
+	 *	Get the current context.
+	 */
+	inline anta::ndl::Context<NLG>* self () const;
 
 	/**
 	 *	Get a mutable reference to a trace variable from the local context.
@@ -468,6 +473,13 @@ public:
 			const arguments_type& a_arguments) const
 	{
 		throw ex::no_lvalue();
+	}
+
+	/**
+	 *	Link the function to a staging object and a namespace.
+	 */
+	virtual void link (IStaging* a_staging, const string_t& a_namespace)
+	{
 	}
 
 };

@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/script/terms/call.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -59,8 +59,9 @@ public:
 
 public:
 	Action (const anta::range<SG>::type& a_range, const std::string& a_name,
-			IFunction::arguments_type& a_arguments):
-		LinkedAction (a_range), m_name (a_name)
+			IFunction::arguments_type& a_arguments, IStaging& a_staging):
+		LinkedAction (a_range), m_name (a_name), m_staging (&a_staging),
+		m_namespace (a_staging. getNamespace())
 	{
 		m_arguments. swap(a_arguments);
 	}
@@ -73,6 +74,7 @@ private:
 			try
 			{
 				m_instance. instantiate(m_name);
+				m_instance -> link(m_staging, m_namespace);
 			}
 			catch (const plugin::unknown_interface& err)
 			{
@@ -88,6 +90,8 @@ private:
 	}
 
 	std::string m_name;
+	IStaging* m_staging;
+	string_t m_namespace;
 	IFunction::arguments_type m_arguments;
 	mutable plugin::instance<IFunction> m_instance;
 
@@ -112,15 +116,15 @@ class Construct: public IConstruct
 		std::stringstream tmp;
 		tmp << "nparse.script.functions." << func;
 
-		// Determine whether a built-in function is referred.
-		if (func. find_last_of('.') == func. npos &&
-				! plugin::manager::instance(). is_provided(tmp. str()))
+		// Built-in functions are preferrable.
+		if (! plugin::manager::instance(). is_provided(tmp. str()))
 		{
 			tmp. str("");
 			tmp. clear();
-			tmp	<< static_cast<const void*>(& arg. staging) << ':'
-				<< arg. staging. getNamespace()
-				<< func;
+			tmp << static_cast<const void*>(& arg. staging) << ':';
+			if (func. find_last_of(L".:") == func. npos)
+				tmp << arg. staging. getNamespace();
+			tmp << func;
 		}
 
 		// Collect the arguments.
@@ -132,7 +136,7 @@ class Construct: public IConstruct
 
 		// Create and push a function call action.
 		action_pointer impl(new Action(
-			get_marked_range(arg), tmp. str(), args
+			get_marked_range(arg), tmp. str(), args, arg. staging
 		));
 		arg. staging. push(impl);
 

@@ -1,0 +1,34 @@
+script:
+    - arithmetics.ng
+
+config:
+    entry_point:       S
+    grammar_pool:      1024
+    input_pool:        16
+
+test_swap: { input: "swap 10 20", check: { x: 20, y: 10 } }
+
+test_assume_1: { input: "assume 1 1", traces: 1 }
+test_assume_2: { input: "assume 1 2", traces: 0 }
+
+test_greater_1: { input: "greater 16 32", check: { value: 32 } }
+test_greater_2: { input: "greater 32 64", check: { value: 64 } }
+
+test_less_1: { input: "less 16 32", check: { value: 16 } }
+test_less_2: { input: "less 32 64", check: { value: 32 } }
+
+test_add_1: { input: "add 1 2 3", check: { z: 3, y: 5, x: 6 } }
+test_add_2: { input: "add 4 5 6", check: { z: 6, y: 11, x: 15 } }
+
+test_substract_1: { input: "substract 1 2 3", check: { z: 3, y: -1, x: 2 } }
+test_substract_2: { input: "substract 4 5 6", check: { z: 6, y: -1, x: 5 } }
+
+test_multiply_1: { input: "multiply 1 2 3", check: { z: 3, y: 6, x: 6 } }
+test_multiply_2: { input: "multiply 4 5 6", check: { z: 6, y: 30, x: 120 } }
+
+test_divide_1: { input: "divide 10 6 3", check: { z: 3, y: 2, x: 5 } }
+test_divide_2: { input: "divide 9 15 5", check: { z: 5, y: 3, x: 3 } }
+
+test_modulus_1: { input: "modulus 17 15 4", check: { z: 4, y: 3, x: 2 } }
+test_modulus_2: { input: "modulus 23 27 29", check: { z: 29, y: 27, x: 23 } }
+test_modulus_3: { input: "modulus 29 27 23", check: { z: 23, y: 4, x: 1 } }

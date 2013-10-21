@@ -1,5 +1,5 @@
 script:
-    cogito.ng
+    - cogito.ng
 
 config:
     grammar_pool:      1024

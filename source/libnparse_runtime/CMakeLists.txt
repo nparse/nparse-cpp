@@ -14,13 +14,12 @@ add_library(nparse_runtime
 	src/operators/relational2.cpp
 	src/operators/logical.cpp
 	src/operators/conditional.cpp
-	src/operators/assignment1.cpp
-	src/operators/assignment2.cpp
-	src/operators/assumption.cpp
+	src/operators/assignment.cpp
 	src/operators/comma.cpp
 	src/functions/cast.cpp
 	src/functions/self.cpp
 	src/functions/ref.cpp
+	src/functions/call.cpp
 	src/functions/swap.cpp
 	src/functions/flow.cpp
 	src/functions/nth.cpp

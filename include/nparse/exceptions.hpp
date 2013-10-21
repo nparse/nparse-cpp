@@ -2,7 +2,7 @@
  * @file $/include/nparse/exceptions.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -46,7 +46,7 @@ NPARSE_CARRIER(function, std::string)
 /**	@} */
 
 /**
- *	Generic error. Server as a base class for all nParse exceptions.
+ *	Generic error. Represents the base class for all nParse exceptions.
  */
 struct generic_error: boost::exception {};
 
@@ -69,13 +69,21 @@ struct runtime_error: generic_error {};
  *	No L-Value. A special case of runtime error thrown on attempt to write to a
  *	read-only port.
  */
-struct no_lvalue: public runtime_error {};
+struct no_lvalue: public runtime_error {
+	no_lvalue () {
+		*this << message("no l-value: writing to a read-only port");
+	}
+};
 
 /**
  *	No R-Value. A special case of runtime error thrown on attempt to read from a
  *	write-only port.
  */
-struct no_rvalue: public runtime_error {};
+struct no_rvalue: public runtime_error {
+	no_rvalue () {
+		*this << message("no r-value: reading from a write-only port");
+	}
+};
 
 }} // namespace nparse::ex
 

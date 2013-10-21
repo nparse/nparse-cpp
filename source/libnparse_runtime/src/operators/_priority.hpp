@@ -2,7 +2,7 @@
  * @file $/source/libnparse_runtime/src/operators/_priority.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -43,9 +43,7 @@ enum operator_priority
 	PRIORITY_RELATIONAL1	= 1100,	// X == Y, X != Y
 	PRIORITY_LOGICAL		= 1200,	// X & Y, X | Y, X ^ Y, X ~ Y
 	PRIORITY_CONDITIONAL	= 1300,	// X ? Y : Z
-	PRIORITY_ASSIGNMENT2	= 1400,	// X *= Y
-	PRIORITY_ASSIGNMENT1	= 1500, // X = Y
-	PRIORITY_ASSUMPTION		= 1600, // X ?= Y
+	PRIORITY_ASSIGNMENT		= 1400,	// X = Y, X ?= Y, X f= Y
 	PRIORITY_COMMA			= 9999	// X, Y
 };
 

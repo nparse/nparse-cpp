@@ -2,7 +2,7 @@
  * @file $/source/nparse-port/src/variable_iterator.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -24,7 +24,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <stdlib.h> // for sprintf
+#include <cstdio> // for sprintf
 #include <nparse/nparse.hpp>
 #include <nparse-port/variable.hpp>
 #include "variable_data.hpp"
@@ -120,7 +120,7 @@ const VariableIterator& VariableIterator::operator++ ()
 VariableIterator& VariableIterator::get (const int a_key)
 {
 	char buf[32];
-	sprintf(buf, "%d", a_key);
+	std::sprintf(buf, "%d", a_key);
 	return get(&*buf);
 }
 

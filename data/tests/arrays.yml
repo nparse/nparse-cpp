@@ -1,0 +1,14 @@
+script:
+    - arrays.ng
+
+config:
+    grammar_pool:      1024
+    input_pool:        16
+
+test1: { config: { entry_point: S1 }, input: '', check: { b.a: alpha } }
+test2: { config: { entry_point: S2 }, input: '', check: { a.x: 1, b.x: 3 } }
+test3: { config: { entry_point: S3 }, input: '', check: { a.x: 3, b.x: 3 } }
+test4: { config: { entry_point: S4 }, input: '', check: { b.z.u: -1 } }
+test5: { config: { entry_point: S5 }, input: '', check: { a.z.x: 1, a.z.z.y: 2 } }
+test6: { config: { entry_point: S6 }, input: '', check: { a.x: 1, a.z.x: 2, a.z.z.x: 3 } }
+test7: { config: { entry_point: S7 }, input: '', check: { y: null, z: 1 } }

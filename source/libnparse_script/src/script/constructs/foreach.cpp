@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/script/constructs/foreach.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.3
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -58,7 +58,8 @@ public:
 	{
 	}
 
-	key_lister& operator= (const typename anta::ndl::context_entry<M_>::type& a_pair)
+	key_lister& operator= (const typename anta::ndl::context_entry<M_>::type&
+			a_pair)
 	{
 		if (! a_pair. first. empty())
 			m_keys. push_back(a_pair. first);
