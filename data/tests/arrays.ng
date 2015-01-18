@@ -43,6 +43,6 @@ S7 {
 	a = {};
 	a.a = a;
 	a.a.x = 1;
-	y = (a.x != null) ? a.x : 'null'; // y <- null
+	y = (a.x != null) ? a.x : null; // y <- null
 	z = a.a.a.x; // z <- 1
 };

@@ -8,11 +8,11 @@ target_link_libraries(nparse
 	nparse_factory
 	nparse_runtime
 	yaml-cpp
-	${BOOST_IOSTREAMS}
-	boost_program_options
-	boost_chrono
-	boost_filesystem
-	boost_system
+	${Boost_IOSTREAMS_LIBRARY}
+	${Boost_PROGRAM_OPTIONS_LIBRARY}
+	${Boost_CHRONO_LIBRARY}
+	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 )
 
 install(TARGETS nparse DESTINATION bin)

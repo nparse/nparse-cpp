@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.6.2)
 project(nParse)
 set(NPARSE_MAJOR 0)
 set(NPARSE_MINOR 1)
-set(NPARSE_PATCH 3)
+set(NPARSE_PATCH 4)
 
 #
 #	Build configuration.
@@ -35,15 +35,24 @@ if(MSVC)
 	)
 endif()
 
-if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	if(CMAKE_COMPILER_IS_GNUCXX)
 		set(COMPILER_FLAGS "-Wall -Wno-parentheses ${COMPILER_FLAGS}")
 	endif()
 	add_definitions(-DDEBUG -DDEBUG_PRINT)
 endif()
 
-set(CMAKE_CXX_FLAGS "${COMPILER_FLAGS} -ansi")
-set(CMAKE_C_FLAGS   "${COMPILER_FLAGS}")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+	set(COMPILER_FLAGS "${COMPILER_FLAGS} -ftemplate-depth=65536")
+endif()
+
+set(CMAKE_C_FLAGS "${COMPILER_FLAGS}")
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+	set(CMAKE_CXX_FLAGS "${COMPILER_FLAGS} -ansi")
+else()
+	set(CMAKE_CXX_FLAGS "${COMPILER_FLAGS}")
+endif()
 
 #
 #	Determine build number.
@@ -101,13 +110,31 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
 #	Direct dependencies: side libraries.
 #
 
+find_package(
+	Boost
+	REQUIRED
+	COMPONENTS
+		chrono
+		filesystem
+		iostreams
+		program_options
+		python
+		regex
+		system
+)
+
+find_package(
+	PythonLibs 2.7
+)
+
 include_directories(
+	${Boost_INCLUDE_DIRS}
 	./contrib/include
 	./contrib/libencode-0.1.0/include
 	./contrib/libplugin-0.1.0/include
 	./contrib/utf8-cpp-2.3.4/include
-	./contrib/yaml-cpp-0.5.0/include
-	./contrib/gtest-1.6.0/include
+	./contrib/yaml-cpp-0.5.1/include
+	./contrib/gtest-1.7.0/include
 )
 
 add_subdirectory(contrib EXCLUDE_FROM_ALL)
@@ -116,25 +143,17 @@ add_subdirectory(contrib EXCLUDE_FROM_ALL)
 #	Optional dependencies.
 #
 
-find_library(BOOST_IOSTREAMS boost_iostreams)
-if(BOOST_IOSTREAMS MATCHES "NOTFOUND")
-	set(BOOST_IOSTREAMS "")
-	message("!! nParse: swap file for state pool is disabled")
+if(Boost_IOSTREAMS_FOUND STREQUAL "ON")
+	add_definitions(-DNPARSE_SWAP_FILE)
 else()
-	add_definitions(
-		-DNPARSE_SWAP_FILE
-	)
+	message("!! nParse: swap file for state pool is disabled")
 endif()
 
-find_library(BOOST_PYTHON boost_python)
-find_package(PythonLibs 2.7)
-if(NOT PYTHONLIBS_FOUND OR BOOST_PYTHON MATCHES "NOTFOUND")
-	set(BOOST_PYTHON "")
-	set(PYTHON_LIBRARIES "")
-	set(PYTHON_INCLUDE_DIRS "")
-	message("!! nParse: Python support is disabled")
-else()
+if(Boost_PYTHON_FOUND STREQUAL "ON" AND PYTHONLIBS_FOUND)
 	include_directories(${PYTHON_INCLUDE_DIRS})
+else()
+	set(PYTHON_LIBRARIES "")
+	message("!! nParse: Python support is disabled")
 endif()
 
 #
@@ -162,7 +181,7 @@ enable_testing()
 
 install(DIRECTORY ./include/nparse-port DESTINATION ./include)
 
-set(CPACK_GENERATOR						"TGZ") 
+set(CPACK_GENERATOR						"TGZ")
 set(CPACK_PACKAGE_NAME					${CMAKE_PROJECT_NAME})
 set(CPACK_PACKAGE_VERSION_MAJOR			${NPARSE_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR			${NPARSE_MINOR})

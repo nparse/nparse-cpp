@@ -2,7 +2,7 @@
  * @file $/source/nparse/src/nparse_app.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.3
+        a general purpose parsing framework, version 0.1.4
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -314,11 +314,11 @@ bool nParseApp::configure (const int argc, char** argv)
 		catch (const std::exception& err)
 		{
 			std::cerr << "warning: " << err. what() << std::endl;
-			if	(	!std::setlocale(LC_ALL, "C")
-				||	!std::setlocale(LC_CTYPE, name. c_str())
+			if	(	!setlocale(LC_ALL, "C")
+				||	!setlocale(LC_CTYPE, name. c_str())
 				)
 			{
-				std::cerr << "warning: std::setlocale also failed" << std::endl;
+				std::cerr << "warning: setlocale() also failed" << std::endl;
 			}
 		}
 	}

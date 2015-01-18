@@ -2,7 +2,7 @@
  * @file $/source/nparse-test/src/test_script.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.4
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -215,7 +215,7 @@ void validate_result (const nparse::Variable& a_result,
 
 	case nparse::Variable::Null:
 	default:
-		ADD_FAILURE() << a_info;
+		EXPECT_TRUE( a_expected. IsNull() ) << a_info;
 		break;
 	}
 }
@@ -630,7 +630,7 @@ void TestScript::SetUp ()
 
 void TestScript::TearDown ()
 {
-	m_config_data. clear();
+	m_config_data. reset();
 	m_scripts. clear();
 }
 

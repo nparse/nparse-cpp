@@ -1,4 +1,4 @@
-if(EXISTS ${BOOST_PYTHON})
+if(${PYTHON_LIBRARIES})
 
 	add_library(nparse-port SHARED
 		src/parser.cpp
@@ -21,10 +21,10 @@ target_link_libraries(nparse-port
 	nparse_script
 	nparse_factory
 	nparse_runtime
-	${BOOST_PYTHON}
-	${BOOST_IOSTREAMS}
-	boost_filesystem
-	boost_system
+	${Boost_PYTHON_LIBRARY}
+	${Boost_IOSTREAMS_LIBRARY}
+	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 	${PYTHON_LIBRARIES}
 )
 

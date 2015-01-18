@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/script/staging.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.4
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -26,13 +26,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <assert.h>
 #include <vector>
-#include <map>
+#include <boost/unordered_map.hpp>
 #include <nparse/nparse.hpp>
 #include <utility/free.hpp>
-#include <utility/hash_gen.hpp>
 #include "../static.hpp"
-
-// bug in boost::filesystem::current_path
 #include "../source_tree.hpp"
 
 namespace {
@@ -47,10 +44,10 @@ class Staging: public IStaging
 	typedef std::vector<IAcceptor*> stored_t;
 	stored_t m_stored;
 
-	typedef std::map<string_t, anta::ndl::Cluster<NLG>*> clusters_t;
+	typedef boost::unordered_map<string_t, anta::ndl::Cluster<NLG>*> clusters_t;
 	clusters_t m_clusters;
 
-	typedef std::map<unsigned long, const IAcceptor*> acceptors_t;
+	typedef boost::unordered_map<string_t, const IAcceptor*> acceptors_t;
 	acceptors_t m_acceptors;
 
 	typedef std::vector<action_pointer> action_stack_t;
@@ -108,10 +105,10 @@ public:
 
 	const anta::Acceptor<NLG>& acceptor (const string_t& a_def)
 	{
+		// @todo: acceptor key (a_def) may depend on current path for cetrain
+		//		  types of acceptors
 		const std::string& path = m_st. current_path();
-		const unsigned long def_hash = utility::hash_gen<unsigned long>::f(
-				a_def. begin(), a_def. end());
-		acceptors_t::iterator found_at = m_acceptors. find(def_hash);
+		acceptors_t::iterator found_at = m_acceptors. find(a_def);
 		if (found_at == m_acceptors. end())
 		{
 			const IAcceptor* instance = NULL;
@@ -121,9 +118,8 @@ public:
 				throw std::logic_error("unable to generate acceptor from"
 						" definition");
 			}
-			// @todo: def_hash may depend on current path for cetrain acceptors
 			const std::pair<acceptors_t::iterator, bool> p =
-				m_acceptors. insert(acceptors_t::value_type(def_hash, instance));
+				m_acceptors. insert(acceptors_t::value_type(a_def, instance));
 			assert(p. second);
 			found_at = p. first;
 		}

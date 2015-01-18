@@ -2,7 +2,7 @@
  * @file $/include/nparse/interfaces.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.3
+        a general purpose parsing framework, version 0.1.4
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -240,11 +240,11 @@ public:
 		}
 		catch (ex::runtime_error& err)
 		{
-			rethrow(err);
+			return rethrow(err);
 		}
 		catch (const std::exception& err)
 		{
-			rethrow(err);
+			return rethrow(err);
 		}
 	}
 
@@ -256,16 +256,16 @@ public:
 		}
 		catch (ex::runtime_error& err)
 		{
-			rethrow(err);
+			return rethrow(err);
 		}
 		catch (const std::exception& err)
 		{
-			rethrow(err);
+			return rethrow(err);
 		}
 	}
 
 private:
-	void rethrow (ex::runtime_error& err) const
+	IAction::result_type& rethrow (ex::runtime_error& err) const
 	{
 		if (! boost::get_error_info<ex::location>(err))
 		{
@@ -276,11 +276,11 @@ private:
 		throw err;
 	}
 
-	void rethrow (const std::exception& err) const
+	IAction::result_type& rethrow (const std::exception& err) const
 	{
 		ex::runtime_error rte;
 		rte << ex::message(err. what());
-		rethrow(rte);
+		return rethrow(rte);
 	}
 
 };

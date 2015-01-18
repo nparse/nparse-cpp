@@ -12,7 +12,7 @@ classes :=
 	|upper
 	|xdigit;
 
-// Rule X1 reads a class definition and stores it in the `class' paramiable,
+// Rule X1 reads a class definition and stores it in the `class' variable,
 // which is being used in the subsequent instantiation of the character class
 // acceptor.
 X1 := $classes:class "[[:$class:]]{1-99}" { self({ (class): $ }); };

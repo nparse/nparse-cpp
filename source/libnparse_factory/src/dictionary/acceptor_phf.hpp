@@ -2,7 +2,7 @@
  * @file $/source/libnparse_factory/src/dictionary/acceptor_phf.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.4
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef SRC_DICTIONARY_ACCEPTOR_PHF_HPP_
 #define SRC_DICTIONARY_ACCEPTOR_PHF_HPP_
 
-// NODE: PHF stands for Perfect Hash Function
+// NOTE: PHF stands for Perfect Hash Function
 
 #include <algorithm>
 #include <utf8.h>

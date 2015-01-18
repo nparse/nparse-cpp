@@ -42,7 +42,7 @@ add_library(nparse_script
 target_link_libraries(nparse_script
 	encode
 	plugin
-	boost_regex
-	boost_filesystem
-	boost_system
+	${Boost_REGEX_LIBRARY}
+	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 )
