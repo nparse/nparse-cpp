@@ -1,4 +1,4 @@
-if(${PYTHON_LIBRARIES})
+if(PYTHON_LIBRARIES)
 
 	add_library(nparse-port SHARED
 		src/parser.cpp
@@ -14,6 +14,7 @@ else()
 		src/variable.cpp
 		src/variable_iterator.cpp
 	)
+	message("!! nParse: Python support is disabled")
 
 endif()
 

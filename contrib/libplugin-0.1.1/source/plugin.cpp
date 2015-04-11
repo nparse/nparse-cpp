@@ -1,6 +1,6 @@
 /*
 The MIT License (MIT)
-Copyright (c) 2010-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2010-2013,2015 Alex S Kudinov <alex@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <map>
 #include <utility/free.hpp>
 #include <plugin/plugin.hpp>
+
+#if __cplusplus < 201103L
+template <typename M_>
+typename M_::iterator erase_from_map(M_& a_map, typename M_::iterator& a_at) {
+	typename M_::iterator next(a_at);
+	++ next;
+	a_map. erase(a_at);
+	return next;
+}
+#else
+template <typename M_>
+typename M_::iterator erase_from_map(M_& a_map, typename M_::iterator& a_at) {
+	return a_map. erase(a_at);
+}
+#endif
 
 namespace plugin {
 
@@ -65,7 +80,7 @@ public:
 		version_map_t::iterator v_at = i_at -> second. find(a_version);
 		if (v_at != i_at -> second. end())
 		{
-			throw interface_version_conflict(); 
+			throw interface_version_conflict();
 		}
 		// Bind the given factory to the specified interface version.
 		const std::pair<version_map_t::iterator, bool> p =
@@ -77,15 +92,27 @@ public:
 	void uninstall (IFactory* a_factory)
 	{
 		for (interface_map_t::iterator i = m_im. begin();
-				i != m_im. end(); ++ i)
+				i != m_im. end(); )
 		{
 			for (version_map_t::iterator j = i -> second. begin();
-					j != i -> second. end(); ++ j)
+					j != i -> second. end(); )
 			{
 				if (j -> second. first == a_factory)
 				{
-					i -> second. erase(j);
+					j = erase_from_map(i -> second, j);
 				}
+				else
+				{
+					++ j;
+				}
+			}
+			if (i -> second. empty())
+			{
+				i = erase_from_map(m_im, i);
+			}
+			else
+			{
+				++ i;
 			}
 		}
 	}

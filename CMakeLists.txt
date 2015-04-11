@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.6.2)
 project(nParse)
 set(NPARSE_MAJOR 0)
 set(NPARSE_MINOR 1)
-set(NPARSE_PATCH 4)
+set(NPARSE_PATCH 5)
 
 #
 #	Build configuration.
@@ -46,13 +46,8 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 	set(COMPILER_FLAGS "${COMPILER_FLAGS} -ftemplate-depth=65536")
 endif()
 
-set(CMAKE_C_FLAGS "${COMPILER_FLAGS}")
-
-if(CMAKE_COMPILER_IS_GNUCXX)
-	set(CMAKE_CXX_FLAGS "${COMPILER_FLAGS} -ansi")
-else()
-	set(CMAKE_CXX_FLAGS "${COMPILER_FLAGS}")
-endif()
+#set(CMAKE_C_FLAGS "${COMPILER_FLAGS}")
+set(CMAKE_CXX_FLAGS "${COMPILER_FLAGS} -std=c++03")
 
 #
 #	Determine build number.
@@ -131,7 +126,7 @@ include_directories(
 	${Boost_INCLUDE_DIRS}
 	./contrib/include
 	./contrib/libencode-0.1.0/include
-	./contrib/libplugin-0.1.0/include
+	./contrib/libplugin-0.1.1/include
 	./contrib/utf8-cpp-2.3.4/include
 	./contrib/yaml-cpp-0.5.1/include
 	./contrib/gtest-1.7.0/include
@@ -151,9 +146,6 @@ endif()
 
 if(Boost_PYTHON_FOUND STREQUAL "ON" AND PYTHONLIBS_FOUND)
 	include_directories(${PYTHON_INCLUDE_DIRS})
-else()
-	set(PYTHON_LIBRARIES "")
-	message("!! nParse: Python support is disabled")
 endif()
 
 #
