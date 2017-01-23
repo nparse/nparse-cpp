@@ -2,7 +2,7 @@
  * @file $/include/nparse/interfaces.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.4
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -135,7 +135,7 @@ public:
 	/**
 	 *	Get the current context.
 	 */
-	inline anta::ndl::Context<NLG>* self () const;
+	inline anta::ndl::Context<NLG>* self (const bool a_create = false) const;
 
 	/**
 	 *	Get a mutable reference to a trace variable from the local context.
@@ -150,7 +150,7 @@ public:
 	/**
 	 *	Create an additional stored context.
 	 */
-	inline boost::shared_ptr<anta::ndl::Context<NLG> > create (
+	inline anta::ndl::context<NLG>::type create (
 			const anta::ndl::Context<NLG>* a_ancestor = NULL) const;
 
 public:
@@ -326,9 +326,14 @@ public:
 
 	/**
 	 *	Add a source file to the import queue.
-	 */
+	 *	@{ */
 	virtual void import (const std::string& a_path, const bool a_reset = false)
 		= 0;
+
+	// This version of the import function is designed to remember the exact
+	// location of the corresponding import declaration in the source script.
+	virtual void import (const anta::range<SG>::type& a_path) = 0;
+	/**	@} */
 
 	/**
 	 *	Load next source file from the import queue.

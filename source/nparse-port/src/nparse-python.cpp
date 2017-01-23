@@ -2,7 +2,7 @@
  * @file $/source/nparse-port/src/nparse-python.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <vector>
 #include <string>
+#include <map>
 #include <sstream>
 #include <boost/python.hpp>
 #include <encode/encode.hpp>
@@ -36,6 +37,8 @@ using namespace nparse;
 
 class Variable2Python
 {
+	typedef std::map<std::size_t, PyObject*> recursive_references_t;
+
 	template <typename T_>
 	static PyObject* make_ptr (const T_& a_val)
 	{
@@ -43,7 +46,7 @@ class Variable2Python
 	}
 
 	static PyObject* convert (const Variable& a_var, char* a_buf,
-			const unsigned int a_buf_len)
+			const unsigned int a_buf_len, recursive_references_t& a_recref)
 	{
 		PyObject* res = NULL;
 
@@ -68,11 +71,25 @@ class Variable2Python
 			break;
 
 		case Variable::Array:
-			res = PyDict_New();
-			for (VariableIterator i(a_var. begin()); ! i. end(); ++ i)
 			{
-				PyDict_SetItem(res, make_ptr(i -> key()),
-						convert(*i, a_buf, a_buf_len));
+				const std::size_t id = a_var. id();
+				assert(id != 0);
+				recursive_references_t::iterator found_at = a_recref. find(id);
+				if (found_at != a_recref. end())
+				{
+					res = incref(found_at -> second);
+				}
+				else
+				{
+					res = PyDict_New();
+					a_recref. insert(
+							recursive_references_t::value_type(id, res));
+					for (VariableIterator i(a_var. begin()); ! i. end(); ++ i)
+					{
+						PyDict_SetItem(res, make_ptr(i -> key()),
+								convert(*i, a_buf, a_buf_len, a_recref));
+					}
+				}
 			}
 			break;
 
@@ -90,7 +107,8 @@ public:
 	static PyObject* convert (const Variable& a_var)
 	{
 		char buf[NPARSE_STRBUF_SIZE];
-		return convert(a_var, buf, sizeof(buf));
+		recursive_references_t recref;
+		return convert(a_var, buf, sizeof(buf), recref);
 	}
 
 };
@@ -131,12 +149,23 @@ public:
 		Parser::load(a_filename, NULL);
 	}
 
+	bool parse (const std::wstring& a_input)
+	{
+		m_text. assign(a_input);
+		return Parser::parse(m_text. data(), m_text. size());
+	}
+
 	template <typename Input_>
 	bool parse (Input_ a_input)
 	{
 		// @todo: is there anything better than just keeping a copy?
 		encode::wstring(a_input). swap(m_text);
 		return Parser::parse(m_text. data(), m_text. size());
+	}
+
+	Variable get_all () const
+	{
+		return get();
 	}
 
 	std::string node () const
@@ -193,6 +222,10 @@ BOOST_PYTHON_MODULE(nparse)
 		.def("compile",				&PParser::compile)
 		.def("load",				&PParser::load)
 
+		.def("parse_unicode",
+				(bool(PParser::*)(const std::wstring&))
+				&PParser::parse)
+
 		.def("parse",
 				(bool(PParser::*)(const char*))
 				&PParser::parse<const char*>)
@@ -206,6 +239,7 @@ BOOST_PYTHON_MODULE(nparse)
 		.def("reset",				&PParser::reset)
 
 		.def("get",					&PParser::get)
+		.def("get",					&PParser::get_all)
 
 		.def("label",				&PParser::label)
 

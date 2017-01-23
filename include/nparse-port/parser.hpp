@@ -2,7 +2,7 @@
  * @file $/include/nparse-port/parser.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -49,6 +49,7 @@ public:
 		stLogicError,
 		stSyntaxError,
 		stSyntaxAmbiguity,
+		stCompileError,
 		stRuntimeError
 	};
 
@@ -95,7 +96,7 @@ public:
 	 *	These functions are used to examine individual trace elements (also
 	 *	known as analysis states).
 	 *	@{ */
-	Variable get (const char* a_variable) const;
+	Variable get (const char* a_variable = NULL) const;
 	int label () const;
 	char* node (char* a_buf, const int a_len) const;
 	char* text (char* a_buf, const int a_len) const;

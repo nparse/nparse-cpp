@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/script/footprint.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -113,7 +113,7 @@ public:
 
 		std::string res;
 		res. reserve(sizeof(flat));
-		for (int i = 0; i < sizeof(flat); ++ i)
+		for (std::size_t i = 0; i < sizeof(flat); ++ i)
 		{
 			x[0] = x[1];
 			x[1] = x[2];

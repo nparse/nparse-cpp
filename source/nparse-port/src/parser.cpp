@@ -2,7 +2,7 @@
  * @file $/source/nparse-port/src/parser.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -175,7 +175,7 @@ struct ParserData
 	}
 
 	// generic error
-	void report (ex::generic_error& a_error)
+	void report (ex::generic_error& a_error, const Parser::status_t a_status)
 	{
 		std::string msg, loc;
 		int line, offset;
@@ -211,7 +211,7 @@ struct ParserData
 
 		messages. push_back(message_t( msg, loc, line, offset ));
 
-		status = Parser::stRuntimeError;
+		status = a_status;
 	}
 
 	// standard exception
@@ -255,7 +255,8 @@ const char* Parser::status_str () const
 {
 	static const char* status_msg[] = {
 		"ready", "steady", "running", "completed", "logic error",
-		"syntax error", "syntax ambiguity", "runtime error" };
+		"syntax error", "syntax ambiguity", "compile error",
+		"runtime error" };
 
 	switch (m_ -> status)
 	{
@@ -266,6 +267,7 @@ const char* Parser::status_str () const
 	case nparse::Parser::stLogicError:
 	case nparse::Parser::stSyntaxError:
 	case nparse::Parser::stSyntaxAmbiguity:
+	case nparse::Parser::stCompileError:
 	case nparse::Parser::stRuntimeError:
 		return status_msg[ static_cast<int>(m_ -> status) ];
 
@@ -331,19 +333,11 @@ void Parser::load (const char* a_filename, const char* a_grammar)
 				return;
 			}
 
-			try
+			tracer. next();
+			while (tracer. step())
 			{
-				tracer. next();
-				while (tracer. step())
-				{
-					tracer -> get_arc(). get_label(). execute(
-						*(m_ -> staging), *tracer);
-				}
-			}
-			catch (ex::compile_error& err)
-			{
-				m_ -> report(err);
-				return;
+				tracer -> get_arc(). get_label(). execute(
+					*(m_ -> staging), *tracer);
 			}
 
 			tracer. rewind();
@@ -369,6 +363,10 @@ void Parser::load (const char* a_filename, const char* a_grammar)
 	catch (const std::exception& err)
 	{
 		m_ -> report(err);
+	}
+	catch (ex::generic_error& err)
+	{
+		m_ -> report(err, stCompileError);
 	}
 }
 
@@ -399,10 +397,6 @@ bool Parser::parse (const wchar_t* a_input, const int a_len)
 		m_ -> status = stCompleted;
 		return true;
 	}
-	catch (ex::runtime_error& err)
-	{
-		m_ -> report(err);
-	}
 	catch (const std::bad_alloc&)
 	{
 		m_ -> report(std::runtime_error("input pool overflow"));
@@ -410,6 +404,10 @@ bool Parser::parse (const wchar_t* a_input, const int a_len)
 	catch (const std::exception& err)
 	{
 		m_ -> report(err);
+	}
+	catch (ex::generic_error& err)
+	{
+		m_ -> report(err, stRuntimeError);
 	}
 
 	return false;
@@ -490,6 +488,7 @@ void Parser::reset ()
 	case stLogicError:
 	case stSyntaxError:
 	case stSyntaxAmbiguity:
+	case stCompileError:
 	case stRuntimeError:
 		m_ -> messages. clear();
 		// no break;
@@ -523,8 +522,16 @@ Variable Parser::get (const char* a_variable) const
 	value_type value;
 	try
 	{
-		key_type(a_variable). swap(key);
-		value_type((*(m_ -> tracer)) -> val(key)). swap(value);
+		if (a_variable)
+		{
+			key_type(a_variable). swap(key);
+			value_type((*(m_ -> tracer)) -> val(key)). swap(value);
+		}
+		else
+		{
+			value_type(anta::ndl::context<NLG>::type(
+						(*(m_ -> tracer)) -> context(NULL))). swap(value);
+		}
 	}
 	catch (const std::exception& err)
 	{

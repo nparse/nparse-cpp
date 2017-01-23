@@ -2,7 +2,7 @@
  * @file $/source/nparse-port/src/variable.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -139,6 +139,13 @@ const char* Variable::key () const
 		: "";
 }
 
+std::size_t Variable::id () const
+{
+	return (m_ && m_ -> entry. second. is_array())
+		? reinterpret_cast<std::size_t>(&* m_ -> entry. second. as_array())
+		: 0;
+}
+
 bool Variable::get_boolean (const bool a_def) const
 {
 	return (m_ && m_ -> entry. second. is_boolean())
@@ -225,7 +232,7 @@ VariableIterator Variable::begin () const
 	if (size() > 0)
 	{
 		data = new VariableIteratorData;
-		data -> context = & m_ -> entry. second. array();
+		data -> context = &* m_ -> entry. second. as_array();
 		data -> begin = m_ -> keys -> begin();
 		data -> end = m_ -> keys -> end();
 	}
@@ -245,7 +252,7 @@ int Variable::size () const
 		if (! m_ -> keys)
 		{
 			VariableData::keys_type* keys = new VariableData::keys_type();
-			m_ -> entry. second. array(). list(
+			m_ -> entry. second. as_array() -> list(
 					lister<VariableData::keys_type>(*keys));
 			if (! keys -> empty())
 			{

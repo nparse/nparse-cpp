@@ -2,7 +2,7 @@
  * @file $/include/anta/core/traveller.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -106,7 +106,7 @@ struct observer
  *		  this base class specialization is applied for basic models only.
  */
 template <typename M_>
-class Base<Traveller<M_>, M_, meta::true_>
+class Base<Traveller<M_>, M_, meta::true_>: public pool<M_>::type
 {
 public:
 	/**
@@ -127,7 +127,7 @@ protected:
  *	Analysis state traveller.
  */
 template <typename M_>
-class Traveller: public Base<Traveller<M_>, M_>, public pool<M_>::type
+class Traveller: public Base<Traveller<M_>, M_>
 {
 public:
 	/**

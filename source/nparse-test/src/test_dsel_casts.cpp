@@ -2,7 +2,7 @@
  * @file $/source/nparse-test/src/test_dsel_casts.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -24,6 +24,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include <boost/type_traits/is_same.hpp>
 #include <boost/mpl/if.hpp>
 #include <anta/dsel.hpp>
 #include <gtest/gtest.h>
@@ -71,7 +72,15 @@ struct context_value<M3>
 
 };
 
-}} // namespace anta::ndl
+} // namespace ndl
+
+template <>
+struct model_of<ndl::context<M2>::type> { typedef M2 type; };
+
+template <>
+struct model_of<ndl::context<M3>::type> { typedef M3 type; };
+
+} // namespace anta
 
 /**
  *	Test data factory.	
@@ -139,6 +148,7 @@ protected:
 	typedef typename boost::mpl::if_<boost::is_same<typename P_::Model, void>,
 			anta::model<>, typename P_::Model>::type Model;
 
+	typename anta::ndl::ContextOwner<Model>		owner;
 	typename anta::aux::null<Model>::type		n;
 	typename anta::aux::boolean<Model>::type	b;
 	typename anta::aux::integer<Model>::type	i;
@@ -147,6 +157,7 @@ protected:
 	typename anta::aux::array<Model>::type		a;
 
 	test_cast ():
+		owner (),
 		n	(),
 		b	(test_case::entries[P_::Case].b),
 		i	(test_case::entries[P_::Case].i),
@@ -154,9 +165,11 @@ protected:
 		s	(test_case::entries[P_::Case].s),
 		s1	(test_case::entries[P_::Case].s1),
 		s2	(test_case::entries[P_::Case].s2),
-		s3	(test_case::entries[P_::Case].s3),
-		a	(new anta::ndl::Context<Model>())
+		s3	(test_case::entries[P_::Case].s3)
 	{
+		this -> owner. set_capacity(1024);
+		this -> a = typename anta::aux::array<Model>::type(
+				this -> owner. create(NULL));
 	}
 
 	/**

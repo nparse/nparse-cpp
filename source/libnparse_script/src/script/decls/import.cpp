@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/script/decls/import.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -38,7 +38,7 @@ class Construct: public IConstruct
 {
 	bool create_import (const hnd_arg_t& arg)
 	{
-		arg. staging. import(get_accepted_str(arg));
+		arg. staging. import(get_accepted_range(arg));
 		return true;
 	}
 

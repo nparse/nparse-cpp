@@ -2,7 +2,7 @@
  * @file $/source/libnparse_runtime/src/operators/access.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -49,7 +49,7 @@ public:
 		// If the object is an array then the field represents its key.
 		if (u. is_array())
 		{
-			return u. array(). val(m_field);
+			return u. as_array() -> val(m_field);
 		}
 
 		// Otherwise, access operator doesn't make much sence.
@@ -69,7 +69,7 @@ public:
 		// If the object is an array then the field represents its key.
 		if (u. is_array())
 		{
-			return u. array(). ref(m_field);
+			return u. as_array() -> ref(m_field);
 		}
 
 		// Otherwise, access operator doesn't make much sence.

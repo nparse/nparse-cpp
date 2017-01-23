@@ -2,7 +2,7 @@
  * @file $/include/anta/ndl/context.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -30,6 +30,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace anta { namespace ndl {
 
 /******************************************************************************/
+
+// (forward declarations)
+template <typename M_> class Context;
+template <typename M_> class ContextOwner;
 
 /**
  *	The default key type for the trace variables.
@@ -69,6 +73,56 @@ struct context_entry
 
 };
 
+template <typename M_>
+struct context
+{
+	typedef typename context_key<M_>::type key_type;
+	typedef typename context_value<M_>::type value_type;
+	typedef typename context_entry<M_>::type entry_type;
+
+	/**
+	 *	Get the default value for the trace variable.
+	 */
+	static const value_type& def ()
+	{
+		static const value_type sc_empty = value_type();
+		return sc_empty;
+	}
+
+	class type
+	{
+	public:
+		type (const Context<M_>* a_ancestor = NULL):
+			m_simple_ptr (NULL), m_shared_ptr ()
+		{
+			if (a_ancestor != NULL)
+			{
+				m_simple_ptr = a_ancestor -> derive();
+			}
+			else
+			{
+				m_shared_ptr. reset(new Context<M_>());
+			}
+		}
+
+		Context<M_>& operator* () const
+		{
+			return *(m_simple_ptr ? m_simple_ptr : m_shared_ptr. get());
+		}
+
+		Context<M_>* operator-> () const
+		{
+			return &**this;
+		}
+
+	private:
+		Context<M_>* m_simple_ptr;
+		boost::shared_ptr<Context<M_> > m_shared_ptr;
+
+	};
+
+};
+
 /**
  *	The trace context (the holder object for the trace variables).
  */
@@ -87,18 +141,21 @@ public:
 	/**
 	 *	The constructor for an initial or a derived context.
 	 */
-	Context (const Context* a_ancestor = NULL):
-		m_ancestor (a_ancestor)
+	Context (const Context* a_ancestor = NULL,
+			ContextOwner<M_>* a_owner = NULL):
+		m_ancestor (a_ancestor), m_owner (a_owner)
 	{
 	}
 
 	/**
-	 *	Get the default value for the trace variable.
+	 *	Derive a new Context instance using this instance as the ancestor.
 	 */
-	static const value_type& def ()
+	Context* derive () const
 	{
-		static const value_type sc_empty = value_type();
-		return sc_empty;
+		if (m_owner == NULL)
+			throw std::logic_error("derivation is impossible because this"
+					" Context instance does not have an owner");
+		return m_owner -> create(this);
 	}
 
 	/**
@@ -111,7 +168,7 @@ public:
 		{
 			const std::pair<typename variables_t::iterator, bool> p =
 				m_variables. insert(typename variables_t::value_type(a_key,
-							def()));
+							context<M_>::def()));
 			assert(p. second);
 			found_at = p. first;
 			if (! a_reset)
@@ -164,7 +221,7 @@ private:
 			if (found_at != c -> m_variables. end())
 				return found_at -> second;
 		}
-		return def();
+		return context<M_>::def();
 	}
 
 private:
@@ -199,8 +256,7 @@ private:
 
 public:
 	/**
-	 *	List all the trace variables that are available within the global
-	 *	context.
+	 *	List all trace variables that are available within the global context.
 	 */
 	template <typename OutputIterator_>
 	uint_t list (OutputIterator_ a_out, const bool a_diff_only = false) const
@@ -229,6 +285,7 @@ public:
 
 private:
 	const Context* m_ancestor; /**< Ancestor context. */
+	ContextOwner<M_>* m_owner; /**< Context's owner. */
 
 	typedef std::map<key_type, value_type> variables_t;
 	variables_t m_variables; /**< Local trace variable map. */
@@ -312,10 +369,8 @@ public:
 
 		const Context* ancestor = find(a_key);
 		if (ancestor == NULL)
-		{
 			throw std::logic_error("trying to pop a variable that has not been"
 				" pushed");
-		}
 
 		ref(a_key, true) = ancestor -> val(a_key);
 		return true;
@@ -348,16 +403,16 @@ public:
  *	The context owner (owns the instances of the Context class).
  */
 template <typename M_>
-class ContextOwner
+class ContextOwner: public pool<M_>::type
 {
 public:
 	/**
 	 *	Create an instance of the Context class.
 	 */
-	boost::shared_ptr<Context<M_> > create (const Context<M_>* a_ancestor)
+	Context<M_>* create (const Context<M_>* a_ancestor)
 	{
-		m_instances. push_back(boost::shared_ptr<Context<M_> >(
-					new Context<M_>(a_ancestor)));
+		void* ptr = this -> allocate(sizeof(Context<M_>));
+		m_instances. push_back(new(ptr) Context<M_>(a_ancestor, this));
 		return m_instances. back();
 	}
 
@@ -366,11 +421,20 @@ public:
 	 */
 	void reset ()
 	{
-		m_instances. clear();
+		if (! m_instances. empty())
+		{
+			for (typename instances_t::iterator i = m_instances. begin();
+					i != m_instances. end(); ++ i)
+			{
+				(*i) -> ~Context<M_>();
+			}
+			m_instances. clear();
+		}
 	}
 
 private:
-	std::vector<boost::shared_ptr<Context<M_> > > m_instances;
+	typedef std::vector<Context<M_>*> instances_t;
+	instances_t m_instances;
 
 };
 

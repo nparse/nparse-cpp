@@ -2,7 +2,7 @@
  * @file $/source/libnparse_runtime/src/operators/assignment.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.3
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -44,10 +44,13 @@ using namespace boost::proto::tag;
 using namespace nparse;
 using anta::dsel::ct;
 
+struct just_assign {}; // tag for simple assignment operator `='
+struct test_assign {}; // tag for conditional assignment operator `?='
+
 template <typename Func_> class Action;
 
 template <>
-class Action<equal_to>: public BinaryAction
+class Action<just_assign>: public BinaryAction
 {
 public:
 	// Overridden from IAction:
@@ -64,7 +67,7 @@ public:
 			// All intermediate instances should be stored in the environment,
 			// otherwise it will be impossible to store arrays in temporary
 			// variables and return them as function results.
-			result_type temp = a_env. create(& right. array());
+			result_type temp = a_env. create(&* right. as_array());
 			left. swap(temp);
 		}
 		else
@@ -83,7 +86,7 @@ public:
 };
 
 template <>
-class Action<not_equal_to>: public BinaryAction
+class Action<test_assign>: public BinaryAction
 {
 public:
 	// Overridden from IAction:
@@ -245,8 +248,8 @@ public:
 		a_current =
 			a_previous
 		>  ~(	space
-			>	(	"="  * M0 > space > a_current > pass * M1 * m_equal_to
-				|	"?=" * M0 > space > a_current > pass * M1 * m_not_equal_to
+			>	(	"="  * M0 > space > a_current > pass * M1 * m_just_assign
+				|	"?=" * M0 > space > a_current > pass * M1 * m_test_assign
 				|	"+=" * M0 > space > a_current > pass * M1 * m_plus
 				|	"-=" * M0 > space > a_current > pass * M1 * m_minus
 				|	"*=" * M0 > space > a_current > pass * M1 * m_multiplies
@@ -259,8 +262,8 @@ public:
 public:
 	Operator ()
 	{
-		m_equal_to = hnd_t(this, &Operator::push<equal_to>);
-		m_not_equal_to = hnd_t(this, &Operator::push<not_equal_to>);
+		m_just_assign = hnd_t(this, &Operator::push<just_assign>);
+		m_test_assign = hnd_t(this, &Operator::push<test_assign>);
 		m_plus = hnd_t(this, &Operator::push<plus>);
 		m_minus = hnd_t(this, &Operator::push<minus>);
 		m_multiplies = hnd_t(this, &Operator::push<multiplies>);
@@ -278,7 +281,7 @@ private:
 		return true;
 	}
 
-	anta::Label<SG> m_equal_to, m_not_equal_to, m_plus, m_minus, m_multiplies,
+	anta::Label<SG> m_just_assign, m_test_assign, m_plus, m_minus, m_multiplies,
 		m_divides, m_modulus;
 
 };

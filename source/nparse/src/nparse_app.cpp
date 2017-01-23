@@ -2,7 +2,7 @@
  * @file $/source/nparse/src/nparse_app.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.4
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -547,85 +547,83 @@ int nParseApp::compile_grammar ()
 	m_staging -> import(m_grammar_file, true);
 
 	// Load and parse each source file.
-	bool first = true;
-	anta::range<SG>::type src;
-	while (m_staging -> load(src))
+	try
 	{
-		// Launch source file parsing.
-		try
+		bool first = true;
+		anta::range<SG>::type src;
+		while (m_staging -> load(src))
 		{
+			// Launch source file parsing.
 			traveller. run(src. first, src. second);
-		}
-		catch (const std::bad_alloc&)
-		{
-			throw std::runtime_error("grammar pool overflow");
-		}
 
-		// Count traces.
-		int traces_count = 0;
-		while (tracer. next())
-			++ traces_count;
-		tracer. rewind();
+			// Count traces.
+			int traces_count = 0;
+			while (tracer. next())
+				++ traces_count;
+			tracer. rewind();
 
-		// Report syntax error/ambiguity errors.
-		switch (traces_count)
-		{
-		case 1:
-			break;
+			// Report syntax error/ambiguity errors.
+			switch (traces_count)
+			{
+			case 1:
+				break;
 
-		case 0:
-			// syntax error
-			rethrow(traveller. get_observer(), *m_staging);
-			break;
+			case 0:
+				// syntax error
+				rethrow(traveller. get_observer(), *m_staging);
+				break;
 
-		default:
-			// syntax ambiguity
-			rethrow(traveller. get_traced(), *m_staging);
-			break;
-		}
+			default:
+				// syntax ambiguity
+				rethrow(traveller. get_traced(), *m_staging);
+				break;
+			}
 
-		// Execture source code (generate the acceptor network).
-		try
-		{
+			// Execture source code (generate the acceptor network).
 			tracer. next();
 			while (tracer. step())
 				tracer -> get_arc(). get_label(). execute(*m_staging, *tracer);
+
+			// Log successul source loading.
+			if (! m_log. empty())
+			{
+				std::string file;
+				int line, offset;
+				m_staging -> identify(src. first, file, line, offset);
+
+				std::ostream& log = *open_file(m_log);
+				log << "loaded: " << file << " ("
+					<< std::setprecision(2)
+					<< 1e2 * traveller. get_usage() / traveller. get_capacity()
+					<< "%)\n";
+			}
+
+			// Reset intermediate objects.
+			tracer. rewind();
+			traveller. reset();
+
+			// Get and save the first namespace (it happens to be the last
+			// namespace declared in the first imported script file).
+			if (first)
+			{
+				const string_t& namespace_ = m_staging -> getNamespace();
+				if (! namespace_. empty() &&
+						m_entry_point. find('.') == m_entry_point. npos)
+					m_entry_point = encode::string(namespace_) + m_entry_point;
+				first = false;
+			}
+
+			// Reset namespace.
+			m_staging -> setNamespace();
 		}
-		catch (ex::compile_error& err)
-		{
-			rethrow(err, *m_staging);
-		}
-
-		// Log successul source loading.
-		if (! m_log. empty())
-		{
-			std::string file;
-			int line, offset;
-			m_staging -> identify(src. first, file, line, offset);
-
-			std::ostream& log = *open_file(m_log);
-			log << "loaded: " << file << " ("
-				<< std::setprecision(2)
-				<< 1e2 * traveller. get_usage() / traveller. get_capacity()
-				<< "%)\n";
-		}
-
-		// Reset intermediate objects.
-		tracer. rewind();
-		traveller. reset();
-
-		// Get and save the first namespace (it happens to be the last namespace
-		// declared in the first imported script file).
-		if (first)
-		{
-			const string_t& namespace_ = m_staging -> getNamespace();
-			if (! namespace_. empty())
-				m_entry_point = encode::string(namespace_) + m_entry_point;
-			first = false;
-		}
-
-		// Reset namespace.
-		m_staging -> setNamespace();
+	}
+	catch (const std::bad_alloc&)
+	{
+		throw std::runtime_error("grammar pool overflow");
+	}
+	catch (ex::generic_error& err)
+	{
+		rethrow(err, *m_staging);
 	}
 
 	return 0;
@@ -681,7 +679,7 @@ int nParseApp::parse_input_text ()
 		{
 			throw std::runtime_error("input pool overflow");
 		}
-		catch (ex::runtime_error& err)
+		catch (ex::generic_error& err)
 		{
 			rethrow(err, *m_staging);
 		}

@@ -2,7 +2,7 @@
  * @file $/include/anta/ndl/prototypes.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -103,8 +103,13 @@ class Base<Node<typename ndl::extend<M_>::type>, M_>:
 {
 public:
 	/**
-	 *	The operator for attaching a semantic action to the node or to one of
-	 *	its arcs.
+	 *	The destructor.
+	 */
+	virtual ~Base() {}
+
+	/**
+	 *	The operator for attaching custom semantic actions to the node itself or
+	 *	to the last of its arcs.
 	 */
 	virtual Node<M_>& operator[] (
 			const typename ndl::action<M_>::type& a_action) = 0;
@@ -248,9 +253,9 @@ public:
 			}
 		}
 
-		// Make an own copy of the context if it is necessary.
-		// (The fact that a context owner was specified means that a local
-		//  context should be created).
+		// Make an own copy of the context if it is necessary. The fact that a
+		// context owner was specified means that a new context instance is
+		// supposed to be created.
 		if ((a_owner != NULL) && ! is_own_context())
 			const_cast<Base*>(this) -> set_ptr(&* a_owner -> create(get_ptr()),
 					true);

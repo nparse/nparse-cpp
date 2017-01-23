@@ -1,0 +1,24 @@
+namespace g1;
+
+// recursive functor invocations with context replacement
+S := ^\w+ :p <A {x:p}> ^$;
+A := <B {x}> { self({ rB: B }); };
+B := <C {x}> { self({ rC: C }); };
+C := (^\w+ +):y <A {x}>?;
+
+namespace g2;
+
+// functor parametrization
+S := ^\w+ :y <A {x:y}> ^$;
+A := "\"$x\"" :z;
+
+namespace g3;
+
+// parametrized context replacement 
+S := ^\w+ :var '=' <A {var}> { self(A); } ^$;
+A := ^.+ { /* #fixMe; */ self({(var): $}); };
+
+namespace g4;
+
+// direct context replacement
+S := ^\w+ { /* #fixMe; */ self({ value: $ }); } ^$;

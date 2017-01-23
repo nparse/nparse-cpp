@@ -2,7 +2,7 @@
  * @file $/include/anta/ndl/selectors.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -47,7 +47,7 @@ public:
 	const typename context_value<M_>::type& operator() (Traveller<M_>& a_trav)
 		const
 	{
-		return Context<M_>::def();
+		return context<M_>::def();
 	}
 
 	// (predicate form, e. g. suppose)

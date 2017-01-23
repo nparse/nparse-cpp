@@ -2,7 +2,7 @@
  * @file $/include/anta/ndl/node.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -268,8 +268,8 @@ public:
 	//
 
 	/**
-	 *	Operator for attaching a custom semantic action to the node itself or to
-	 *	one of its arcs.
+	 *	The operator for attaching custom semantic actions to the node itself or
+	 *	to the last of its arcs.
 	 */
 	Node& operator[] (const typename action<M_>::type& a_action)
 	{

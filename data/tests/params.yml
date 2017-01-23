@@ -1,0 +1,42 @@
+script:
+    - params.ng
+
+config:
+    grammar_pool:      1024
+    input_pool:        256
+
+g1.test1:
+    config:     { entry_point: g1.S }
+    input:      u1 Alpha
+    traces:     1
+    check:
+        A.rB.rC.y:  Alpha
+        A.rB.rC.x:  u1
+        p:          u1
+
+g1.test2:
+    config:     { entry_point: g1.S }
+    input:      u2 Alpha Beta
+    traces:     2
+    forest:
+        - (g1.S u2 (g1.A (g1.B (g1.C Alpha (g1.A (g1.B (g1.C Beta)))))))
+        - (g1.S u2 (g1.A (g1.B (g1.C Alpha Beta))))
+    check:
+        p:          u2
+
+g2.test1:
+    config:     { entry_point: g2.S }
+    input:      alpha "beta"
+    traces:     0
+
+g2.test2:
+    config:     { entry_point: g2.S }
+    input:      alpha "alpha"
+    traces:     1
+
+g3.test1:
+    config:     { entry_point: g3.S }
+    input:      x = 12345
+    traces:     1
+    check:
+        x:          12345

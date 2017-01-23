@@ -1,6 +1,6 @@
 script:
     - acceptor-dict-red.ng
-#   - acceptor-dict-phf.ng
+    - acceptor-dict-phf.ng
 
 config:
     entry_point:       S1

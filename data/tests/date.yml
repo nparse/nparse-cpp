@@ -4,7 +4,7 @@ script:
 config:
     entry_point:       Date.S
     grammar_pool:      1024
-    input_pool:        16
+    input_pool:        32
 
 test1:
     input:             09 05 1972 

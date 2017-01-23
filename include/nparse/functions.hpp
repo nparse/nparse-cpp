@@ -2,7 +2,7 @@
  * @file $/include/nparse/functions.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -70,7 +70,6 @@ inline string_t get_accepted_str (const hnd_arg_t& arg)
 	const anta::range<SG>::type& range = get_accepted_range(arg);
 	return string_t(range. first, range. second);
 }
-
 
 /**
  *	Auxiliary ports for the useful placeholder generator functions.

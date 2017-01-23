@@ -2,7 +2,7 @@
  * @file $/include/nparse-port/variable.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -67,6 +67,7 @@ public:
 	type_t type () const;
 	const char* tag () const;
 	const char* key () const;
+	std::size_t id () const;
 
 	bool	get_boolean (const bool a_def = false) const;
 	int		get_integer (const int a_def = 0) const;

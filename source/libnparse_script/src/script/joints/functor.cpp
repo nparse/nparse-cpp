@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/script/joints/functor.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -71,7 +71,7 @@ public:
 		// i.e. substitute initializer array for the current context.
 		if (init. is_array())
 		{
-			traveller. get_state(). substitute(& init. array());
+			traveller. get_state(). substitute(&* init. as_array());
 		}
 		else
 
@@ -134,7 +134,7 @@ public:
 		assert( val. is_array() );
 
 		// Substitute restored external context for the current.
-		traveller. get_state(). substitute(& val. array());
+		traveller. get_state(). substitute(&* val. as_array());
 
 		// Save previous context as the result in another special variable.
 		if (! m_alias. empty())
@@ -251,7 +251,7 @@ class Operator: public IOperator
 	bool create_functor2 (const hnd_arg_t& arg)
 	{
 		// Instantiate trivial pre and post contitional actions.
-		auto_alias(arg);
+		no_alias(arg);
 		no_pre_cond(arg);
 		no_post_cond(arg);
 		// Create a new joint of appropriate compound type.

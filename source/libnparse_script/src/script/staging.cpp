@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/script/staging.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.4
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -58,6 +58,9 @@ class Staging: public IStaging
 
 	typedef std::vector<plugin::IFactory*> bound_factories_t;
 	bound_factories_t m_bound_factories;
+
+	typedef std::vector<anta::range<SG>::type> import_hints_t;
+	import_hints_t m_import_hints;
 
 	string_t m_namespace;
 
@@ -153,14 +156,39 @@ public:
 
 	void import (const std::string& a_path, const bool a_reset)
 	{
-		m_st. import(a_path, a_reset);
+		m_st. import(a_path, a_reset, -1);
+	}
+
+	void import (const anta::range<SG>::type& a_path)
+	{
+		const string_t path(a_path. first, a_path. second);
+		const int hint = static_cast<int>(m_import_hints. size());
+		m_import_hints. push_back(a_path);
+		m_st. import(path, false, hint);
 	}
 
 	bool load (anta::range<SG>::type& a_range)
 	{
 		SourceTree<string_t>::range r;
-		if (! m_st. load(r))
-			return false;
+		try
+		{
+			if (! m_st. load(r))
+				return false;
+		}
+		catch (const std::exception& err_)
+		{
+			ex::compile_error err;
+			err << ex::message(err_. what());
+			const int hint_ = m_st. current_hint();
+			if (hint_ >= 0)
+			{
+				const import_hints_t::size_type index =
+					static_cast<import_hints_t::size_type>(hint_);
+				const anta::range<SG>::type& where = m_import_hints[index];
+				err << ex::location(where);
+			}
+			throw err;
+		}
 		a_range. first = &* r. first;
 		a_range. second = &* r. second;
 		m_namespace. clear();

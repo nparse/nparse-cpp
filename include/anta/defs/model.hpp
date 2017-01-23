@@ -2,7 +2,7 @@
  * @file $/include/anta/defs/model.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -52,14 +52,13 @@ struct narrow {};
 struct wide {};
 
 /**
- *	Metafunction that is used to separate basic and extended models.
+ *	Metafunction that is used to distinguish basic and extended models.
  */
 template <typename Model_, typename Phony_ = Model_>
 struct is_basic
 {
-	// NOTE: All the models are supposed to be basic unless the opposite is
-	//		 declared (e.g. by a specialization of this metafunction for some
-	//		 particular template arguments).
+	// NOTE: All models are supposed to be basic unless declared otherwise, e.g.
+	// 		 with a concrete specialization of this metafunction.
 	typedef true_ type;
 
 };
@@ -67,7 +66,7 @@ struct is_basic
 } // namespace meta
 
 /**
- *	Basic model. Ta-Daa!
+ *	Common basic model.
  */
 template <typename Sequence_ = meta::narrow>
 struct model
@@ -85,13 +84,18 @@ struct model
 };
 
 /**
- *	Metafunction that is used to determine model of a parametrized type.
+ *	Metafunction that is used to determine the model of a parametrized type.
  *	@{ */
-template <typename Type_> struct model_of;
 
-/// Specialization for parametrized classes.
-template <typename M_, template <typename M2_> class Class_>
-struct model_of<Class_<M_> >
+template <typename Type_>
+struct model_of
+{
+	typedef model<> type;
+
+};
+
+template <typename M_, template <typename M2_> class Type_>
+struct model_of<Type_<M_> >
 {
 	typedef M_ type;
 

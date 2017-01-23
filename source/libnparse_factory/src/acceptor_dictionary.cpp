@@ -2,7 +2,7 @@
  * @file $/source/libnparse_factory/src/acceptor_dictionary.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -90,13 +90,11 @@ public:
 			a_instance = new Acceptor<dictionary::AcceptorRED<NLG> >(path);
 			break;
 
-		case 200:
 #if defined(NPARSE_CMPH)
+		case 200:
 			a_instance = new Acceptor<dictionary::AcceptorPHF<NLG> >(path);
-#else
-			success = false;
-#endif
 			break;
+#endif
 
 		default:
 			success = false;

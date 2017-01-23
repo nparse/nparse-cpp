@@ -4,7 +4,7 @@ script:
 config:
     entry_point:       S
     grammar_pool:      1024 # 1MB for grammar
-    input_pool:        4    # 4K for input
+    input_pool:        8    # 4K for input
 
 case1:
     input:             hello world

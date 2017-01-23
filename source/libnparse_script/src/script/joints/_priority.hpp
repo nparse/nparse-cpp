@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/script/joints/_priority.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -29,13 +29,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 enum operator_priority
 {
-	PRIORITY_OPERAND 		= 0,		// acceptor, $Node, $:Node, (X)
+	PRIORITY_OPERAND 		= 0,		// acceptor, $Node, $:Node, (X), _, #
 	PRIORITY_FUNCTOR		= 100,		// <res:X {pre} post>, [ X ]
 	PRIORITY_PREFIX			= 200,		// & X, ! X
 	PRIORITY_POSTFIX		= 300,		// X +, X *, X ?, X :y, X *123
 	PRIORITY_ALTERNATION_LC	= 400,		// X | Y
 	PRIORITY_COMPOSITION	= 500,		// X ^ Y, X / Y, X % Y
-	PRIORITY_SEQUENCING		= 600,		// X Y, X _ Y, X # Y
+	PRIORITY_SEQUENCING		= 600,		// X Y
 	PRIORITY_ALTERNATION_GL	= 700,		// X || Y
 	PRIORITY_PRIORITIZING	= 800		// X |? Y
 };

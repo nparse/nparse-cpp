@@ -2,7 +2,7 @@
  * @file $/source/nparse-test/src/test_dsel_arithmetic.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -115,6 +115,12 @@ public:
 		// For real numbers there's a specific way of value comparison limited
 		// to a certain precision.
 		return ((u > v) ? u - v : v - u) < 1e-10;
+	}
+
+	bool operator() (const typename anta::ndl::context<M_>::type&,
+			const typename anta::ndl::context<M_>::type&) const
+	{
+		throw std::logic_error("Contexts (and arrays) are incomparable.");
 	}
 
 };

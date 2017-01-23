@@ -1,5 +1,5 @@
 include_directories(./include)
-add_library(cmph-2.0
+add_library(cmph-2.0 SHARED
 	./source/bdz.c
 	./source/bdz_ph.c
 	./source/bm_numbers.c

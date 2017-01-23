@@ -2,7 +2,7 @@
  * @file $/source/libnparse_runtime/src/operators/subscripting.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -52,7 +52,7 @@ public:
 		if (u. is_array())
 		{
 			const IEnvironment::key_type key = v. as_string();
-			return u. array(). val(key);
+			return u. as_array() -> val(key);
 		}
 
 		// If the object is a string then the index represents an offset.
@@ -103,7 +103,7 @@ public:
 		if (u. is_array())
 		{
 			const IEnvironment::key_type key = v. as_string();
-			return u. array(). ref(key);
+			return u. as_array() -> ref(key);
 		}
 
 		// Otherwise, subscript operator doesn't make much sence.

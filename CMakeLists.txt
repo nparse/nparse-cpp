@@ -7,7 +7,8 @@ cmake_minimum_required(VERSION 2.6.2)
 project(nParse)
 set(NPARSE_MAJOR 0)
 set(NPARSE_MINOR 1)
-set(NPARSE_PATCH 5)
+set(NPARSE_PATCH 6)
+add_definitions(-DNPARSE_CMPH)
 
 #
 #	Build configuration.
@@ -128,8 +129,9 @@ include_directories(
 	./contrib/libencode-0.1.0/include
 	./contrib/libplugin-0.1.1/include
 	./contrib/utf8-cpp-2.3.4/include
-	./contrib/yaml-cpp-0.5.1/include
-	./contrib/gtest-1.7.0/include
+	./contrib/yaml-cpp-0.5.3/include
+	./contrib/gtest-1.8.0/googlemock/include
+	./contrib/gtest-1.8.0/googletest/include
 )
 
 add_subdirectory(contrib EXCLUDE_FROM_ALL)

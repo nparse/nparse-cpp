@@ -2,7 +2,7 @@
  * @file $/source/nparse-port/src/nparse-php.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -25,6 +25,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <assert.h>
+#include <map>
 #include <encode/encode.hpp>
 #include <nparse/_version.hpp>
 #include <nparse-port/parser.hpp>
@@ -200,8 +201,10 @@ PHP_METHOD(nParse, reset)
 	RETURN_NULL();
 }
 
-void wrap (zval* a_res, const nparse::Variable& a_var, char* a_buf,
-		const unsigned int a_buf_len)
+typedef std::map<std::size_t, zval*> recursive_references_t;
+
+void wrap (zval*& a_res, const nparse::Variable& a_var, char* a_buf,
+		const unsigned int a_buf_len, recursive_references_t& a_recref)
 {
 	switch (a_var. type())
 	{
@@ -222,13 +225,28 @@ void wrap (zval* a_res, const nparse::Variable& a_var, char* a_buf,
 		break;
 
 	case nparse::Variable::Array:
-		array_init(a_res);
-		for (nparse::VariableIterator i(a_var. begin()); ! i. end(); ++ i)
 		{
-			zval* entry = NULL;
-			MAKE_STD_ZVAL(entry);
-			wrap(entry, *i, a_buf, a_buf_len);
-			add_assoc_zval(a_res, i -> key(), entry);
+			const std::size_t id = a_var. id();
+			assert(id != 0);
+			recursive_references_t::iterator found_at = a_recref. find(id);
+			if (found_at != a_recref. end())
+			{
+				a_res = found_at -> second;
+				zval_add_ref(&a_res);
+			}
+			else
+			{
+				array_init(a_res);
+				a_recref. insert(recursive_references_t::value_type(id, a_res));
+				for (nparse::VariableIterator i(a_var. begin()); ! i. end();
+						++ i)
+				{
+					zval* entry = NULL;
+					MAKE_STD_ZVAL(entry);
+					wrap(entry, *i, a_buf, a_buf_len, a_recref);
+					add_assoc_zval(a_res, i -> key(), entry);
+				}
+			}
 		}
 		break;
 
@@ -247,20 +265,21 @@ PHP_METHOD(nParse, get)
 {
 	const char* a_name = NULL;
 	int a_name_len = 0;
-	if (FAILURE == zend_parse_parameters(1 TSRMLS_CC,
-				"s", &a_name, &a_name_len))
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				"|s!", &a_name, &a_name_len))
 	{
 		RETURN_NULL();
 	}
 
-	assert( a_name[a_name_len] == 0 );
+	assert( a_name == NULL || a_name[a_name_len] == 0 );
 
 	nparse::Variable result = static_cast<nparse_object*>(
 			zend_object_store_get_object(getThis() TSRMLS_CC)
 		) -> impl -> get(a_name);
 
 	char buf[NPARSE_STRBUF_SIZE];
-	wrap(return_value, result, buf, sizeof(buf));
+	recursive_references_t recref;
+	wrap(return_value, result, buf, sizeof(buf), recref);
 }
 
 PHP_METHOD(nParse, label)

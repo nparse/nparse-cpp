@@ -1,0 +1,27 @@
+script:
+    - functor.ng
+
+config:
+    entry_point:       S
+    grammar_pool:      1024
+    input_pool:        16
+
+test1:
+    config: { entry_point: S1 }
+    input:  gamma
+    check:  { a.x: 3 }
+
+test2:
+    config: { entry_point: S2 }
+    input:  gamma
+    check:  { a.x: 3 }
+
+test1a:
+    config: { entry_point: A1 }
+    input:  beta
+    check:  { x: 2 }
+
+test2a:
+    config: { entry_point: A2 }
+    input:  beta
+    check:  { x: 2 }

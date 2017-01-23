@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/source_tree.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -44,7 +44,7 @@ template <typename String_>
 class SourceTree
 {
 	typedef std::vector<typename String_::size_type> offsets_t;
-	typedef boost::tuple<fs::path, String_, offsets_t> import_queue_item_t;
+	typedef boost::tuple<fs::path, String_, offsets_t, int> import_queue_item_t;
 	typedef boost::ptr_vector<import_queue_item_t> import_queue_t;
 	import_queue_t m_import_queue;
 	typename import_queue_t::iterator m_current_import;
@@ -80,7 +80,7 @@ public:
 	{
 	}
 
-	void import (const std::string& a_path, const bool a_reset)
+	void import (const std::string& a_path, const bool a_reset, int a_hint)
 	{
 #if 1
 		const fs::path pp = fs::absolute(m_current_path / a_path);
@@ -94,14 +94,14 @@ public:
 		else
 			pp = fs::absolute(m_current_path / a_path;
 #endif
-		// @todo: functors are for chicks, real men should use lambdas!
 		if (std::find_if(m_import_queue. begin(), m_import_queue. end(),
 					compare<fs::path, 0>(pp)) == m_import_queue. end())
 		{
 			const typename import_queue_t::size_type offset =
 				m_current_import - m_import_queue. begin();
 
-			import_queue_item_t* ptr = new import_queue_item_t(pp, "");
+			import_queue_item_t* ptr = new import_queue_item_t(pp, "",
+				offsets_t(), a_hint);
 			m_import_queue. push_back(ptr);
 
 			m_current_import = m_import_queue. begin() + offset;
@@ -122,7 +122,7 @@ public:
 		const fs::path& filepath = boost::get<0>(*m_current_import);
 		std::ifstream file(filepath. c_str());
 		if (!file)
-			throw std::runtime_error("unable to read source file");
+			throw std::runtime_error("unable to read file");
 
 		m_current_path = filepath. parent_path();
 
@@ -131,6 +131,7 @@ public:
 			std::string buf;
 			while (std::getline(file, buf, '\x00'))
 				contents += encode::make<String_>::from(buf);
+			file. close();
 		}
 
 		offsets_t offsets;
@@ -142,8 +143,6 @@ public:
 
 		boost::get<1>(*m_current_import). swap(contents);
 		boost::get<2>(*m_current_import). swap(offsets);
-
-		file. close();
 
 		a_range. first = &* boost::get<1>(*m_current_import). begin();
 		a_range. second = a_range. first + boost::get<1>(*m_current_import). size();
@@ -192,6 +191,11 @@ public:
 	std::string current_path () const
 	{
 		return m_current_path. string();
+	}
+
+	int current_hint () const
+	{
+		return boost::get<3>(*m_current_import);
 	}
 
 };

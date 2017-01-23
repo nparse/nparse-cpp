@@ -2,7 +2,7 @@
  * @file $/include/anta/_aux/variable.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -31,7 +31,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sstream>
 #include <iomanip>
 #include <stdexcept>
-#include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
@@ -58,10 +57,12 @@ struct type_id { enum type {
 }; };
 
 /**
- *	Set of overridble wrappers for model-dependent static types.
+ *	Set of overridable wrappers for model-dependent static types.
  *	@{ */
 
+/// Unified implementation of the null type to be shared among all models.
 struct unified_null_type {};
+
 inline bool operator== (unified_null_type, unified_null_type) { return true; }
 inline bool operator!= (unified_null_type, unified_null_type) { return false; }
 
@@ -97,14 +98,13 @@ struct real
 
 };
 
-// The string type is already defined outside.
-// ...
+// NOTE: We assume that a model-dependent string type has been defined already.
 
 /// Associative array type.
 template <typename M_>
 struct array
 {
-	typedef boost::shared_ptr<ndl::Context<M_> > type;
+	typedef typename ndl::context<M_>::type type;
 
 };
 
@@ -121,7 +121,7 @@ struct wrapper;
 template <typename M_>
 struct wrapper<M_, typename null<M_>::type>
 {
-	typedef null<model<> > type; // null is not supposed to depend on model
+	typedef null<M_> type;
 
 };
 
@@ -168,20 +168,20 @@ struct wrapper<M_, typename array<M_>::type>
 
 namespace id_ {
 
-// (implementation for unknown/arbitrary types)
-template <typename T_>
+// (default implementation for unspecialized types)
+template <typename M_, typename T_>
 struct impl
 {
 	static type_id::type value () { return type_id::unknown; }
-	template <typename X_> static type_id::type value (X_) { return value(); }
+	template <typename X_> static type_id::type value (X_&) { return value(); }
 
 };
 
-// (implementation for compile-time resolved types)
-#define ANTA_AUX_VARIABLE_DEFTAG(TYPE)							\
-	template <typename M_> struct impl<TYPE<M_> > {				\
-		static type_id::type value () { return type_id::TYPE; }	\
-		template <typename X_> static type_id::type value (X_) {\
+// (specializations for types resolved in compile-time)
+#define ANTA_AUX_VARIABLE_DEFTAG(TYPE)								\
+	template <typename M_> struct impl<M_, TYPE<M_> > {				\
+		static type_id::type value () { return type_id::TYPE; }		\
+		template <typename X_> static type_id::type value (X_&) {	\
 			return value(); } };
 ANTA_AUX_VARIABLE_DEFTAG(null)
 ANTA_AUX_VARIABLE_DEFTAG(boolean)
@@ -191,29 +191,30 @@ ANTA_AUX_VARIABLE_DEFTAG(string)
 ANTA_AUX_VARIABLE_DEFTAG(array)
 #undef ANTA_AUX_VARIABLE_DEFTAG
 
-// (a very special compile-time workaround for associative arrays)
+// (workaround specialization for arrays)
 template <typename M_>
-struct impl<boost::shared_ptr<ndl::Context<M_> > >
+struct impl<M_, typename array<M_>::type>
 {
 	static type_id::type value () { return type_id::array; }
-	template <typename X_> static type_id::type value (X_) { return value(); }
+	template <typename X_> static type_id::type value (X_&) { return value(); }
 
 };
 
 // (handles unwrapped static types in compile-time)
-template <typename T_>
-struct of: impl<typename wrapper<model<>, T_>::type> {};
+template <typename T_, typename M_ = typename model_of<T_>::type>
+struct of: impl<M_, typename wrapper<M_, T_>::type> {};
 
 // (handles wrapped model-dependent static types in compile-time)
 template <typename M_, template <typename M2_> class Type_>
-struct of<Type_<M_> >: impl<Type_<M_> > {};
+struct of<Type_<M_> >: impl<M_, Type_<M_> > {};
 
 // (handles dynamic types in realtime)
 template <typename M_>
 struct of<Variable<M_> >
 {
 	static type_id::type value () { return type_id::dynamic; }
-	static type_id::type value (const Variable<M_>& a_v) { return a_v. value(); }
+	static type_id::type value (const Variable<M_>& a_v) {
+		return a_v. value(); }
 
 };
 
@@ -356,28 +357,6 @@ public:
 /**	@} */
 
 /**
- *	Static proxy factory, simplifies proxy instantiation.
- */
-template <typename M_>
-class proxy
-{
-public:
-	template <typename T_>
-	static Proxy<typename wrapper<M_, T_>::type> from (const T_& a_t)
-	{
-		// (implies implicit invocation of Proxy class constructor)
-		return a_t;
-	}
-
-	template <typename C_, typename T_, typename A_>
-	static Proxy<string<M_> > from (const std::basic_string<C_, T_, A_>& a_t)
-	{
-		return encode::make<typename string<M_>::type>::from(a_t);
-	}
-
-};
-
-/**
  *	Dynamic type container.
  */
 template <typename M_>
@@ -391,6 +370,57 @@ struct container
 	,	Proxy<string<M_> >
 	,	Proxy<array<M_> >
 	> type;
+
+};
+
+/**
+ *	Static proxy factory, simplifies proxy instantiation.
+ */
+template <typename M_>
+class proxy
+{
+public:
+	template <typename T_>
+	static Proxy<typename wrapper<M_, T_>::type> from (const T_& a_t)
+	{
+		// (implies an implicit invocation of the Proxy class constructor)
+		return a_t;
+	}
+
+	template <typename C_, typename T_, typename A_>
+	static Proxy<string<M_> > from (const std::basic_string<C_, T_, A_>& a_t)
+	{
+		return encode::make<typename string<M_>::type>::from(a_t);
+	}
+
+};
+
+/**
+ *	Dynamic type derivation mechanism.
+ */
+template <typename M_>
+class derive: public boost::static_visitor<void>
+{
+public:
+	derive (typename container<M_>::type& a_container):
+		m_container (a_container)
+	{
+	}
+
+	template <typename T_>
+	void operator() (const Proxy<T_>& a_ancestor) const
+	{
+		m_container = proxy<M_>::from(a_ancestor. value());
+	}
+
+	void operator() (const Proxy<array<M_> >& a_ancestor) const
+	{
+		m_container = proxy<M_>::from(typename array<M_>::type(
+					&* a_ancestor. value()));
+	}
+
+private:
+	typename container<M_>::type& m_container;
 
 };
 
@@ -724,7 +754,7 @@ class as<Proxy<array<M_> > >: public boost::static_visitor<Proxy<array<M_> > >
 public:
 	Proxy<array<M_> > operator() (const Proxy<null<M_> >&) const
 	{
-		return typename array<M_>::type(new ndl::Context<M_>());
+		return typename array<M_>::type();
 	}
 
 	Proxy<array<M_> > operator() (const Proxy<array<M_> >& a_v) const
@@ -737,7 +767,7 @@ public:
 	{
 		static const typename ndl::context_key<M_>::type index =
 			typename ndl::context_key<M_>::type();
-		typename array<M_>::type r(new ndl::Context<M_>());
+		typename array<M_>::type r = typename array<M_>::type();
 		r -> ref(index) = a_t. value();
 		return r;
 	}
@@ -747,41 +777,6 @@ public:
 } // namespace cast
 
 /**	@} */
-
-/**
- *	Dynamic value derivation mechanism.
- */
-template <typename M_>
-class derive: public boost::static_visitor<void>
-{
-public:
-	derive (typename container<M_>::type& a_container):
-		m_container (a_container)
-	{
-	}
-
-	template <typename T_>
-	void operator() (const Proxy<T_>& a_ancestor) const
-	{
-		// For the most of the stored types the derivation process is just a
-		// simple copying through assignment.
-		m_container = proxy<M_>::from(a_ancestor. value());
-	}
-
-	void operator() (const Proxy<array<M_> >& a_ancestor) const
-	{
-		// For an associative array the derivation process is a bit more
-		// complicated: instead of copying the entire array each time we store
-		// it as a chain of array portions each of which contains only the
-		// changed items.
-		m_container = proxy<M_>::from(typename array<M_>::type(
-					new ndl::Context<M_>(&* a_ancestor. value())));
-	}
-
-private:
-	typename container<M_>::type& m_container;
-
-};
 
 /**
  *	Variable, the main class that does dynamic value handling.
@@ -1009,18 +1004,14 @@ public:
 
 	/**
 	 *	Makes the variable an associative array.
-	 */
-	ndl::Context<M_>& array ()
+	 *
+	typename aux::array<M_>::type array()
 	{
 		if (! is_array())
-		{
-			m_container = proxy<M_>::from(typename aux::array<M_>::type(
-					new ndl::Context<M_>()));
-		}
-		return *(
-			boost::get<Proxy<typename aux::array<M_> > >(m_container). value()
-		);
+			m_container = proxy<M_>::from(typename aux::array<M_>::type());
+		return this -> as_array();
 	}
+	 */
 
 private:
 	/**

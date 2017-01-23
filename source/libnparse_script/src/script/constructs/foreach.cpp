@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/script/constructs/foreach.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.3
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -111,7 +111,7 @@ public:
 
 		// Get array keys.
 		keys<NLG>::type klist;
-		list. array(). list(key_lister<NLG>(klist), false);
+		list. as_array() -> list(key_lister<NLG>(klist), false);
 
 		// Get a mutable reference to the key storage (variable).
 		result_type& iter = m_iter. evalRef(a_env);

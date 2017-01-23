@@ -2,7 +2,7 @@
  * @file $/source/libnparse_runtime/src/functions/self.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.3
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -24,6 +24,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include <iostream>
 #include <nparse/nparse.hpp>
 #include "../static.hpp"
 
@@ -46,7 +47,7 @@ public:
 				<< ex::message("invalid argument count");
 		}
 
-		const anta::ndl::Context<NLG>* self = a_env. self();
+		const anta::ndl::Context<NLG>* self = a_env. self(true);
 
 		if (! a_arguments. empty())
 		{
@@ -64,26 +65,23 @@ public:
 			const anta::ndl::Context<NLG>* chained = self -> find(zero);
 			if (chained != NULL)
 			{
-				// NOTE: For the explanation of the need of double ancestor
-				//		 backward step below, see the definition of the zero
-				//		 member in ../joints/functor.cpp : PreCond::evalVal()
-				anta::aux::array<NLG>::type chained2 = a_env. create(
-						chained -> get_ancestor() -> get_ancestor());
+				anta::aux::array<NLG>::type chained2 = a_env. create(NULL);
 				chained2 -> ref(zero, true) = chained -> val(zero);
 				chained2 -> push(zero);
 
-				const anta::ndl::Context<NLG>* target =& arg. array();
+				const anta::ndl::Context<NLG>* target = &* arg. as_array();
 				while (target -> get_ancestor() != NULL)
 					target = target -> get_ancestor();
+
 				const_cast<anta::ndl::Context<NLG>*>(target)
 					-> set_ancestor(&* chained2);
 			}
 			// </HACK>
 
-			a_env. get_traveller(). get_state(). substitute(& arg. array());
+			a_env. get_traveller(). get_state(). substitute(&* arg. as_array());
 		}
 
-		return anta::aux::array<NLG>::type(a_env. create(self));
+		return anta::aux::array<NLG>::type(self);
 	}
 
 };

@@ -2,7 +2,7 @@
  * @file $/source/nparse-test/src/test_script.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.4
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -77,6 +77,13 @@ std::string enumerate (const std::vector<std::string>& a_lines,
 	return result;
 }
 
+YAML::NodeType::value get_node_type(const YAML::Node& a_node)
+{
+	// YAML::Node::Type() throws InvalidNode exception for undefined nodes
+	// instead of returning the Undefined node type in yaml-cpp-0.5.3. Dumb.
+	return a_node. IsDefined() ? a_node. Type() : YAML::NodeType::Undefined;
+}
+
 /**
  *	Apply a single setting to the Parser object.
  */
@@ -100,15 +107,25 @@ void configure_parser (nparse::Parser& a_parser, const YAML::Node& a_common,
 		const YAML::Node& a_case)
 {
 	YAML::Node::const_iterator i;
-	for (i = a_common. begin(); i != a_common. end(); ++ i)
+	if (a_case. IsDefined())
 	{
-		if (a_case[i -> first]. IsDefined())
-			continue;
-		configure_parser(a_parser, i);
+		for (i = a_common. begin(); i != a_common. end(); ++ i)
+		{
+			if (a_case[i -> first]. IsDefined())
+				continue;
+			configure_parser(a_parser, i);
+		}
+		for (i = a_case. begin(); i != a_case. end(); ++ i)
+		{
+			configure_parser(a_parser, i);
+		}
 	}
-	for (i = a_case. begin(); i != a_case. end(); ++ i)
+	else
 	{
-		configure_parser(a_parser, i);
+		for (i = a_common. begin(); i != a_common. end(); ++ i)
+		{
+			configure_parser(a_parser, i);
+		}
 	}
 }
 
@@ -234,7 +251,7 @@ void validate_state (const char* a_script, const char* a_case,
 	for (int i = 0; sc_params[i]; ++ i)
 	{
 		const YAML::Node& expected = a_test[sc_params[i]];
-		switch (expected. Type())
+		switch (get_node_type(expected))
 		{
 		case YAML::NodeType::Scalar:
 
@@ -288,7 +305,7 @@ void validate_asts (const char* a_script, const char* a_case,
 	char buf[NPARSE_STRBUF_SIZE];
 
 	const YAML::Node& forest = a_test[TAG_FOREST];
-	switch (forest. Type())
+	switch (get_node_type(forest))
 	{
 	case YAML::NodeType::Sequence:
 		break;
@@ -407,13 +424,13 @@ void validate_asts (const char* a_script, const char* a_case,
 
 		if (mode == 0)
 		{
-			std::cout << "+++ " << *i << '\n';
+			std::cout << "--- " << *i << '\n';
 			++ i;
 		}
 		else
 		if (mode == 1)
 		{
-			std::cout << "--- " << *j << '\n';
+			std::cout << "+++ " << *j << '\n';
 			++ j;
 		}
 	}
@@ -467,8 +484,6 @@ void process_case (const char* a_script, const char* a_case,
 		nparse::Parser& a_parser, const YAML::Node& a_common,
 		const YAML::Node& a_test)
 {
-	char buf[NPARSE_STRBUF_SIZE];
-
 	std::stringstream info;
 	info << "  Source: " << a_script << ':' << a_case;
 
@@ -518,7 +533,7 @@ void process_case (const char* a_script, const char* a_case,
 
 	// Run checks associated with the test case.
 	const YAML::Node& check = a_test[TAG_CHECK];
-	switch (check. Type())
+	switch (get_node_type(check))
 	{
 	case YAML::NodeType::Map:
 		process_check(
@@ -598,10 +613,10 @@ void TestScript::SetUp ()
 	const std::string config_name = GetParam(). path(). string();
 
 	m_config_data = YAML::LoadFile(config_name);
-	ASSERT_EQ( YAML::NodeType::Map, m_config_data. Type() );
+	ASSERT_EQ( YAML::NodeType::Map, get_node_type(m_config_data) );
 
 	const YAML::Node& script = m_config_data[TAG_SCRIPT];
-	switch (script. Type())
+	switch (get_node_type(script))
 	{
 	case YAML::NodeType::Scalar:
 		m_scripts. push_back(script. as<std::string>());

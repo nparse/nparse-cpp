@@ -2,7 +2,7 @@
  * @file $/include/nparse/environment.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.3
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -83,16 +83,9 @@ anta::Traveller<NLG>& IEnvironment::get_traveller () const
 }
 
 // Get the current context.
-anta::ndl::Context<NLG>* IEnvironment::self () const
+anta::ndl::Context<NLG>* IEnvironment::self (const bool a_create) const
 {
-	if (m_local_context. get() != NULL)
-	{
-		return m_local_context. get();
-	}
-	else
-	{
-		return m_traveller. get_state(). context(NULL);
-	}
+	return m_traveller. get_state(). context(a_create ? &m_traveller : NULL);
 }
 
 // Get a mutable reference to a trace variable from the local context.
@@ -107,7 +100,7 @@ IEnvironment::value_type& IEnvironment::ref (const key_type& a_key,
 	{
 		if (m_local_context. get() == NULL)
 		{
-			m_local_context. reset(new anta::ndl::Context<NLG>());
+			m_local_context. reset(new anta::ndl::Context<NLG>(self()));
 		}
 		return m_local_context -> ref(a_key, a_reset);
 	}
@@ -127,15 +120,15 @@ const IEnvironment::value_type& IEnvironment::val (const key_type& a_key) const
 	}
 	else
 	{
-		return anta::ndl::Context<NLG>::def();
+		return anta::ndl::context<NLG>::def();
 	}
 }
 
 // Create an additional stored context.
-boost::shared_ptr<anta::ndl::Context<NLG> > IEnvironment::create (
+anta::ndl::context<NLG>::type IEnvironment::create (
 		const anta::ndl::Context<NLG>* a_ancestor) const
 {
-	return m_traveller. create(a_ancestor);
+	return anta::ndl::context<NLG>::type(m_traveller. create(a_ancestor));
 }
 
 } // namespace nparse
