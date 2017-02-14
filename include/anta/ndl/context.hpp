@@ -287,7 +287,7 @@ private:
 	const Context* m_ancestor; /**< Ancestor context. */
 	ContextOwner<M_>* m_owner; /**< Context's owner. */
 
-	typedef std::map<key_type, value_type> variables_t;
+	typedef boost::unordered_map<key_type, value_type> variables_t;
 	variables_t m_variables; /**< Local trace variable map. */
 
 #if defined(ANTA_NDL_STACKING)
@@ -295,7 +295,7 @@ private:
 	static const uint_t FLAG_PUSH = 1;
 	static const uint_t FLAG_POP = 2;
 
-	typedef std::map<key_type, int> marks_t;
+	typedef boost::unordered_map<key_type, int> marks_t;
 	marks_t m_marks; /**< Marked trace variables. */
 
 	/**

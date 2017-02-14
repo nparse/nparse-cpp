@@ -2,7 +2,7 @@
  * @file $/include/anta/ndl.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -33,6 +33,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <map>
 #include <algorithm>
 #include <sstream>
+#include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
