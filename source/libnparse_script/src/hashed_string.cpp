@@ -2,7 +2,7 @@
  * @file $/source/libnparse_script/src/hashed_string.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -25,14 +25,12 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <assert.h>
-#include <map>
-//#include <boost/container/flat_map.hpp>
 #include <stdexcept>
+#include <boost/unordered_map.hpp>
 #include <nparse/util/hashed_string.hpp>
 #include <utility/hash_gen.hpp>
 
-typedef std::map<unsigned long, std::string> hashes_t;
-//typedef boost::container::flat_map<unsigned long, std::string> hashes_t;
+typedef boost::unordered_map<hashed_string::result_type, std::string> hashes_t;
 hashes_t g_hashes;
 
 void hashed_string::init (const std::string& a_str)
@@ -43,8 +41,9 @@ void hashed_string::init (const std::string& a_str)
 		return;
 	}
 
-	const unsigned long h = utility::hash_gen<unsigned long>::f(
-			a_str. begin(), a_str. end()) << 1;
+	const hashed_string::result_type h =
+		utility::hash_gen<hashed_string::result_type>::f(a_str. begin(), a_str. end())
+			<< 1;
 
 	if (*a_str. begin() == '_')
 	{
@@ -52,21 +51,23 @@ void hashed_string::init (const std::string& a_str)
 	}
 	else
 	{
-		m_hash = h & ~static_cast<unsigned long>(1);
+		m_hash = h & ~static_cast<hashed_string::result_type>(1);
 	}
 
-	hashes_t::const_iterator found_at = g_hashes. find(m_hash);
+	hashes_t::const_iterator found_at;
+	while	(	(found_at = g_hashes. find(m_hash)) != g_hashes. end()
+			&&	found_at -> second != a_str
+			)
+	{
+		m_hash += 2;
+	}
+
 	if (found_at == g_hashes. end())
 	{
 		const std::pair<hashes_t::iterator, bool> p = g_hashes. insert(
 				hashes_t::value_type(m_hash, a_str));
 		assert(p. second);
 	}
-#if defined(DEBUG)
-	else
-	if (found_at -> second != a_str)
-		throw std::logic_error("hashed_string: collision detected");
-#endif
 }
 
 hashed_string::operator const std::string& () const

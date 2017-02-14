@@ -2,7 +2,7 @@
  * @file $/include/nparse/util/hashed_string.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.6
 
 The MIT License (MIT)
 Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
@@ -29,15 +29,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <string>
 #include <ostream>
+#include <boost/functional/hash.hpp>
 #include <encode/encode.hpp>
 
 class hashed_string
 {
-	unsigned long m_hash;
-
-	void init (const std::string& a_str);
-
 public:
+	typedef std::size_t result_type;
+
 	hashed_string ():
 		m_hash (0)
 	{
@@ -50,7 +49,7 @@ public:
 		init(encode::string(a_first));
 	}
 
-	unsigned long hash () const
+	result_type hash () const
 	{
 		return m_hash;
 	}
@@ -78,6 +77,11 @@ public:
 	{
 		std::swap(m_hash, a_hs. m_hash);
 	}
+
+private:
+	result_type m_hash;
+
+	void init (const std::string& a_str);
 
 };
 
@@ -115,5 +119,20 @@ inline std::ostream& operator<< (std::ostream& a_out, const hashed_string& a_hs)
 {
 	return a_out << static_cast<const std::string&>(a_hs);
 }
+
+namespace boost {
+
+template<>
+class hash<hashed_string>: public std::unary_function<hashed_string, std::size_t>
+{
+public:
+	std::size_t operator() (const hashed_string& s) const
+	{
+		return s.hash();
+	}
+
+};
+
+} // namespace boost
 
 #endif /* NPARSE_UTIL_HASHED_STRING_HPP_ */
