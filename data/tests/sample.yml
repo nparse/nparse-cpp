@@ -7,7 +7,7 @@ config:
     grammar_pool:      1024 # 1MB for grammar
     input_pool:        4    # 4K for input
 
-case1:
+test1:
     config:
         entry_point:   N1.S1
     input:             hello world
@@ -18,7 +18,7 @@ case1:
         w1:            hello
         w2:            world
 
-case2:
+test2:
     config:
         entry_point:   N2.S1
     input:             goodbye world

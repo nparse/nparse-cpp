@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/statement.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -36,20 +36,24 @@ using namespace nparse;
 
 class Construct: public IConstruct
 {
-	static const std::string sc_constructs_family;
+	static const std::string sc_construct_ctg;
 	plugin::category<IConstruct> m_constructs;
 	plugin::instance<IConstruct> m_comment, m_expression;
 	anta::ndl::Rule<SG> entry_, constructs_;
 
 public:
 	Construct ():
-		m_constructs (sc_constructs_family),
+		m_constructs (sc_construct_ctg),
 		m_comment ("nparse.script.Comment"),
 		m_expression ("nparse.script.Expression"),
 // <DEBUG_NODE_NAMING>
 		entry_		("Statement.Entry"),
 		constructs_	("Statement.Constructs")
 // </DEBUG_NODE_NAMING>
+	{
+	}
+
+	void initialize ()
 	{
 		using namespace anta::ndl::terminals;
 
@@ -59,7 +63,7 @@ public:
 			constructs_. cluster()(
 				i -> second -> entry(). cluster(),
 				anta::Label<SG>(
-					i -> first. substr(sc_constructs_family. length() + 1))
+					i -> first. substr(sc_construct_ctg. length() + 1))
 			);
 		}
 
@@ -77,9 +81,8 @@ public:
 
 };
 
-const std::string Construct::sc_constructs_family("nparse.script.constructs");
+const std::string Construct::sc_construct_ctg("nparse.script.constructs");
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Construct, script_statement, nparse.script.Statement, 1 )
+PLUGIN(Construct, script_statement, nparse.script.Statement)

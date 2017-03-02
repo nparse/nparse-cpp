@@ -2,10 +2,10 @@
  * @file $/source/libnparse_runtime/src/operators/access.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -99,9 +99,8 @@ class Operator: public IOperator
 {
 	bool create_action (const hnd_arg_t& arg) const
 	{
-		arg. staging. push(action_pointer(new Action(
-				get_marked_range(arg), arg. staging, get_accepted_str(arg)
-		)));
+		arg. staging. push(new Action(get_marked_range(arg), arg. staging,
+					get_accepted_str(arg)));
 		return true;
 	}
 
@@ -132,5 +131,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Operator, operator_access, nparse.script.operators.Access, 1 )
+PLUGIN(Operator, operator_access, nparse.script.operators.Access)

@@ -2,10 +2,10 @@
  * @file $/source/nparse-test/src/test_script.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -37,7 +37,7 @@ static const char* TAG_CHECK = "check";
 static const char* TAG_ERROR = "error";
 static const char* TAG_FOREST = "forest";
 
-static char* trim (char* str)
+static char* static_trim (char* str)
 {
 	char* beg = str;
 	char* end = NULL;
@@ -244,7 +244,7 @@ void validate_state (const char* a_script, const char* a_case,
 		const nparse::Parser& a_parser, const YAML::Node& a_test)
 {
 	static const char* sc_params[] = {
-		"traces", "iterations", "usage", NULL };
+		"traces", "iterations", "contexts", "usage", NULL };
 
 	std::stringstream info;
 
@@ -255,7 +255,7 @@ void validate_state (const char* a_script, const char* a_case,
 		{
 		case YAML::NodeType::Scalar:
 
-			info<< "  Source: " << a_script << ':' << a_case << '\n'
+			info<< "  Source: " << a_script << " @ " << a_case << '\n'
 				<< "   Query: " << sc_params[i];
 
 			// @todo: implement comparison modifiers
@@ -271,6 +271,11 @@ void validate_state (const char* a_script, const char* a_case,
 					a_parser. get_iteration_count() ) << info. str();
 				break;
 			case 2:
+				EXPECT_EQ(
+					expected. as<unsigned long>(),
+					a_parser. get_context_count() ) << info. str();
+				break;
+			case 3:
 				EXPECT_NEAR(
 					expected. as<double>(),
 					100.0 * a_parser. get_pool_usage()
@@ -289,7 +294,7 @@ void validate_state (const char* a_script, const char* a_case,
 			break;
 
 		default:
-			ADD_FAILURE() << "node `" << a_script << ':' << a_case << '/'
+			ADD_FAILURE() << "node `" << a_script << " @ " << a_case << '/'
 				<< sc_params[i] << "' must be a scalar whenever specified";
 			break;
 		}
@@ -311,7 +316,7 @@ void validate_asts (const char* a_script, const char* a_case,
 		break;
 	case YAML::NodeType::Map:
 	case YAML::NodeType::Scalar:
-		FAIL() << "node `" << a_script << ':' << a_case << '/'
+		FAIL() << "node `" << a_script << " @ " << a_case << '/'
 			<< TAG_FOREST << "' must be a sequence whenever specified";
 		// no break;
 	case YAML::NodeType::Undefined:
@@ -349,7 +354,7 @@ void validate_asts (const char* a_script, const char* a_case,
 			if (0 !=* a_parser. text(buf, sizeof(buf)))
 			{
 				tree. append(1, ' ');
-				tree. append(trim(buf));
+				tree. append(static_trim(buf));
 			}
 		}
 		tree. append(a_parser. shift(), ')');
@@ -374,13 +379,13 @@ void validate_asts (const char* a_script, const char* a_case,
 
 	// Report unexpected observations.
 	EXPECT_TRUE( extra. empty() )
-		<< "  Source: " << a_script << ':' << a_case << '\n'
+		<< "  Source: " << a_script << " @ " << a_case << '\n'
 		<< "  Reason: found " << extra. size() << " extra trace(s)\n"
 		<< enumerate(extra, "   |----: ", "\n");
 
 	// Report missing opservations.
 	EXPECT_TRUE( missing. empty() )
-		<< "  Source: " << a_script << ':' << a_case << '\n'
+		<< "  Source: " << a_script << " @ " << a_case << '\n'
 		<< "  Reason: not found " << missing. size() << " trace(s)\n"
 		<< enumerate(missing, "   |----: ", "\n");
 
@@ -449,8 +454,8 @@ void process_check (const char* a_script, const char* a_case,
 	// Step into first trace.
 	a_parser.rewind();
 	ASSERT_TRUE( a_parser. next() )
-		<< "  Source: " << a_script << ':' << a_case << '\n'
-		<< "  Reason: expected at least one trace to analyze.";
+		<< "  Source: " << a_script << " @ " << a_case << '\n'
+		<< "  Reason: expected at least one trace to analyze";
 
 	// Run through expected values.
 	for (YAML::Node::const_iterator check_it = a_check. begin();
@@ -459,7 +464,7 @@ void process_check (const char* a_script, const char* a_case,
 		const std::string query = check_it -> first. as<std::string>();
 		const nparse::Variable& result = request(a_parser, query);
 
-		info<< "  Source: " << a_script << ':' << a_case << '\n'
+		info<< "  Source: " << a_script << " @ " << a_case << '\n'
 			<< "   Input: " << a_input << '\n'
 			<< "   Query: " << query << '\n'
 			<< "  Target: " << check_it -> second << '\n'
@@ -485,7 +490,7 @@ void process_case (const char* a_script, const char* a_case,
 		const YAML::Node& a_test)
 {
 	std::stringstream info;
-	info << "  Source: " << a_script << ':' << a_case;
+	info << "  Source: " << a_script << " @ " << a_case;
 
 	ASSERT_EQ( nparse::Parser::stSteady, a_parser. status() ) << info. str();
 
@@ -518,9 +523,10 @@ void process_case (const char* a_script, const char* a_case,
 		for (int i = 0; i < a_parser. get_message_count(); ++ i)
 		{
 			int line = -1, offset = -1;
-			info<< "\n Message: " << a_parser. get_message(i)
-				<< "\nLocation: " << a_parser. get_location(i, &line, &offset)
-					<< " : " << line << ", offset " << offset;
+			info<< "\n Message (" << i << "): " << a_parser. get_message(i)
+				<< "\nLocation (" << i << "): " << a_parser. get_location(
+					i, &line, &offset) << " : " << line << ", offset "
+						<< offset;
 		}
 		FAIL() << info. str();
 	}
@@ -550,7 +556,7 @@ void process_case (const char* a_script, const char* a_case,
 		break;
 
 	default:
-		ADD_FAILURE() << "node `" << a_script << ':' << a_case << '/'
+		ADD_FAILURE() << "node `" << a_script << " @ " << a_case << '/'
 			<< TAG_CHECK << "' must be a map whenever specified";
 		break;
 	}
@@ -561,10 +567,12 @@ void process_case (const char* a_script, const char* a_case,
  */
 void process_script (const char* a_script, const YAML::Node& a_config)
 {
+	std::stringstream info;
+	info << "  Source: " << a_script;
+
 	// Instantiate parser.
 	nparse::Parser parser;
-	ASSERT_EQ( nparse::Parser::stReady, parser. status() )
-		<< "  Source: " << a_script;
+	ASSERT_EQ( nparse::Parser::stReady, parser. status() ) << info. str();
 
 	// Load and compile grammar script.
 	parser. load(a_script);
@@ -573,16 +581,22 @@ void process_script (const char* a_script, const YAML::Node& a_config)
 	const YAML::Node& error = a_config[TAG_ERROR];
 	if (error. IsDefined())
 	{
-		ASSERT_NE( nparse::Parser::stSteady, parser. status() )
-			<< "  Source: " << a_script << '\n'
-			<< "  Reason: emulating a syntax error";
+		info << "\n  Reason: emulating a syntax error";
+		ASSERT_NE( nparse::Parser::stSteady, parser. status() ) << info. str();
 		validate_error(a_script, parser, error);
 		return;
 	}
 
-	ASSERT_EQ( nparse::Parser::stSteady, parser. status() )
-		<< "  Source: " << a_script << '\n'
-		<< "  Reason: emulating normal workflow";
+	info << "\n  Reason: emulating normal workflow";
+	for (int i = 0; i < parser. get_message_count(); ++ i)
+	{
+		int line = -1, offset = -1;
+		info<< "\n Message (" << i << "): " << parser. get_message(i)
+			<< "\nLocation (" << i << "): " << parser. get_location(
+				i, &line, &offset) << " : " << line << ", offset " << offset;
+	}
+
+	ASSERT_EQ( nparse::Parser::stSteady, parser. status() ) << info. str();
 
 	// Run through all test cases.
 	for (YAML::Node::const_iterator test_it = a_config. begin();
@@ -608,7 +622,7 @@ void process_script (const char* a_script, const YAML::Node& a_config)
 
 /*****************************************************************************/
 
-void TestScript::SetUp ()
+void TestBundle::SetUp ()
 {
 	const std::string config_name = GetParam(). path(). string();
 
@@ -643,13 +657,13 @@ void TestScript::SetUp ()
 	}
 }
 
-void TestScript::TearDown ()
+void TestBundle::TearDown ()
 {
 	m_config_data. reset();
 	m_scripts. clear();
 }
 
-TEST_P(TestScript, execute)
+TEST_P(TestBundle, execute)
 {
 	// Run through all listed scripts.
 	for (scripts_t::const_iterator script_it = m_scripts. begin();
@@ -665,8 +679,8 @@ TEST_P(TestScript, execute)
 using namespace boost::xpressive;
 
 INSTANTIATE_TEST_CASE_P(
-	external_scripts,
-	TestScript,
+	scripts,
+	TestBundle,
 	::testing::ValuesIn(find_files(
 	/* where */ "./",
 	/* what  */ bos >> +_ >> ".yml" >> eos // ^.+\.yml$

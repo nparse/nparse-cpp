@@ -2,10 +2,10 @@
  * @file $/include/anta/ndl/generator.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -126,7 +126,7 @@ class Generator: public Base<Generator<M_>, M_>
 {
 public:
 	/**
-	 *	The destructor (needed for correct memory disposal).
+	 *	The polymorphic destructor.
 	 */
 	virtual ~Generator () {}
 
@@ -205,32 +205,6 @@ class LinkBase: public Base<LinkBase<M_>, M_>, public Entangled<M_>
 
 public:
 	/**
-	 *	Get a pointer to the target bunch (if there is such one).
-	 */
-	virtual Bunch<M_> get_bunch () const
-	{
-		// NOTE: There is no target bunch by default.
-		return Bunch<M_>(-1);
-	}
-
-	/**
-	 *	Replace all pointers to a particular bunch in the target domain with a
-	 *	pointer to another bunch.
-	 */
-	virtual void replace (const Bunch<M_>& a_from, const Bunch<M_>& a_to,
-			BunchSet<M_>& a_bs)
-	{
-		// NOTE: It does nothing because there is no target domain by default.
-	}
-
-	/**
-	 *	Deploy a link of a certain type between two network nodes.
-	 */
-	virtual Arc<M_>& deploy (Generator<M_>& a_generator,
-			const uint_t a_node_from, uint_t& a_node_counter) = 0;
-
-public:
-	/**
 	 *	The only constructor.
 	 */
 	LinkBase (const Label<M_>& a_label = Label<M_>(true)):
@@ -239,7 +213,7 @@ public:
 	}
 
 	/**
-	 *	The destructor (needed for correct memory disposal).
+	 *	The polymorphic destructor.
 	 */
 	virtual ~LinkBase () {}
 
@@ -250,7 +224,9 @@ public:
 	{
 		Bunch<M_> bunch = get_bunch();
 		if (bunch)
+		{
 			bunch -> set_label(a_label, a_bs);
+		}
 		m_label. advance(a_label);
 	}
 
@@ -280,14 +256,12 @@ public:
 				return false;
 			}
 		}
-		else
-		if (! a_ptr)
+		else if (! a_ptr)
 		{
 			a_ptr = this;
 			return true;
 		}
-		else
-		if (a_ptr == this)
+		else if (a_ptr == this)
 		{
 			return true;
 		}
@@ -310,8 +284,6 @@ public:
 	 */
 	void pass_actions (Arc<M_>& a_arc)
 	{
-		if (m_actions. empty())
-			return ;
 		for (typename actions_t::iterator i = m_actions. begin();
 				i != m_actions. end(); ++ i)
 		{
@@ -319,6 +291,31 @@ public:
 		}
 		m_actions. clear();
 	}
+
+	/**
+	 *	Get a pointer to the target bunch (if there is such one).
+	 */
+	virtual Bunch<M_> get_bunch () const
+	{
+		// NOTE: There is no target bunch by default.
+		return Bunch<M_>(-1);
+	}
+
+	/**
+	 *	Replace all pointers to a particular bunch in the target domain with a
+	 *	pointer to another bunch.
+	 */
+	virtual void replace (const Bunch<M_>& a_from, const Bunch<M_>& a_to,
+			BunchSet<M_>& a_bs)
+	{
+		// NOTE: It does nothing because there is no target domain by default.
+	}
+
+	/**
+	 *	Deploy a link of a certain type between two network nodes.
+	 */
+	virtual Arc<M_>& deploy (Generator<M_>& a_generator,
+			const uint_t a_node_from, uint_t& a_node_counter) = 0;
 
 private:
 	Label<M_> m_label;
@@ -354,9 +351,13 @@ public:
 			BunchSet<M_>& a_bs)
 	{
 		if (m_bunch == a_from)
+		{
 			m_bunch = a_to;
+		}
 		else
+		{
 			m_bunch -> replace(a_from, a_to, a_bs);
+		}
 	}
 
 	Arc<M_>& deploy (Generator<M_>& a_generator, const uint_t a_node_from,
@@ -458,7 +459,9 @@ public:
 	uint_t index (uint_t& counter)
 	{
 		if (m_index == 0)
+		{
 			m_index = (counter ++);
+		}
 		return m_index;
 	}
 
@@ -470,9 +473,13 @@ public:
 			BunchSet<M_>& a_bs)
 	{
 		if (is_call_recursive(a_bs))
+		{
 			return ;
+		}
 		for (iterator i = this -> begin(); i != this -> end(); ++ i)
+		{
 			(*i) -> replace(a_from, a_to, a_bs);
+		}
 	}
 
 	/**
@@ -491,7 +498,9 @@ public:
 			BunchSet<M_>& a_bs) const
 	{
 		if (is_call_recursive(a_bs))
+		{
 			return true;
+		}
 		for (const_iterator i = this -> begin(); i != this -> end(); ++ i)
 		{
 			if (! (*i) -> find_link_to(a_to, a_ptr, a_bs))
@@ -537,9 +546,13 @@ public:
 	void set_label (const Label<M_>& a_label, BunchSet<M_>& a_bs)
 	{
 		if (is_call_recursive(a_bs))
+		{
 			return ;
+		}
 		for (iterator i = this -> begin(); i != this -> end(); ++ i)
+		{
 			(*i) -> set_label(a_label, a_bs);
+		}
 	}
 
 private:
@@ -549,9 +562,14 @@ private:
 	bool is_call_recursive (BunchSet<M_>& a_bs) const
 	{
 		if (a_bs. find(this) != a_bs. end())
+		{
 			return true;
-		a_bs. insert(this);
-		return false;
+		}
+		else
+		{
+			a_bs. insert(this);
+			return false;
+		}
 	}
 
 private:
@@ -570,7 +588,7 @@ class JointBase: public Base<JointBase<M_>, M_>
 {
 public:
 	/**
-	 *	The destructor (needed for correct memory disposal).
+	 *	The polymorphic destructor.
 	 */
 	virtual ~JointBase() {}
 
@@ -946,10 +964,14 @@ public:
 		m_mid0 -> link(m_mid1);
 		m_mid0 -> link(this -> exit());
 		if (a_flags & 1)
+		{
 			m_mid1 -> link(a_spacer_left, atInvoke);
+		}
 		m_mid1 -> link(a_entry1, atInvoke);
 		if (a_flags & 2)
+		{
 			m_mid1 -> link(a_spacer_right, atInvoke);
+		}
 		m_mid1 -> link(m_mid0);
 	}
 

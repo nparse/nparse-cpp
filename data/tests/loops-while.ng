@@ -1,33 +1,33 @@
 namespace loops;
 
 C1 {
-	counter = 0;
-	while (counter < integer(repeat_number))
-		++ counter;
+    counter = 0;
+    while (counter < integer(repeat_number))
+        ++ counter;
 };
 
 C2 {
-	_k = 0;
-	_n = integer(repeat_number);
-	while (test1(_k, _n)) {
-		++ _k;
-	}
-	counter = _k;
+    _k = 0;
+    _n = integer(repeat_number);
+    while (test1(_k, _n)) {
+        ++ _k;
+    }
+    counter = _k;
 };
 
 C3 {
-	counter = 0;
-	while (test1(counter, integer(repeat_number))) {
-		increment1();
-	}
+    counter = 0;
+    while (test1(counter, integer(repeat_number))) {
+        increment1();
+    }
 };
 
 function test1 (_iter, _n)
 {
-	test1 = (_iter < _n);
+    test1 = (_iter < _n);
 };
 
 procedure increment1 ()
 {
-	++ counter;
+    ++ counter;
 };

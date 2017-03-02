@@ -14,7 +14,7 @@ A := "\"$x\"" :z;
 
 namespace g3;
 
-// parametrized context replacement 
+// parametrized context replacement
 S := ^\w+ :var '=' <A {var}> { self(A); } ^$;
 A := ^.+ { /* #fixMe; */ self({(var): $}); };
 

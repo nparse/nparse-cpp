@@ -1,0 +1,25 @@
+script:
+    - inline.ng
+
+config:
+    entry_label:       100
+    grammar_pool:      1024
+    input_pool:        64
+
+test1a:
+    config:     { entry_point: S1a }
+    input:      "alpha = 1000"
+    check:
+        alpha:  1000
+        k:      alpha
+        v:      1000
+
+test1b:
+    config:     { entry_point: S1b }
+    input:      alpha = 1, beta = 2, gamma = "3,5,8"
+    check:
+        alpha:  1
+        beta:   2
+        gamma:  '"3,5,8"'
+        k:      gamma
+        v:      '"3,5,8"'

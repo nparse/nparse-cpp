@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/constructs/switch.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -137,10 +137,10 @@ private:
 
 class Construct: public IConstruct
 {
-//	<LOCAL PARSER DATA>
+//	<LOCAL_PARSER_DATA>
 	std::stack<Action*> m_switch_stack;
 
-//	</LOCAL PARSER DATA>
+//	</LOCAL_PARSER_DATA>
 
 	bool create_condition (const hnd_arg_t& arg)
 	{
@@ -154,7 +154,7 @@ class Construct: public IConstruct
 
 	bool create_case (const hnd_arg_t& arg)
 	{
-		assert( !m_switch_stack. empty() );
+		assert(! m_switch_stack. empty());
 		if (! m_switch_stack. top() -> add_case(arg. staging. pop()))
 		{
 			throw ex::runtime_error()
@@ -167,7 +167,7 @@ class Construct: public IConstruct
 
 	bool create_default (const hnd_arg_t& arg)
 	{
-		assert( !m_switch_stack. empty() );
+		assert(! m_switch_stack. empty());
 		if (! m_switch_stack. top() -> add_default())
 		{
 			throw ex::runtime_error()
@@ -180,15 +180,15 @@ class Construct: public IConstruct
 
 	bool create_action (const hnd_arg_t& arg)
 	{
-		assert( !m_switch_stack. empty() );
+		assert(! m_switch_stack. empty());
 		m_switch_stack. top() -> add_action(arg. staging. pop());
 		return true;
 	}
 
 	bool create_switch (const hnd_arg_t& arg)
 	{
-		assert( !m_switch_stack. empty() );
-		arg. staging. push(action_pointer(m_switch_stack. top()));
+		assert(! m_switch_stack. empty());
+		arg. staging. push(m_switch_stack. top());
 		m_switch_stack. pop();
 		return true;
 	}
@@ -203,6 +203,10 @@ public:
 // <DEBUG_NODE_NAMING>
 		entry_		("Switch.Entry")
 // </DEBUG_NODE_NAMING>
+	{
+	}
+
+	void initialize ()
 	{
 		using namespace anta::ndl::terminals;
 		using namespace anta::dsel;
@@ -242,5 +246,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Construct, construct_switch, nparse.script.constructs.Switch, 1 )
+PLUGIN(Construct, construct_switch, nparse.script.constructs.Switch)

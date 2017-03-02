@@ -15,7 +15,7 @@ cast_integer_3: { input: "integer, -0", check: { value: 0 } }
 cast_integer_4: { input: "integer, -1", check: { value: -1 } }
 cast_integer_5: { input: "integer, +1", check: { value: 1 } }
 cast_integer_6: { input: "integer, 123", check: { value: 123 } }
-cast_integer_7: { input: "integer, NaN", error: [[ "bad lexical cast: source type value could not be interpreted as target", 4, 30 ]] }
+cast_integer_7: { input: "integer, NaN", error: [[ "bad lexical cast: source type value could not be interpreted as target", 4, 37 ]] }
 
 cast_real_1a: { input: "real, 0", check: { value: 0 } }
 cast_real_2a: { input: "real, 0.0", check: { value: 0 } }

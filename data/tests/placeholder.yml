@@ -1,5 +1,6 @@
 script:
-    - placeholder.ng
+    - placeholder1.ng
+    - placeholder2.ng
 
 config:
     grammar_pool:      1024
@@ -51,3 +52,26 @@ test5.3:
     input:             alpha beta gamma 3
     check:
         res:           alpha
+
+test6:
+    config:
+        entry_point:   S6
+    input:             alpha beta gamma delta epsilon
+    check:
+        res:           epsilon-delta-gamma-beta-alpha
+
+test7a:
+    config:
+        entry_point:   S7a
+    input:             alpha beta gamma delta epsilon
+    check:
+        res:           epsilon--delta--gamma--beta--alpha
+    comment:           Calls inevitably produce empty placeholders.
+
+test7b:
+    config:
+        entry_point:   S7b
+    input:             alpha beta gamma delta epsilon
+    check:
+        res:           epsilon--delta--gamma--beta--alpha
+    comment:           Calls inevitably produce empty placeholders.

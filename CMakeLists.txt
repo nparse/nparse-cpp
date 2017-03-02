@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 2.6.2)
+cmake_minimum_required(VERSION 2.8)
+
+set(CMAKE_MACOSX_RPATH 1)
 
 #
 #	Project name and version.
@@ -7,7 +9,7 @@ cmake_minimum_required(VERSION 2.6.2)
 project(nParse)
 set(NPARSE_MAJOR 0)
 set(NPARSE_MINOR 1)
-set(NPARSE_PATCH 6)
+set(NPARSE_PATCH 7)
 add_definitions(-DNPARSE_CMPH)
 
 #
@@ -43,7 +45,7 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	add_definitions(-DDEBUG -DDEBUG_PRINT)
 endif()
 
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "^(Clang|AppleClang)$")
 	set(COMPILER_FLAGS "${COMPILER_FLAGS} -ftemplate-depth=65536")
 endif()
 
@@ -127,7 +129,7 @@ include_directories(
 	${Boost_INCLUDE_DIRS}
 	./contrib/include
 	./contrib/libencode-0.1.0/include
-	./contrib/libplugin-0.1.1/include
+	./contrib/libplugin-0.2.0/include
 	./contrib/utf8-cpp-2.3.4/include
 	./contrib/yaml-cpp-0.5.3/include
 	./contrib/gtest-1.8.0/googlemock/include
@@ -182,8 +184,8 @@ set(CPACK_PACKAGE_VERSION_MINOR			${NPARSE_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH			${NPARSE_PATCH})
 set(CPACK_PACKAGE_VENDOR				"Alex S Kudinov")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY	"general purpose parsing framework")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER		"Alex S Kudinov <alex@nparse.com>")
-set(CPACK_DEBIAN_PACKAGE_HOMEPAGE		"http://nparse.com")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER		"Alex S Kudinov <alex.s.kudinov@gmail.com>")
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE		"https://nparse.com")
 
 include(CPack)
 set(CPACK_INSTALL_CMAKE_PROJECTS	"bin;${CMAKE_PROJECT_NAME};nparse;/")

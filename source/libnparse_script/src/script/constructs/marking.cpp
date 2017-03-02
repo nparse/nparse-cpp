@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/constructs/marking.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -89,15 +89,15 @@ private:
 
 class Construct: public IConstruct
 {
-//	<LOCAL PARSER DATA>
+//	<LOCAL_PARSER_DATA>
 	int m_type;
 	targets_t m_targets;
 
-//	</LOCAL PARSER DATA>
+//	</LOCAL_PARSER_DATA>
 
 	bool set_type (const hnd_arg_t& arg)
 	{
-		assert( m_targets. empty() );
+		assert(m_targets. empty());
 
 		const string_t type = get_accepted_str(arg);
 
@@ -127,11 +127,10 @@ class Construct: public IConstruct
 
 	bool create_action (const hnd_arg_t& arg)
 	{
-		assert( m_type == 0 || m_type == 1 );
-		assert( !m_targets. empty() );
+		assert(m_type == 0 || m_type == 1);
+		assert(!m_targets. empty());
 
-		action_pointer impl(new Action(m_type, m_targets));
-		arg. staging. push(impl);
+		arg. staging. push(new Action(m_type, m_targets));
 		return true;
 	}
 
@@ -166,5 +165,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Construct, construct_marking, nparse.script.constructs.Marking, 1 )
+PLUGIN(Construct, construct_marking, nparse.script.constructs.Marking)

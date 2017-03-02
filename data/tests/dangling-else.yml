@@ -6,7 +6,7 @@ config:
     grammar_pool:      1024
     input_pool:        4
 
-case1a:
+test1a:
     config:
         entry_point:   S1
         condition:     1
@@ -14,7 +14,7 @@ case1a:
     check:
         result:        "A"
 
-case1b:
+test1b:
     config:
         entry_point:   S1
         condition:     2
@@ -22,7 +22,7 @@ case1b:
     check:
         result:        "B"
 
-case1c:
+test1c:
     config:
         entry_point:   S1
         condition:     3
@@ -30,7 +30,7 @@ case1c:
     check:
         result:        "C"
 
-case2a:
+test2a:
     config:
         entry_point:   S2
         condition:     1
@@ -38,7 +38,7 @@ case2a:
     check:
         result:        "A"
 
-case2b:
+test2b:
     config:
         entry_point:   S2
         condition:     2
@@ -46,7 +46,7 @@ case2b:
     check:
         result:        "B"
 
-case2c:
+test2c:
     config:
         entry_point:   S2
         condition:     3
@@ -54,7 +54,7 @@ case2c:
     check:
         result:        "C"
 
-case3a:
+test3a:
     config:
         entry_point:   S3
         condition:     1
@@ -62,7 +62,7 @@ case3a:
     check:
         result:        "A"
 
-case3b:
+test3b:
     config:
         entry_point:   S3
         condition:     2
@@ -70,7 +70,7 @@ case3b:
     check:
         result:        "B"
 
-case3c:
+test3c:
     config:
         entry_point:   S3
         condition:     3
@@ -78,7 +78,7 @@ case3c:
     check:
         result:        "C"
 
-case4a:
+test4a:
     config:
         entry_point:   S4
         condition:     1
@@ -86,7 +86,7 @@ case4a:
     check:
         result:        "A"
 
-case4b:
+test4b:
     config:
         entry_point:   S4
         condition:     2
@@ -94,7 +94,7 @@ case4b:
     check:
         result:        "B"
 
-case4c:
+test4c:
     config:
         entry_point:   S4
         condition:     3
@@ -102,7 +102,7 @@ case4c:
     check:
         result:        "C"
 
-case5a:
+test5a:
     config:
         entry_point:   S5
         condition:     1
@@ -110,7 +110,7 @@ case5a:
     check:
         result:        "A"
 
-case5b:
+test5b:
     config:
         entry_point:   S5
         condition:     2
@@ -118,7 +118,7 @@ case5b:
     check:
         result:        "B"
 
-case5c:
+test5c:
     config:
         entry_point:   S5
         condition:     3

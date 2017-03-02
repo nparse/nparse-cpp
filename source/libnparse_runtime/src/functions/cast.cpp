@@ -2,10 +2,10 @@
  * @file $/source/libnparse_runtime/src/functions/cast.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -92,17 +92,17 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON( Function<anta::aux::boolean<NLG> >,
-		function_boolean, nparse.script.functions.boolean, 1 )
+PLUGIN(Function<anta::aux::boolean<NLG> >,
+		function_boolean, nparse.script.functions.boolean)
 
-PLUGIN_STATIC_EXPORT_SINGLETON( Function<anta::aux::integer<NLG> >,
-		function_integer, nparse.script.functions.integer, 1 )
+PLUGIN(Function<anta::aux::integer<NLG> >,
+		function_integer, nparse.script.functions.integer)
 
-PLUGIN_STATIC_EXPORT_SINGLETON( Function<anta::aux::real<NLG> >,
-		function_real, nparse.script.functions.real, 1 )
+PLUGIN(Function<anta::aux::real<NLG> >,
+		function_real, nparse.script.functions.real)
 
-PLUGIN_STATIC_EXPORT_SINGLETON( Function<anta::string<NLG> >,
-		function_string, nparse.script.functions.string, 1 )
+PLUGIN(Function<anta::string<NLG> >,
+		function_string, nparse.script.functions.string)
 
-PLUGIN_STATIC_EXPORT_SINGLETON( Function<anta::aux::array<NLG> >,
-		function_array, nparse.script.functions.array, 1 )
+PLUGIN(Function<anta::aux::array<NLG> >,
+		function_array, nparse.script.functions.array)

@@ -1,19 +1,19 @@
 S := <L1> ^$ { res = L1.res; };
 
 L1 :=
-	<x:L2>			{ res = x.res; }
-	(	^\s* '+' <y:L2>		{ res += y.res; }
-	||	^\s* '-' <y:L2>		{ res -= y.res; }
-	)*;
+    <x:L2>          { res = x.res; }
+    (   ^\s* '+' <y:L2>     { res += y.res; }
+    ||  ^\s* '-' <y:L2>     { res -= y.res; }
+    )*;
 
 L2 :=
-	<x:L3>			{ res = x.res; }
-	(	^\s* '*' <y:L3>		{ res *= y.res; }
-	||	^\s* '/' <y:L3>		{ res /= y.res; }
-	||	^\s* '%' <y:L3>		{ res %= y.res; }
-	)*;
+    <x:L3>          { res = x.res; }
+    (   ^\s* '*' <y:L3>     { res *= y.res; }
+    ||  ^\s* '/' <y:L3>     { res /= y.res; }
+    ||  ^\s* '%' <y:L3>     { res %= y.res; }
+    )*;
 
 L3 :=
-		^\d+(?!\.)					{ res = integer($); }
-	||	^\d+\.\d+([eE][-+]?\d+)?	{ res = real($); }
-	||	'(' <x:L1> ')'				{ res = x.res; };
+        ^\d+(?!\.)                  { res = integer($); }
+    ||  ^\d+\.\d+([eE][-+]?\d+)?    { res = real($); }
+    ||  '(' <x:L1> ')'              { res = x.res; };

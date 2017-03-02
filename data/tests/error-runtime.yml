@@ -11,7 +11,7 @@ cast-boolean:
         entry_point:   cast-boolean
     input:             ""
     error:
-        - [ "std::bad_cast", 2, 2 ]
+        - [ "std::bad_cast", 2, 5 ]
 
 cast-integer:
     config:

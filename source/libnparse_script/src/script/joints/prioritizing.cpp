@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/joints/prioritizing.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -75,7 +75,7 @@ class Operator: public IOperator
 		// Determine the operator arity.
 		const anta::aux::integer<SG>::type pr =
 			arg. state. val("pr_arity"). as_integer();
-		assert( pr > 1 );
+		assert(pr > 1);
 
 		// Pop joints out of the LL stack.
 		typedef std::vector<IStaging::joint_pointer> joints_t;
@@ -160,5 +160,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Operator, joint_prioritizing, nparse.script.joints.Prioritizing, 1 )
+PLUGIN(Operator, joint_prioritizing, nparse.script.joints.Prioritizing)

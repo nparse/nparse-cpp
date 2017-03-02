@@ -2,10 +2,10 @@
  * @file $/source/nparse-port/src/nparse-php.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -112,7 +112,7 @@ PHP_METHOD(nParse, compile)
 		RETURN_NULL();
 	}
 
-	assert( a_grammar[a_grammar_len] == 0 );
+	assert(a_grammar[a_grammar_len] == 0);
 
 	static_cast<nparse_object*>(
 			zend_object_store_get_object(getThis() TSRMLS_CC))
@@ -134,7 +134,7 @@ PHP_METHOD(nParse, load)
 		RETURN_NULL();
 	}
 
-	assert( a_filename[a_filename_len] == 0 );
+	assert(a_filename[a_filename_len] == 0);
 
 	static_cast<nparse_object*>(
 			zend_object_store_get_object(getThis() TSRMLS_CC))
@@ -156,7 +156,7 @@ PHP_METHOD(nParse, parse)
 		RETURN_NULL();
 	}
 
-	assert( a_input[a_input_len] == 0 ); // not really necessary
+	assert(a_input[a_input_len] == 0); // not really necessary
 
 	nparse_object* object = static_cast<nparse_object*>(
 			zend_object_store_get_object(getThis() TSRMLS_CC));
@@ -271,7 +271,7 @@ PHP_METHOD(nParse, get)
 		RETURN_NULL();
 	}
 
-	assert( a_name == NULL || a_name[a_name_len] == 0 );
+	assert(a_name == NULL || a_name[a_name_len] == 0);
 
 	nparse::Variable result = static_cast<nparse_object*>(
 			zend_object_store_get_object(getThis() TSRMLS_CC)
@@ -332,7 +332,7 @@ PHP_METHOD(nParse, set)
 			zend_object_store_get_object(getThis() TSRMLS_CC));
 	nparse::Parser& parser = *(object -> impl);
 
-	assert( a_name[a_name_len] == 0 );
+	assert(a_name[a_name_len] == 0);
 
 	switch (a_value -> type)
 	{
@@ -351,7 +351,7 @@ PHP_METHOD(nParse, set)
 	case IS_STRING:
 		{
 			const char* str = Z_STRVAL_P(a_value);
-			assert( str[Z_STRLEN_P(a_value)] == 0 );
+			assert(str[Z_STRLEN_P(a_value)] == 0);
 			parser. set( a_name, str );
 		}
 		break;
@@ -433,6 +433,13 @@ PHP_METHOD(nParse, get_location)
 	RETURN_STRING(location, 1);
 }
 
+PHP_METHOD(nParse, get_trace_count)
+{
+	RETURN_LONG( static_cast<nparse_object*>(
+				zend_object_store_get_object(getThis() TSRMLS_CC)
+		) -> impl -> get_trace_count() );
+}
+
 PHP_METHOD(nParse, get_iteration_count)
 {
 	RETURN_LONG( static_cast<nparse_object*>(
@@ -440,11 +447,11 @@ PHP_METHOD(nParse, get_iteration_count)
 		) -> impl -> get_iteration_count() );
 }
 
-PHP_METHOD(nParse, get_trace_count)
+PHP_METHOD(nParse, get_context_count)
 {
 	RETURN_LONG( static_cast<nparse_object*>(
 				zend_object_store_get_object(getThis() TSRMLS_CC)
-		) -> impl -> get_trace_count() );
+		) -> impl -> get_context_count() );
 }
 
 PHP_METHOD(nParse, get_pool_usage)
@@ -483,8 +490,9 @@ zend_function_entry global_nparse_methods[] = {
 	PHP_ME(nParse, get_message_count,	arginfo_nParse__void,			ZEND_ACC_PUBLIC)
 	PHP_ME(nParse, get_message,			arginfo_nParse_get_message,		ZEND_ACC_PUBLIC)
 	PHP_ME(nParse, get_location,		arginfo_nParse_get_location,	ZEND_ACC_PUBLIC)
-	PHP_ME(nParse, get_iteration_count,	arginfo_nParse__void,			ZEND_ACC_PUBLIC)
 	PHP_ME(nParse, get_trace_count,		arginfo_nParse__void,			ZEND_ACC_PUBLIC)
+	PHP_ME(nParse, get_iteration_count,	arginfo_nParse__void,			ZEND_ACC_PUBLIC)
+	PHP_ME(nParse, get_context_count,	arginfo_nParse__void,			ZEND_ACC_PUBLIC)
 	PHP_ME(nParse, get_pool_usage,		arginfo_nParse__void,			ZEND_ACC_PUBLIC)
 	PHP_ME(nParse, get_pool_capacity,	arginfo_nParse__void,			ZEND_ACC_PUBLIC)
 	{ NULL, NULL, NULL }

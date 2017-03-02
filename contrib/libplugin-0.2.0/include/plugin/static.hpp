@@ -1,17 +1,17 @@
 /*
 The MIT License (MIT)
-Copyright (c) 2010-2013 Alex S Kudinov <alex@nparse.com>
- 
+Copyright (c) 2010-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -23,21 +23,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define PLUGIN_STATIC_HPP_
 
 /**
- *	Declare a statically initializable plug-in.
+ *	Declare a plugin.
  */
-#define PLUGIN_STATIC_EXPORT( CLASS, SLOT, NAME, VERSION ) \
-	namespace { plugin::install<CLASS> SLOT##_v##VERSION ( #NAME, VERSION ); } \
+#define PLUGIN( CLASS, SLOT, NAME ) \
+	namespace { plugin::install<CLASS> install##SLOT(#NAME); } \
 	const void* plugin::PLUGIN_NAMESPACE::static_export::SLOT =& \
-		SLOT##_v##VERSION;
-
-#define PLUGIN_STATIC_EXPORT_SINGLETON( CLASS, SLOT, NAME, VERSION ) \
-	namespace { plugin::install_singleton<CLASS> SLOT##_v##VERSION ( #NAME, \
-			VERSION ); } \
-	const void* plugin::PLUGIN_NAMESPACE::static_export::SLOT =& \
-		SLOT##_v##VERSION;
+		install##SLOT;
 
 /**
- *	Declare a statically initializable plug-in module.
+ *	Declare a plugin module, i.e. a collection of plugins.
  */
 #define PLUGIN_STATIC_MODULE( SLOT_LIST ) \
 	namespace plugin { \
@@ -50,7 +44,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	} }
 
 /**
- *	Deploy the initialization point for a plug-in module.
+ *	Deploy initialization point for a plugin module.
  */
 #define PLUGIN_STATIC_DEPLOY \
 	namespace plugin { namespace PLUGIN_NAMESPACE { \
@@ -58,7 +52,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	} }
 
 /**
- *	Declare the export of a plug-in module initialization point.
+ *	Import plugin module initialization point.
  */
 #define PLUGIN_STATIC_IMPORT( NS ) \
 	namespace plugin { namespace NS { \
@@ -66,7 +60,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	} }
 
 /**
- *	Call the initialization point of a plug-in module.
+ *	Invoke plugin module initialization point.
  */
 #define PLUGIN_STATIC_INIT( NS ) \
 	plugin::NS::init()

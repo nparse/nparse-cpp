@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/staging.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -68,7 +68,6 @@ public:
 	Staging ():
 		m_factory ("nparse.AcceptorFactory")
 	{
-		m_factory -> import("nparse.acceptors");
 	}
 
 	~Staging ()
@@ -115,11 +114,11 @@ public:
 		if (found_at == m_acceptors. end())
 		{
 			const IAcceptor* instance = NULL;
-			if (! m_factory -> generate(a_def, instance, path))
+			if (! m_factory -> create(a_def, instance, path))
 			{
 				// NOTE: Yes, it's a logic error!
-				throw std::logic_error("unable to generate acceptor from"
-						" definition");
+				throw std::logic_error("unable to create acceptor from"
+						" the given definition");
 			}
 			const std::pair<acceptors_t::iterator, bool> p =
 				m_acceptors. insert(acceptors_t::value_type(a_def, instance));
@@ -256,7 +255,16 @@ public:
 
 };
 
+class StagingFactory: public IStagingFactory
+{
+public:
+	boost::shared_ptr<IStaging> createInstance ()
+	{
+		return boost::shared_ptr<IStaging>(new Staging());
+	}
+
+};
+
 } // namespace
 
-PLUGIN_STATIC_EXPORT(
-		Staging, script_staging, nparse.script.Staging, 1 )
+PLUGIN(StagingFactory, script_staging, nparse.script.StagingFactory)

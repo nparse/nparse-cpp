@@ -5,7 +5,7 @@ This file is a part of the "nParse" project -
         a general purpose parsing framework, version 0.1.2
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -277,7 +277,7 @@ struct entry_functor
 };
 
 /**
- *	Semantic action provider invokation point.
+ *	Semantic action provider invocation point.
  */
 template <typename Trav_>
 inline bool entry (Trav_& a_trav)

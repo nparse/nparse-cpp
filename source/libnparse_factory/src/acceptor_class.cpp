@@ -2,10 +2,10 @@
  * @file $/source/libnparse_factory/src/acceptor_class.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -139,13 +139,13 @@ public:
 			'['
 		>  +(	('\\' > char_[ add_char ])
 			|	("[:" > (+char_("a-zA-Z0-9"))[ add_class ] > ":]")
-			|	((char_ - '-') >> '-' > char_)[ add_range ]
+			|	(((char_ - '-') >> '-') > char_)[ add_range ]
 			|	(char_ - ']')[ add_char ]
 			)
 		>	']'
 		>	(	eoi[ add_length ]
 			|	'{'
-			>	(	(uint_ >> '-' > uint_)[ add_interval ]
+			>	(	((uint_ >> '-') > uint_)[ add_interval ]
 				|	uint_[ add_length ]
 				)
 				% ','
@@ -187,7 +187,7 @@ public:
 	void accept (const anta::range<NLG>::type& C,
 			const anta::range<NLG>::type& E, anta::spectrum<NLG>::type& S) const
 	{
-		assert( !m_bounds. empty() );
+		assert(! m_bounds. empty());
 
 		anta::iterator<NLG>::type i = E. second;
 		anta::iterator<NLG>::type i_max = i + std::min<std::size_t>(
@@ -199,7 +199,7 @@ public:
 			if (static_cast<std::size_t>(i - E. second) == *b)
 			{
 				++ b;
-				assert( b != m_bounds. end() );
+				assert(b != m_bounds. end());
 			}
 			if ((b - m_bounds. begin()) & 1)
 			{
@@ -214,7 +214,7 @@ public:
 	}
 
 	// Overridden from IAcceptor:
-	operator const anta::Acceptor<NLG>& () const
+	const anta::Acceptor<NLG>& get () const
 	{
 		return *this;
 	}
@@ -275,9 +275,9 @@ public:
 };
 
 /**
- *	Generator implementation.
+ *	AcceptorFactory implementation.
  */
-class Generator: public IAcceptorGenerator
+class AcceptorFactory: public IAcceptorFactory
 {
 public:
 	// Overridden from IPrioritized:
@@ -286,8 +286,8 @@ public:
 		return PRIORITY_CLASS;
 	}
 
-	// Overridden from IAcceptorGenerator:
-	bool generate (const string_t& a_definition, const IAcceptor*& a_instance,
+	// Overridden from IAcceptorFactory:
+	bool create (const string_t& a_definition, const IAcceptor*& a_instance,
 			const std::string&/* a_path*/)
 	{
 		string_t::const_iterator first = a_definition. begin();
@@ -317,5 +317,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Generator, acceptor_class, nparse.acceptors.Class, 1 )
+PLUGIN(AcceptorFactory, acceptor_class, nparse.acceptors.Class)

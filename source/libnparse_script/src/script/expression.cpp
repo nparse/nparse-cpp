@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/expression.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -38,14 +38,18 @@ using namespace nparse;
 
 class Construct: public IConstruct
 {
-	static const std::string sc_operators_family;
+	static const std::string sc_operator_ctg;
 	typedef plugin::category<IOperator> operators_t;
 	operators_t m_operators;
 	boost::ptr_vector<anta::ndl::Rule<SG> > levels_;
 
 public:
 	Construct ():
-		m_operators (sc_operators_family)
+		m_operators (sc_operator_ctg)
+	{
+	}
+
+	void initialize ()
 	{
 		// Sort operator category in priority ascending order.
 		std::sort(m_operators. begin(), m_operators. end(), less_priority());
@@ -61,7 +65,7 @@ public:
 			const int index = static_cast<int>(i - m_operators. begin());
 // <DEBUG_NODE_NAMING>
 			tmp << "Expression.Level(" << index << ", "
-				<< i -> first. substr(sc_operators_family. length() + 1) << ')';
+				<< i -> first. substr(sc_operator_ctg. length() + 1) << ')';
 			levels_[index]. cluster(). set_name(tmp. str());
 			tmp. str("");
 			tmp. clear();
@@ -83,9 +87,8 @@ public:
 
 };
 
-const std::string Construct::sc_operators_family("nparse.script.operators");
+const std::string Construct::sc_operator_ctg("nparse.script.operators");
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT(
-		Construct, script_expression, nparse.script.Expression, 1 )
+PLUGIN(Construct, script_expression, nparse.script.Expression)

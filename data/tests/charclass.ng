@@ -1,16 +1,16 @@
 // list of allowed character classes
 classes :=
-	 alnum
-	|alpha
-	|cntrl
-	|digit
-	|graph
-	|lower
-	|print
-	|punct
-	|space
-	|upper
-	|xdigit;
+     alnum
+    |alpha
+    |cntrl
+    |digit
+    |graph
+    |lower
+    |print
+    |punct
+    |space
+    |upper
+    |xdigit;
 
 // Rule X1 reads a class definition and stores it in the `class' variable,
 // which is being used in the subsequent instantiation of the character class
@@ -20,10 +20,10 @@ X1 := $classes:class "[[:$class:]]{1-99}" { self({ (class): $ }); };
 // Rule Xn acts the same way as X1 with the only difference that it allows more
 // than one class definitions.
 Xn :=
-	{class='';}
-	( $classes {class+="[:$:]";} )+
-	"[$class]{1-99}"
-	{ self({ (class): $ }); };
+    {class='';}
+    ( $classes {class+="[:$:]";} )+
+    "[$class]{1-99}"
+    { self({ (class): $ }); };
 
 // Rules X2 and X3 represent so-called "compound" character classes.
 X2 := "[0-9a-f]{1-99}":value;

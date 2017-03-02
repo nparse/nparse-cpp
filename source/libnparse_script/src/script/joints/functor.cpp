@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/joints/functor.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -73,11 +73,10 @@ public:
 		{
 			traveller. get_state(). substitute(&* init. as_array());
 		}
-		else
 
 		// Otherwise, check if the initializer can be reduced to the positive
 		// logical value.
-		if (! init. as_boolean())
+		else if (! init. as_boolean())
 		{
 			throw flow_control(false);
 		}
@@ -131,7 +130,7 @@ public:
 
 		// Get the value of the special variable (supposed to be array).
 		result_type val = self -> val(zero);
-		assert( val. is_array() );
+		assert(val. is_array());
 
 		// Substitute restored external context for the current.
 		traveller. get_state(). substitute(&* val. as_array());
@@ -163,11 +162,11 @@ private:
 
 class Operator: public IOperator
 {
-//	<LOCAL PARSER DATA>
+//	<LOCAL_PARSER_DATA>
 	string_t m_alias, m_target;
 	action_pointer m_pre_cond, m_post_cond;
 
-//	</LOCAL PARSER DATA>
+//	</LOCAL_PARSER_DATA>
 
 	// Defines alias.
 	bool set_alias (const hnd_arg_t& arg)
@@ -327,5 +326,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT(
-		Operator, joint_functor, nparse.script.joints.Functor, 1 )
+PLUGIN(Operator, joint_functor, nparse.script.joints.Functor)

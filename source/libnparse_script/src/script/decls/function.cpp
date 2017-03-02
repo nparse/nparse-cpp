@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/decls/function.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.3
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -36,7 +36,8 @@ namespace {
 
 using namespace nparse;
 
-class Function: public IFunction, public plugin::IFactory
+class Function: public IFunction,
+	public plugin::auto_factory<Function, plugin::singleton_factory>
 {
 	typedef std::vector<IEnvironment::key_type> parameters_type;
 
@@ -66,22 +67,10 @@ public:
 public:
 	// Overridden from IFactory:
 
-	bool create (IInterface*& a_instance, const std::string&, const int)
+	plugin::IPluggable* construct (void* a_address)
 	{
-		assert(a_instance == NULL);
-		a_instance = static_cast<IFunction*>(this);
-		return false;
-	}
-
-	void destroy (IInterface* a_instance)
-	{
-		assert(a_instance == static_cast<IFunction*>(this));
-	}
-
-	void release ()
-	{
-		m_parameters. clear();
-		m_body. reset();
+		// TODO: This is a side effect of multiple inheritance.
+		return this;
 	}
 
 public:
@@ -109,18 +98,9 @@ public:
 
 public:
 	Function (const std::string& a_name, const bool a_local_only):
-		m_local_only (a_local_only)
+		auto_factory (a_name), m_local_only (a_local_only),
+		m_result (a_name. substr(a_name. find_last_of(".:") + 1))
 	{
-		// NOTE: factory-instance is the owner of itself
-		plugin::manager::instance(). install(
-			static_cast<plugin::IFactory*>(this), a_name, 1, false);
-		m_result = a_name. substr(a_name. find_last_of(".:") + 1);
-	}
-
-	~Function ()
-	{
-		plugin::manager::instance(). uninstall(
-			static_cast<plugin::IFactory*>(this) );
 	}
 
 private:
@@ -133,10 +113,10 @@ private:
 
 class Construct: public IConstruct
 {
-//	<LOCAL PARSER DATA>
+//	<LOCAL_PARSER_DATA>
 	Function* m_func;
 
-//	</LOCAL PARSER DATA>
+//	</LOCAL_PARSER_DATA>
 
 	std::string getFunctionName (const hnd_arg_t& arg) const
 	{
@@ -155,10 +135,10 @@ class Construct: public IConstruct
 			m_func = new Function(name, true);
 			arg. staging. bind(m_func);
 		}
-		catch (const plugin::interface_version_conflict& err)
+		catch (const plugin::interface_name_conflict& err)
 		{
 			throw ex::compile_error()
-				<< ex::function(name)
+				<< ex::function(get_accepted_str(arg))
 				<< ex::location(get_accepted_range(arg))
 				<< ex::message("function redefinition");
 		}
@@ -173,10 +153,10 @@ class Construct: public IConstruct
 			m_func = new Function(name, false);
 			arg. staging. bind(m_func);
 		}
-		catch (const plugin::interface_version_conflict& err)
+		catch (const plugin::interface_name_conflict& err)
 		{
 			throw ex::compile_error()
-				<< ex::function(name)
+				<< ex::function(get_accepted_str(arg))
 				<< ex::location(get_accepted_range(arg))
 				<< ex::message("procedure redefinition");
 		}
@@ -214,6 +194,10 @@ public:
 		entry_		("Function.Entry")
 // </DEBUG_NODE_NAMING>
 	{
+	}
+
+	void initialize ()
+	{
 		using namespace anta::ndl::terminals;
 		using boost::proto::lit;
 
@@ -240,5 +224,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Construct, decl_function, nparse.script.decls.Function, 1 )
+PLUGIN(Construct, decl_function, nparse.script.decls.Function)

@@ -2,10 +2,10 @@
  * @file $/source/nparse-port/src/parser.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -48,8 +48,9 @@ struct ParserData
 	named_property_map config;
 
 	// settings
-	plugin::instance<IStaging> staging;
 	plugin::instance<IConstruct> grammar;
+	plugin::instance<IStagingFactory> staging_factory;
+	boost::shared_ptr<IStaging> staging;
 	int grammar_pool;
 	int input_pool;
 	std::string input_swap;
@@ -78,8 +79,8 @@ struct ParserData
 	Parser::status_t status;
 
 	ParserData ():
-		staging ("nparse.script.Staging"),
 		grammar ("nparse.script.Grammar"),
+		staging_factory ("nparse.script.StagingFactory"),
 		grammar_pool (16 << 10),	// [ kB ]
 		input_pool (16 << 10),		// [ kB ]
 		entry_point ("S"),
@@ -97,6 +98,7 @@ struct ParserData
 			("entry_point", entry_point)
 			("entry_label", entry_label)
 			(init); // fallback
+		staging = staging_factory -> createInstance();
 	}
 
 	void activate ()
@@ -672,6 +674,13 @@ const char* Parser::get_location (const int a_index, int* a_line, int* a_offset)
 	}
 }
 
+unsigned long Parser::get_trace_count () const
+{
+	return m_ -> validate(stCompleted)
+		? static_cast<unsigned long>(m_ -> traveller -> get_traced(). size())
+		: 0;
+}
+
 unsigned long Parser::get_iteration_count () const
 {
 	return m_ -> validate(stCompleted)
@@ -679,10 +688,10 @@ unsigned long Parser::get_iteration_count () const
 		: 0;
 }
 
-unsigned long Parser::get_trace_count () const
+unsigned long Parser::get_context_count () const
 {
 	return m_ -> validate(stCompleted)
-		? static_cast<unsigned long>(m_ -> traveller -> get_traced(). size())
+		? static_cast<unsigned long>(m_ -> traveller -> context_count())
 		: 0;
 }
 

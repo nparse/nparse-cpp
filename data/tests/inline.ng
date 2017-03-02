@@ -1,0 +1,7 @@
+Name := ^\w+;
+Value := ^[^\s,]+ || '"' ^([^"]|\\")* '"';
+Definition := $Name:k '=' $Value:v { (k): v };
+
+S1a := $Definition ^$;
+
+S1b := ($Definition % ',') ^$;

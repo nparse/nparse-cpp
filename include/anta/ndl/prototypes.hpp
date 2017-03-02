@@ -2,10 +2,10 @@
  * @file $/include/anta/ndl/prototypes.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -103,7 +103,7 @@ class Base<Node<typename ndl::extend<M_>::type>, M_>:
 {
 public:
 	/**
-	 *	The destructor.
+	 *	The polymorphic destructor.
 	 */
 	virtual ~Base() {}
 
@@ -226,16 +226,17 @@ public:
 	 */
 	ndl::Context<M_>* context (ndl::ContextOwner<M_>* a_owner) const
 	{
-		// We're in a specialized template base class now but we have to use it
-		// as if it were derived, so lets get a pointer of the derived type.
-		// NOTE: It used to be implemented using the dynamic_cast operator.
-		//		 Since we don't need dynamic polymorphism here it might be
-		//		 somewhat cheaper to use so-called static polymorphism.
+		// NOTE: We're in a specialized template base class now but we have to
+		//		 use it as if it was a descendant, so we need a pointer of the
+		//		 derived type.
+		//		 It could also be implemented using the dynamic_cast operator.
+		//		 However, since we don't need dynamic polymorphism here it might
+		//		 be somewhat cheaper to use so-called static polymorphism.
 		const State<M_>* p0 = this -> self();
 
 		// Find the nearest ancestor that has a context.
 		const State<M_>* p = p0;
-		while ((p != NULL) && ! p -> has_context())
+		while (p != NULL && ! p -> has_context())
 			p = p -> get_ancestor();
 
 		if (p != p0)
@@ -243,8 +244,8 @@ public:
 			// If there is such an ancestor then take its context.
 			ndl::Context<M_>* context = (p != NULL) ? p -> get_ptr() : NULL;
 
-			// Set the found context pointer for each of the just passed
-			// ancestors to not search for it next time.
+			// Set the found context pointer for each of the just traversed
+			// ancestors to avoid searching for it next time.
 			const State<M_>* q = p0;
 			while (q != p)
 			{
@@ -254,13 +255,15 @@ public:
 		}
 
 		// Make an own copy of the context if it is necessary. The fact that a
-		// context owner was specified means that a new context instance is
+		// context owner was provided means that a new context instance is
 		// supposed to be created.
-		if ((a_owner != NULL) && ! is_own_context())
-			const_cast<Base*>(this) -> set_ptr(&* a_owner -> create(get_ptr()),
-					true);
+		if (a_owner != NULL && ! is_own_context())
+		{
+			const_cast<Base*>(this)
+				-> set_ptr(&* a_owner -> create(get_ptr()), true);
+		}
 
-		// Return the pointer.
+		// Return the context pointer.
 		return get_ptr();
 	}
 

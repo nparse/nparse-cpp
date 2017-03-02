@@ -2,10 +2,10 @@
  * @file $/include/nparse/specs/sg/label.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -34,22 +34,28 @@ class IStaging;
 
 /**
  *	An auxiliary structure for passing arbitrary data to the semantic handlers
- *	at invokation points.
+ *	at invocation points.
  */
 struct hnd_arg_t
 {
 	IStaging& staging;
 	const anta::State<SG>& state;
 
-	hnd_arg_t (IStaging& a_staging, const anta::State<SG>& a_state):
+private:
+	// NOTE: By making the only constructor explicit and private we make sure
+	//		 that the class can be instantiated only in specificly allowed
+	//		 locations in the source code (see the friend list below).
+	explicit hnd_arg_t (IStaging& a_staging, const anta::State<SG>& a_state):
 		staging (a_staging), state (a_state)
 	{
 	}
 
+	friend class anta::Label<SG>;
+
 };
 
 /**
- *	The semantic handler.
+ *	The semantic handler type.
  */
 typedef utility::callback<bool, const hnd_arg_t&> hnd_t;
 

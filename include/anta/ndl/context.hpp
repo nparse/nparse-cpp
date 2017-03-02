@@ -2,10 +2,10 @@
  * @file $/include/anta/ndl/context.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -36,7 +36,7 @@ template <typename M_> class Context;
 template <typename M_> class ContextOwner;
 
 /**
- *	The default key type for the trace variables.
+ *	The default key type provider for the trace variables.
  */
 template <typename M_>
 struct context_key
@@ -61,48 +61,60 @@ struct context_value
 template <typename M_>
 struct context_entry
 {
-// NOTE: Usage of map<...>::value_type instead of pair<...> (see the commented
-//		 out lines below) prevents from unnecessary copying of trace variables
-//		 while a trace context is being listed.
+// NOTE: Usage of *map<...>::value_type instead of pair<...> (see the commented
+//		 out lines below) prevents unnecessary copying of trace variables when
+//		 a trace context is being listed.
 
 //	typedef std::pair<typename context_key<M_>::type,
 //			typename context_value<M_>::type> type;
 
-	typedef typename std::map<typename context_key<M_>::type,
+	typedef typename boost::unordered_map<typename context_key<M_>::type,
 			typename context_value<M_>::type>::value_type type;
 
 };
 
+/**
+ *	A metafunction that is used to determine if the given model allows orphan
+ *	trace context instances, i.e. instances not belonging to any ContextOwner.
+ */
 template <typename M_>
-struct context
+struct allow_orphan_contexts
 {
-	typedef typename context_key<M_>::type key_type;
-	typedef typename context_value<M_>::type value_type;
-	typedef typename context_entry<M_>::type entry_type;
+	// NOTE: Orphan trace context instances are safe and allowed by default.
+	typedef meta::true_ result_type;
 
-	/**
-	 *	Get the default value for the trace variable.
-	 */
-	static const value_type& def ()
-	{
-		static const value_type sc_empty = value_type();
-		return sc_empty;
-	}
+};
 
+/**
+ *	The trace context type implementation template.
+ */
+template<typename M_,
+	typename F_ = typename allow_orphan_contexts<M_>::result_type>
+struct context_type_impl;
+
+/**
+ *	A specialization of the trace context type implementation template for
+ *	models that DO allow orphan context instances.
+ */
+template <typename M_>
+struct context_type_impl<M_, meta::true_>
+{
 	class type
 	{
 	public:
-		type (const Context<M_>* a_ancestor = NULL):
-			m_simple_ptr (NULL), m_shared_ptr ()
+		type ():
+			m_simple_ptr (NULL), m_shared_ptr (new Context<M_>())
 		{
-			if (a_ancestor != NULL)
-			{
-				m_simple_ptr = a_ancestor -> derive();
-			}
-			else
-			{
-				m_shared_ptr. reset(new Context<M_>());
-			}
+		}
+
+		type (Context<M_>* a_context):
+			m_simple_ptr (a_context), m_shared_ptr ()
+		{
+		}
+
+		type (const Context<M_>* a_ancestor):
+			m_simple_ptr (a_ancestor -> derive()), m_shared_ptr ()
+		{
 		}
 
 		Context<M_>& operator* () const
@@ -124,15 +136,81 @@ struct context
 };
 
 /**
- *	The trace context (the holder object for the trace variables).
+ *	A specialization of the trace context type implementation template for
+ *	models that DO NOT allow orphan context instances.
+ */
+template <typename M_>
+struct context_type_impl<M_, meta::false_>
+{
+	class type
+	{
+	public:
+		type ()
+		{
+			throw std::logic_error("orphan context instances are not allowed"
+					" for this model");
+		}
+
+		type (Context<M_>* a_context):
+			m_simple_ptr (a_context)
+		{
+		}
+
+		type (const Context<M_>* a_ancestor):
+			m_simple_ptr (a_ancestor -> derive())
+		{
+		}
+
+		Context<M_>& operator* () const
+		{
+			return *m_simple_ptr;
+		}
+
+		Context<M_>* operator-> () const
+		{
+			return &**this;
+		}
+
+	private:
+		Context<M_>* m_simple_ptr;
+
+	};
+
+};
+
+/**
+ *	The trace context type provider.
+ */
+template <typename M_>
+struct context
+{
+	typedef typename context_key<M_>::type key_type;
+	typedef typename context_value<M_>::type value_type;
+	typedef typename context_entry<M_>::type entry_type;
+
+	typedef typename context_type_impl<M_>::type type;
+
+	/**
+	 *	Get the default value for a trace variable.
+	 */
+	static const value_type& def ()
+	{
+		static const value_type sc_empty = value_type();
+		return sc_empty;
+	}
+
+};
+
+/**
+ *	The trace context, i.e. the holder object for trace variables.
  */
 template <typename M_>
 class Context
 {
 public:
 	/**
-	 *	Necessary type definitions for meeting the requirements of the Context
-	 *	concept.
+	 *	Necessary type definitions for meeting the requirements of the Trace
+	 *	Context concept.
 	 *	@{ */
 	typedef typename context_key<M_>::type key_type;
 	typedef typename context_value<M_>::type value_type;
@@ -259,7 +337,7 @@ public:
 	 *	List all trace variables that are available within the global context.
 	 */
 	template <typename OutputIterator_>
-	uint_t list (OutputIterator_ a_out, const bool a_diff_only = false) const
+	uint_t list (OutputIterator_ a_out, const bool a_last_only = false) const
 	{
 #if 0
 		if (!this)
@@ -268,7 +346,7 @@ public:
 		}
 		else
 #endif
-		if (a_diff_only)
+		if (a_last_only)
 		{
 			std::copy(m_variables. begin(), m_variables. end(), a_out);
 			return static_cast<uint_t>(m_variables. size());
@@ -277,10 +355,28 @@ public:
 		{
 			std::set<key_type> passed;
 			for (const Context* c = this; c != NULL; c = c -> m_ancestor)
+			{
 				std::remove_copy_if(c -> m_variables. begin(),
 						c -> m_variables. end(), a_out, list_filter(passed));
+			}
 			return static_cast<uint_t>(passed. size());
 		}
+	}
+
+	/**
+	 *	Get the total number of trace variable entries availabe within the
+	 *	global context, including redefinitions.
+	 */
+	std::size_t entry_count (const bool a_last_only = true) const
+	{
+		std::size_t total = 0;
+		for (const Context* c = this; c != NULL; c = c -> m_ancestor)
+		{
+			total += c -> m_variables. size();
+			if (a_last_only)
+				break;
+		}
+		return total;
 	}
 
 private:
@@ -400,7 +496,7 @@ public:
 };
 
 /**
- *	The context owner (owns the instances of the Context class).
+ *	The trace context owner, i.e. the holder object for trace contexts.
  */
 template <typename M_>
 class ContextOwner: public pool<M_>::type
@@ -417,7 +513,7 @@ public:
 	}
 
 	/**
-	 *	Destroy all the instances.
+	 *	Destroy all previously created instances of the Context class.
 	 */
 	void reset ()
 	{
@@ -430,6 +526,14 @@ public:
 			}
 			m_instances. clear();
 		}
+	}
+
+	/**
+	 *	Get the current number of instances of the Context class.
+	 */
+	std::size_t context_count () const
+	{
+		return m_instances. size();
 	}
 
 private:

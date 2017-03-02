@@ -2,7 +2,7 @@ script:
     - permutation.ng
 
 config:
-    entry_point:       S 
+    entry_point:       S
     grammar_pool:      1024
     input_pool:        256
 

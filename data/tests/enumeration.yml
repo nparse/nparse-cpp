@@ -28,7 +28,7 @@ test1:
       - (S (X41 < a b a b a >))
 
 test2:
-    input:  "< ababa>"  
+    input:  "< ababa>"
     traces: 8
     forest:
       - (S (X01 < a b a b a >))

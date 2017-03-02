@@ -2,10 +2,10 @@
  * @file $/source/nparse-port/src/variable_iterator.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.3
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -117,34 +117,29 @@ const VariableIterator& VariableIterator::operator++ ()
 	return *this;
 }
 
-VariableIterator& VariableIterator::get (const int a_key)
+void VariableIterator::seek (const int a_key)
 {
 	char buf[32];
 	std::sprintf(buf, "%d", a_key);
-	return get(&*buf);
+	seek(&*buf);
 }
 
-VariableIterator& VariableIterator::get (const char* a_key)
+void VariableIterator::seek (const char* a_key)
 {
 	if (m_ != NULL)
 	{
 		const anta::ndl::context_key<NLG>::type key(a_key);
 		VariableData::keys_type::const_iterator lower_at =
 			std::lower_bound(m_ -> begin, m_ -> end, key);
-		if (lower_at == m_ -> end || *lower_at != key)
-		{
-			this -> ~VariableIterator();
-		}
-		else
+		if (lower_at != m_ -> end && *lower_at == key)
 		{
 			m_ -> begin = lower_at;
 		}
+		else
+		{
+			this -> ~VariableIterator();
+		}
 	}
-	else
-	{
-		this -> ~VariableIterator();
-	}
-	return *this;
 }
 
 } // namespace nparse

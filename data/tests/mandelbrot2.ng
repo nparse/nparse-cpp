@@ -2,54 +2,54 @@ namespace mandelbrot;
 
 node S {
 
-	markers = {
-		9: ' ', 8: '.', 7: ':', 6: '+', 5: '@',
-		4: '=', 3: '*', 2: '%', 1: '$', 0: '#'
-	};
-	max_steps = 10;
+    markers = {
+        9: ' ', 8: '.', 7: ':', 6: '+', 5: '@',
+        4: '=', 3: '*', 2: '%', 1: '$', 0: '#'
+    };
+    max_steps = 10;
 
-	s = '';
-	iteration_count = 0;
+    s = '';
+    iteration_count = 0;
 
-	width = (width == null) ? 100 : integer(width);
-	height = (height == null) ? 49 : integer(height);
+    width = (width == null) ? 100 : integer(width);
+    height = (height == null) ? 49 : integer(height);
 
-	max_dist = 6.0;
-	x0 = -1.5;
-	x1 =  0.5;
-	y0 = -1.0;
-	y1 =  1.0;
+    max_dist = 6.0;
+    x0 = -1.5;
+    x1 =  0.5;
+    y0 = -1.0;
+    y1 =  1.0;
 
-	dx = (x1 - x0) / (width - 1);
-	dy = (y1 - y0) / (height - 1);
+    dx = (x1 - x0) / (width - 1);
+    dy = (y1 - y0) / (height - 1);
 
-	for ( _i = 0; _i < height; ++ _i )
-	{
-		y = y0 + dy * _i;
+    for ( _i = 0; _i < height; ++ _i )
+    {
+        y = y0 + dy * _i;
 
-		for ( _j = 0; _j < width; ++ _j )
-		{
-			x = x0 + dx * _j;
+        for ( _j = 0; _j < width; ++ _j )
+        {
+            x = x0 + dx * _j;
 
-			_k = 0;
-			Zx = 0.0;
-			Zy = 0.0;
-			for ( _k = 0; _k < max_steps; ++ _k )
-			{
-				_Zx = Zx*Zx - Zy*Zy + x;
-				_Zy = 2.0*Zx*Zy + y;
-				if (_Zx*_Zx + _Zy*_Zy >= max_dist)
-					break;
-				Zx = _Zx;
-				Zy = _Zy;
+            _k = 0;
+            Zx = 0.0;
+            Zy = 0.0;
+            for ( _k = 0; _k < max_steps; ++ _k )
+            {
+                _Zx = Zx*Zx - Zy*Zy + x;
+                _Zy = 2.0*Zx*Zy + y;
+                if (_Zx*_Zx + _Zy*_Zy >= max_dist)
+                    break;
+                Zx = _Zx;
+                Zy = _Zy;
 
-				++ iteration_count;
-			}
+                ++ iteration_count;
+            }
 
-			s = s + markers[_k % max_steps];
-		}
+            s = s + markers[_k % max_steps];
+        }
 
-		s = s + '\n';
-	}
+        s = s + '\n';
+    }
 
 };

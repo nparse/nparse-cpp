@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/joints/operand.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -37,17 +37,22 @@ namespace {
 
 using namespace nparse;
 
-class MetaAcceptor: private ActionString, public IAcceptor,
-	public anta::Acceptor<NLG>
+class MetaAcceptor: public IAcceptor, public anta::Acceptor<NLG>,
+	private ActionString
 {
 public:
+	MetaAcceptor (const anta::range<SG>::type& a_range, IStaging& a_staging):
+		ActionString (a_range), m_staging (a_staging)
+	{
+	}
+
+public:
 	// Overridden from IAcceptor:
-	operator const anta::Acceptor<NLG>& () const
+	const anta::Acceptor<NLG>& get () const
 	{
 		return *this;
 	}
 
-public:
 	// Overridden from Acceptor<NLG>:
 	void accept (const anta::range<NLG>::type& C,
 			const anta::range<NLG>::type& E, anta::spectrum<NLG>::type& S) const
@@ -55,14 +60,43 @@ public:
 		m_staging. acceptor(eval(S)). accept(C, E, S);
 	}
 
+private:
+	IStaging& m_staging;
+
+};
+
+class InlineArrayAction: public IAction
+{
 public:
-	MetaAcceptor (const anta::range<SG>::type& a_range, IStaging& a_staging):
-		ActionString (a_range), m_staging (a_staging)
+	// Overridden from IAction:
+
+	result_type evalVal (IEnvironment& a_env) const
+	{
+		anta::ndl::Context<NLG>* target0 = const_cast<anta::ndl::Context<NLG>*>(
+				&* (*m_statement). evalVal(a_env). as_array());
+
+		anta::ndl::Context<NLG>* self = a_env. self(false);
+		if (self != NULL)
+		{
+			const anta::ndl::Context<NLG>* target = target0;
+			while (target -> get_ancestor() != NULL)
+				target = target -> get_ancestor();
+			const_cast<anta::ndl::Context<NLG>*>(target) -> set_ancestor(self);
+		}
+
+		a_env. get_traveller(). get_state(). substitute(target0);
+
+		return result_type(true);
+	}
+
+public:
+	InlineArrayAction (action_pointer a_statement):
+		m_statement (a_statement)
 	{
 	}
 
 private:
-	IStaging& m_staging;
+	action_pointer m_statement;
 
 };
 
@@ -137,7 +171,7 @@ class Operator: public IOperator
 		return true;
 	}
 
-	bool action (const hnd_arg_t& arg)
+	bool inline_block (const hnd_arg_t& arg)
 	{
 		// Create a new joint of appropriate type (unconditional repeat with
 		// attached semantic action).
@@ -145,6 +179,22 @@ class Operator: public IOperator
 			anta::ndl::JointJump<NLG>(
 				anta::unconditional<NLG>(), anta::Label<NLG>() )
 			[ arg. staging. pop() ]
+		);
+		// Push the new joint into the LL stack.
+	//	joint -> set_flavor(0, 0);
+		joint -> set_flavor(1, 1);
+		arg. staging. pushJoint(joint);
+		return true;
+	}
+
+	bool inline_array (const hnd_arg_t& arg)
+	{
+		// Create a new joint of appropriate type (unconditional repeat with
+		// attached semantic action).
+		IStaging::joint_pointer joint(
+			anta::ndl::JointJump<NLG>(
+				anta::unconditional<NLG>(), anta::Label<NLG>() )
+			[ new InlineArrayAction(arg. staging. pop()) ]
 		);
 		// Push the new joint into the LL stack.
 	//	joint -> set_flavor(0, 0);
@@ -177,19 +227,21 @@ class Operator: public IOperator
 		return true;
 	}
 
-	plugin::instance<IConstruct> m_block;
-	anta::Label<SG> m_jump, m_call1, m_call2, m_group, m_action, m_separate,
-		m_concatenate;
+	plugin::instance<IConstruct> m_block, m_array;
+	anta::Label<SG> m_jump, m_call1, m_call2, m_group, m_inline_block,
+		m_inline_array, m_separate, m_concatenate;
 
 public:
 	Operator ():
-		m_block ("nparse.script.constructs.Block")
+		m_block ("nparse.script.constructs.Block"),
+		m_array ("nparse.script.$.Array")
 	{
 		m_jump = hnd_t(this, &Operator::jump),
 		m_call1 = hnd_t(this, &Operator::call1),
 		m_call2 = hnd_t(this, &Operator::call2),
 		m_group = hnd_t(this, &Operator::group);
-		m_action = hnd_t(this, &Operator::action);
+		m_inline_block = hnd_t(this, &Operator::inline_block);
+		m_inline_array = hnd_t(this, &Operator::inline_array);
 		m_separate = hnd_t(this, &Operator::separate);
 		m_concatenate = hnd_t(this, &Operator::concatenate);
 	}
@@ -217,7 +269,8 @@ public:
 
 		|	'(' > space > a_top > space > lit(')') * m_group
 
-		|	m_block -> entry() > pass * m_action
+		|	m_block -> entry() > pass * m_inline_block
+		|	m_array -> entry() > pass * m_inline_array
 
 		|	lit('_') * m_separate
 		|	lit('#') * m_concatenate;
@@ -227,5 +280,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT(
-		Operator, joint_operand, nparse.script.joints.Operand, 1 )
+PLUGIN(Operator, joint_operand, nparse.script.joints.Operand)
