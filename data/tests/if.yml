@@ -6,7 +6,7 @@ config:
     grammar_pool:      1024
     input_pool:        4
 
-caseT:
+testT:
     config:
         condition:     true
     input:             ""
@@ -16,7 +16,7 @@ caseT:
         result3:       F
         result4:       T
 
-caseF:
+testF:
     config:
         condition:     false
     input:             ""

@@ -2,10 +2,10 @@
  * @file $/contrib/include/utility/callback.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -35,7 +35,7 @@ namespace utility {
 
 /**
  *	An auxiliary specializable functor for copying of temporary callable objects
- *	given as constant expressions (rvalue).
+ *	provided as constant expressions (rvalue).
  */
 template <typename T_>
 class rcopy
@@ -51,17 +51,11 @@ public:
 };
 
 /**
- *	The generic single-argument callback object.
- *		The main purpose of this template class is to create arbitrary callback
- *		objects that are able to be passed between different program modules and
- *		fit some simple invocation protocol (the types of the argument and the
- *		return value are strictly defined).
+ *	The universal single-argument callback object.
  */
 template <typename Result_ = void, typename Argument_ = void>
 class callback
 {
-	// @todo: use shared_ptr<proxy_base> instead of counter
-
 	/**
 	 *	The inner sharable proxy interface.
 	 */
@@ -291,7 +285,9 @@ public:
 		if (m_proxy != NULL)
 		{
 			if (m_proxy -> release())
+			{
 				delete m_proxy;
+			}
 			m_proxy = NULL;
 		}
 	}
@@ -302,7 +298,9 @@ public:
 	Result_ operator() (Argument_ a_arg) const
 	{
 		if (m_proxy == NULL)
+		{
 			throw std::logic_error("void callback");
+		}
 		return (*m_proxy)(a_arg);
 	}
 

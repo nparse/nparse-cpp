@@ -7,13 +7,13 @@ config:
     input_pool:        32
 
 test1:
-    input:             09 05 1972 
+    input:             09 05 1972
     traces:            1
     check:
         res:           September 5th, 1972
 
 test2:
-    input:             02/29/2000 
+    input:             02/29/2000
     traces:            1
     check:
         res:           February 29th, 2000
@@ -44,4 +44,4 @@ test7:
     input:             28291
     traces:            1
     check:
-        res:           February 28th, 1991 
+        res:           February 28th, 1991

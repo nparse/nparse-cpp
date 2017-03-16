@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/terms/constant.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -98,10 +98,7 @@ public:
 				i != m_key_value_list. end(); ++ i)
 		{
 			i -> second. evalVal(a_env). swap(
-				res -> ref(
-					i -> first. evalVal(a_env). as_string(), true
-				)
-			);
+				res -> ref(i -> first. evalVal(a_env). as_string(), true));
 		}
 
 		return result_type(res);
@@ -144,12 +141,42 @@ private:
 
 };
 
+class ArrayConstruct: public IConstruct,
+	public plugin::auto_factory<ArrayConstruct, plugin::singleton_factory>
+{
+public:
+	// Overridden from IConstruct:
+
+	const anta::ndl::Rule<SG>& entry (const int) const
+	{
+		return entry_;
+	}
+
+public:
+	// Overridden from IFactory:
+
+	plugin::IPluggable* construct (void* a_address)
+	{
+		// TODO: This is a side effect of multiple inheritance.
+		return this;
+	}
+
+public:
+	ArrayConstruct (const anta::ndl::Rule<SG>& a_entry):
+		auto_factory ("nparse.script.$.Array"), entry_ (a_entry)
+	{
+	}
+
+private:
+	const anta::ndl::Rule<SG>& entry_;
+
+};
+
 class Construct: public IConstruct
 {
 	bool create_empty (const hnd_arg_t& arg)
 	{
-		action_pointer impl(new Action());
-		arg. staging. push(impl);
+		arg. staging. push(new Action());
 		return true;
 	}
 
@@ -158,10 +185,13 @@ class Construct: public IConstruct
 		const string_t value_str = get_accepted_str(arg);
 		bool value;
 		if (value_str == L"true")
+		{
 			value = true;
-		else
-		if (value_str == L"false")
+		}
+		else if (value_str == L"false")
+		{
 			value = false;
+		}
 		else
 		{
 			throw std::logic_error("bad logical constant");
@@ -169,8 +199,7 @@ class Construct: public IConstruct
 		//		<< ex::message("bad logical constant");
 		}
 
-		action_pointer impl(new Action(value));
-		arg. staging. push(impl);
+		arg. staging. push(new Action(value));
 		return true;
 	}
 
@@ -189,8 +218,7 @@ class Construct: public IConstruct
 					encode::unwrap(value_str));
 		}
 
-		action_pointer impl(new Action(value));
-		arg. staging. push(impl);
+		arg. staging. push(new Action(value));
 		return true;
 	}
 
@@ -199,15 +227,13 @@ class Construct: public IConstruct
 		const anta::range<SG>::type& range = get_accepted_range(arg);
 		if (*arg. state. get_range(). first == L'"')
 		{
-			arg. staging. push(action_pointer(new ActionString(range)));
+			arg. staging. push(new ActionString(range));
 		}
 		else
 		{
 			try
 			{
-				arg. staging. push(action_pointer(new Action(
-					Tokenizer::decode(range)
-				)));
+				arg. staging. push(new Action(Tokenizer::decode(range)));
 			}
 			catch (const std::runtime_error& err)
 			{
@@ -219,6 +245,7 @@ class Construct: public IConstruct
 		return true;
 	}
 
+	// @todo: These auxiliary fields must be stored in the context.
 	bool m_expecting_value;
 	std::stack<ActionArray*> m_array_stack;
 	action_pointer m_key_value;
@@ -278,10 +305,7 @@ class Construct: public IConstruct
 		assert(! m_array_stack. empty());
 
 		// Add the value.
-		action_pointer impl(new ActionReference(
-			m_key_value. get()
-		));
-		m_array_stack. top() -> add(impl);
+		m_array_stack. top() -> add(new ActionReference(m_key_value. get()));
 
 		// Expect the next key or end of array.
 		m_expecting_value = false;
@@ -293,7 +317,7 @@ class Construct: public IConstruct
 		if (m_expecting_value || m_array_stack. empty())
 		{
 			// Push an empty array action.
-			arg. staging. push(action_pointer(new ActionArray()));
+			arg. staging. push(new ActionArray());
 		}
 		else
 		{
@@ -304,27 +328,35 @@ class Construct: public IConstruct
 			// If the top array was the only item in the stack then push it as
 			// an action to the staging object.
 			if (m_array_stack. empty())
-				arg. staging. push(action_pointer(top));
+				arg. staging. push(top);
 		}
 		return true;
 	}
 
 	plugin::instance<IConstruct> m_expression;
-	anta::ndl::Rule<SG> entry_, empty_, boolean_, numeric_, string_, array_;
+	ArrayConstruct m_array_construct;
+	anta::ndl::Rule<SG> entry_, empty_, boolean_, numeric_, string_, array_,
+		array_entry_;
 	anta::sas::TokenClass<SG> m_tc;
 
 public:
 	Construct ():
 		m_expecting_value (false),
 		m_expression ("nparse.script.Expression"),
+		m_array_construct (array_entry_),
 // <DEBUG_NODE_NAMING>
 		entry_		("Constant.Entry"),
 		empty_		("Constant.Empty"),
 		boolean_	("Constant.Boolean"),
 		numeric_	("Constant.Numeric"),
 		string_		("Constant.String"),
-		array_		("Constant.Array")
+		array_		("Constant.Array"),
+		array_entry_("Constant.ArrayEntry")
 // </DEBUG_NODE_NAMING>
+	{
+	}
+
+	void initialize ()
 	{
 		using namespace anta::ndl::terminals;
 		using boost::proto::lit;
@@ -344,7 +376,10 @@ public:
 		|	boolean_	> pass * doCreateBoolean
 		|	numeric_	> pass * doCreateNumeric
 		|	string_		> pass * doCreateString
-		|	array_		> pass * doCreateArray;
+		|	array_entry_;
+
+		array_entry_ =
+			array_		> pass * doCreateArray;
 
 		empty_ = lit("null");
 
@@ -386,5 +421,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Construct, term_constant, nparse.script.terms.Constant, 1 )
+PLUGIN(Construct, term_constant, nparse.script.terms.Constant)

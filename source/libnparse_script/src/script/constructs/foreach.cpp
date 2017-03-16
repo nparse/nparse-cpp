@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/constructs/foreach.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -164,9 +164,8 @@ class Construct: public IConstruct
 			arg. state. val("loop"). as_string();
 
 		// Instantiate and push a new action.
-		action_pointer impl(new Action(get_marked_range(arg), loop,
+		arg. staging. push(new Action(get_marked_range(arg), loop,
 					arg. staging));
-		arg. staging. push(impl);
 
 		return true;
 	}
@@ -181,6 +180,10 @@ public:
 // <DEBUG_NODE_NAMING>
 		entry_		("ForEach.Entry")
 // </DEBUG_NODE_NAMING>
+	{
+	}
+
+	void initialize ()
 	{
 		using namespace anta::ndl::terminals;
 		using namespace anta::dsel;
@@ -209,5 +212,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Construct, construct_foreach, nparse.script.constructs.ForEach, 1 )
+PLUGIN(Construct, construct_foreach, nparse.script.constructs.ForEach)

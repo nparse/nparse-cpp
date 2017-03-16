@@ -2,36 +2,36 @@ namespace Date;
 
 function leap (_y)
 {
-	leap = (_y % 4 == 0) & (_y % 100 != 0 | _y % 400 == 0);
+    leap = (_y % 4 == 0) & (_y % 100 != 0 | _y % 400 == 0);
 };
 
 procedure validate ()
 {
-	day = integer(day);
-	month = integer(month);
-	year = integer(len(year)==2 ? (integer(year) < 50 ? '20' : '19') + year : year);
-	_days = { 1:31, 2:28 + (leap(year) ? 1 : 0), 3:31, 4:30,
-		5:31, 6:30, 7:31, 8:31, 9:30, 10:31, 11:30, 12:31 };
-	stop( 1 > month | month > 12 );
-	stop( 1 > day | day > _days[month] );
+    day = integer(day);
+    month = integer(month);
+    year = integer(len(year)==2 ? (integer(year) < 50 ? '20' : '19') + year : year);
+    _days = { 1:31, 2:28 + (leap(year) ? 1 : 0), 3:31, 4:30,
+        5:31, 6:30, 7:31, 8:31, 9:30, 10:31, 11:30, 12:31 };
+    stop( 1 > month | month > 12 );
+    stop( 1 > day | day > _days[month] );
 };
 
 function suffix (_d)
 {
-	switch ((10 <= _d & _d <= 20) ? 0 : d%10) {
-	case 1: suffix = 'st'; break;
-	case 2: suffix = 'nd'; break;
-	case 3: suffix = 'rd'; break;
-	default: suffix = 'th';
-	}
+    switch ((10 <= _d & _d <= 20) ? 0 : d%10) {
+    case 1: suffix = 'st'; break;
+    case 2: suffix = 'nd'; break;
+    case 3: suffix = 'rd'; break;
+    default: suffix = 'th';
+    }
 };
 
 function format (_d, _m, _y)
 {
-	_months = { 1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May',
-		6: 'June', 7: 'July', 8: 'August', 9: 'September', 10: 'October',
-		11: 'November', 12: 'December' };
-	format = _months[_m] + " $_d" + suffix(_d) + ', ' + _y;
+    _months = { 1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May',
+        6: 'June', 7: 'July', 8: 'August', 9: 'September', 10: 'October',
+        11: 'November', 12: 'December' };
+    format = _months[_m] + " $_d" + suffix(_d) + ', ' + _y;
 };
 
 month := '[0-9]{1-2}';
@@ -39,15 +39,15 @@ day   := '[0-9]{1-2}';
 year  := '[0-9]{2,4}';
 
 MDY :=
-	$:month		^[[:punct:]]+ *0 ?
-	$:day		^[[:punct:]]+ *0 ?
-	$:year
-	{ validate(); } ^$;
+    $:month     ^[[:punct:]]+ *0 ?
+    $:day       ^[[:punct:]]+ *0 ?
+    $:year
+    { validate(); } ^$;
 
 DMY :=
-	$:day		^[[:punct:]]+ *0 ?
-	$:month		^[[:punct:]]+ *0 ?
-	$:year
-	{ validate(); } ^$;
+    $:day       ^[[:punct:]]+ *0 ?
+    $:month     ^[[:punct:]]+ *0 ?
+    $:year
+    { validate(); } ^$;
 
 S := ($MDY |? $DMY) { self({res: format(day, month, year)}); };

@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/constructs/control.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -71,8 +71,7 @@ class Construct: public IConstruct
 		const anta::string<SG>::type
 			loop = arg. state. val("loop"). as_string();
 
-		action_pointer impl(new Action(exit, loop));
-		arg. staging. push(impl);
+		arg. staging. push(new Action(exit, loop));
 
 		return true;
 	}
@@ -115,5 +114,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Construct, construct_control, nparse.script.constructs.Control, 1 )
+PLUGIN(Construct, construct_control, nparse.script.constructs.Control)

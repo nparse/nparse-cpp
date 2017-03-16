@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/terms/call.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.3
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -61,23 +61,31 @@ public:
 	Action (const anta::range<SG>::type& a_range, const std::string& a_name,
 			IFunction::arguments_type& a_arguments, IStaging& a_staging):
 		LinkedAction (a_range), m_name (a_name), m_staging (&a_staging),
-		m_namespace (a_staging. getNamespace())
+		m_namespace (a_staging. getNamespace()), m_function (NULL)
 	{
 		m_arguments. swap(a_arguments);
+	}
+
+	~Action ()
+	{
+		if (m_function != NULL)
+		{
+			plugin::IManager::instance(). dispose(m_function);
+			m_function = NULL;
+		}
 	}
 
 private:
 	IFunction& instantiate () const
 	{
-		if (! m_instance)
+		if (! m_function)
 		{
-			try
+			plugin::IPluggable* ptr =
+				plugin::IManager::instance(). create(m_name);
+			if (ptr == NULL)
 			{
-				m_instance. instantiate(m_name);
-				m_instance -> link(m_staging, m_namespace);
-			}
-			catch (const plugin::unknown_interface& err)
-			{
+				// NOTE: Unlike implicit call, term call throws 'undefined
+				//		 function/procedure' exception rather than flow control.
 				anta::range<SG>::type where;
 				getLocation(where);
 				throw ex::runtime_error()
@@ -85,15 +93,17 @@ private:
 					<< ex::location(where)
 					<< ex::message("undefined function or procedure");
 			}
+			m_function = dynamic_cast<IFunction*>(ptr);
+			m_function -> link(m_staging, m_namespace);
 		}
-		return *m_instance;
+		return *m_function;
 	}
 
 	std::string m_name;
 	IStaging* m_staging;
 	string_t m_namespace;
 	IFunction::arguments_type m_arguments;
-	mutable plugin::instance<IFunction> m_instance;
+	mutable IFunction* m_function;
 
 };
 
@@ -117,7 +127,7 @@ class Construct: public IConstruct
 		tmp << "nparse.script.functions." << func;
 
 		// Built-in functions are preferrable.
-		if (! plugin::manager::instance(). is_provided(tmp. str()))
+		if (! plugin::IManager::instance(). factory_exists(tmp. str()))
 		{
 			tmp. str("");
 			tmp. clear();
@@ -135,10 +145,8 @@ class Construct: public IConstruct
 		std::reverse(args. begin(), args. end());
 
 		// Create and push a function call action.
-		action_pointer impl(new Action(
-			get_marked_range(arg), tmp. str(), args, arg. staging
-		));
-		arg. staging. push(impl);
+		arg. staging. push(new Action(get_marked_range(arg), tmp. str(), args,
+					arg. staging));
 
 		return true;
 	}
@@ -149,6 +157,10 @@ public:
 // <DEBUG_NODE_NAMING>
 		entry_		("Call.Entry")
 // </DEBUG_NODE_NAMING>
+	{
+	}
+
+	void initialize ()
 	{
 		using namespace anta::ndl::terminals;
 		using namespace anta::dsel;
@@ -190,5 +202,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Construct, term_call, nparse.script.terms.Call, 1 )
+PLUGIN(Construct, term_call, nparse.script.terms.Call)

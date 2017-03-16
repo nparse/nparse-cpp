@@ -2,10 +2,10 @@
  * @file $/include/nparse/markers.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -30,22 +30,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace nparse {
 
 /**
- *	A specific arc label that is used to mark arbitrary elements of the nPparse
- *	script grammar as source script binding points.
+ *	A specific arc label that is used to mark arbitrary elements of the script
+ *	grammar as source script binding points.
  */
 static const boost::proto::terminal<anta::Label<SG> >::type M0 =
 	{ anta::Label<SG>(-100) };
 
 /**
- *	A specific arc label that is used to mark arbitrary elements of the nPparse
- *	script grammar as points where corresponding source script bindings are
+ *	A specific arc label that is used to mark arbitrary elements of the script
+ *	grammar as points where corresponding source script bindings are
  *	being analyzed.
  */
 static const boost::proto::terminal<anta::Label<SG> >::type M1 =
 	{ anta::Label<SG>(+100) };
 
 /**
- *	Find a previously marked state having regard to the nesting principle.
+ *	Find a previously marked state with respect to the nesting principle.
  */
 const anta::State<SG>& get_marked_state (const hnd_arg_t& arg);
 

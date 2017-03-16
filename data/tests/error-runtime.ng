@@ -1,11 +1,11 @@
 cast-boolean {
-	boolean('string');
+    boolean('string');
 };
 
 cast-integer {
-	integer('string');
+    integer('string');
 };
 
 cast-real {
-	real('string');
+    real('string');
 };

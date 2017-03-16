@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/decls/rule.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -44,15 +44,21 @@ using namespace nparse;
 
 class Construct: public IConstruct
 {
+	static const std::string sc_joint_ctg;
+	typedef plugin::category<IOperator> joints_t;
+	joints_t m_joints;
+	anta::ndl::Rule<SG> entry_;
+	boost::ptr_vector<anta::ndl::Rule<SG> > levels_;
+
 	// NOTE: In general, storing parser data locally is not a good idea because
 	//		 it may lead to heavy side effects, especially if the grammar allows
 	//		 local ambiguity. Though, if there's no ambiguity this technique may
 	//		 work out pretty well. I'm leaving it here as an example.
 
-//	<LOCAL PARSER DATA>
+//	<LOCAL_PARSER_DATA>
 	sg_string_t m_rule_name;
 
-//	</LOCAL PARSER DATA>
+//	</LOCAL_PARSER_DATA>
 
 	bool set_name (const hnd_arg_t& arg)
 	{
@@ -71,38 +77,36 @@ class Construct: public IConstruct
 		return true;
 	}
 
-	typedef plugin::category<IOperator> operators_t;
-	operators_t m_operators;
-	anta::ndl::Rule<SG> entry_;
-	boost::ptr_vector<anta::ndl::Rule<SG> > levels_;
-	static const std::string sc_operators_family;
-
 public:
 	Construct ():
-		m_operators (sc_operators_family),
+		m_joints (sc_joint_ctg),
 // <DEBUG_NODE_NAMING>
 		entry_		("Rule.Entry")
 // </DEBUG_NODE_NAMING>
+	{
+	}
+
+	void initialize ()
 	{
 		using namespace anta::ndl::terminals;
 		using namespace anta::dsel;
 		using boost::proto::lit;
 
-		// Sort operator category in priority ascending order.
-		std::sort(m_operators. begin(), m_operators. end(), less_priority());
+		// Sort joint category in priority ascending order.
+		std::sort(m_joints. begin(), m_joints. end(), less_priority());
 
 		// Instantiate the set of rules representing expression levels.
-		levels_. resize(m_operators. size());
+		levels_. resize(m_joints. size());
 
 		// Initialize expression levels by deploying operators.
 		std::stringstream tmp;
-		for (operators_t::const_iterator i = m_operators. begin();
-				i != m_operators. end(); ++ i)
+		for (joints_t::const_iterator i = m_joints. begin();
+				i != m_joints. end(); ++ i)
 		{
-			const int index = static_cast<int>(i - m_operators. begin());
+			const int index = static_cast<int>(i - m_joints. begin());
 // <DEBUG_NODE_NAMING>
 			tmp << "Rule.Level(" << index << ", "
-				<< i -> first. substr(sc_operators_family. length() + 1) << ')';
+				<< i -> first. substr(sc_joint_ctg. length() + 1) << ')';
 			levels_[index]. cluster(). set_name(tmp. str());
 			tmp. str("");
 			tmp. clear();
@@ -131,9 +135,8 @@ public:
 
 };
 
-const std::string Construct::sc_operators_family("nparse.script.joints");
+const std::string Construct::sc_joint_ctg("nparse.script.joints");
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Construct, decl_rule, nparse.script.decls.Rule, 1 )
+PLUGIN(Construct, decl_rule, nparse.script.decls.Rule)

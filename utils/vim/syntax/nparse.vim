@@ -1,6 +1,6 @@
 " Vim syntax file
 " Language:		nParse script
-" Maintainer:	Alex S Kudinov <alex@nparse.com>
+" Maintainer:	Alex Kudinov <alex.s.kudinov@gmail.com>
 " Filenames:	*.ng
 
 " common syntax

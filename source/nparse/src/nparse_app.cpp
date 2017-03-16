@@ -2,10 +2,10 @@
  * @file $/source/nparse/src/nparse_app.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -36,7 +36,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "tracer_nlg.hpp"
 #include "serializer.hpp"
 
-// Plugin declarations.
 PLUGIN_STATIC_IMPORT(nparse_script_grammar)
 PLUGIN_STATIC_IMPORT(nparse_acceptor_factory)
 PLUGIN_STATIC_IMPORT(nparse_runtime)
@@ -164,9 +163,9 @@ nParseApp::nParseApp ():
 	m_input_stream (NULL),
 	m_input_pool (0),
 	m_input_batch (false),
-	m_entry_label (1)
+	m_entry_label (1),
+	m_staging_factory ("nparse.script.StagingFactory")
 {
-	// Plugin initialization.
 	PLUGIN_STATIC_INIT(nparse_script_grammar);
 	PLUGIN_STATIC_INIT(nparse_acceptor_factory);
 	PLUGIN_STATIC_INIT(nparse_runtime);
@@ -302,20 +301,26 @@ bool nParseApp::configure (const int argc, char** argv)
 
 	// Set up internal locale.
 	{
-		const std::string& name = vm["locale"]. as<std::string>();
+		const std::string& lname = vm["locale"]. as<std::string>();
 		try
 		{
 			std::locale c_loc("C");
-			std::locale g_loc(name. c_str());
-			std::locale::global(
-				c_loc. combine<std::ctype<char> >(g_loc)
-			);
+			if (lname. empty() || lname == "C")
+			{
+				std::locale::global(c_loc);
+			}
+			else
+			{
+				std::locale g_loc(lname. c_str());
+				std::locale::global(c_loc. combine<std::ctype<char> >(g_loc));
+			}
 		}
 		catch (const std::exception& err)
 		{
-			std::cerr << "warning: " << err. what() << std::endl;
+			std::cerr << "warning: could not set locale `" << lname << "': "
+				<< err. what() << std::endl;
 			if	(	!setlocale(LC_ALL, "C")
-				||	!setlocale(LC_CTYPE, name. c_str())
+				||	!setlocale(LC_CTYPE, lname. c_str())
 				)
 			{
 				std::cerr << "warning: setlocale() also failed" << std::endl;
@@ -328,19 +333,20 @@ bool nParseApp::configure (const int argc, char** argv)
 	{
 		std::cerr << NPARSE_VERSION_STR "\n";
 #if defined(DEBUG_PRINT)
-#define	OBJ_SIZE(M, C) << sizeof(anta::C<M>) << "\t" #C "<" #M ">\n"
+#define	OBJ_SIZE(C) << sizeof(anta::C) << "\t" #C "\n"
 		if (! vm["debug-print"]. as<std::string>(). empty())
 		{
 			std::cerr
-			OBJ_SIZE(NLG, StateCommon)
-			OBJ_SIZE(NLG, StateSplit)
-			OBJ_SIZE(NLG, StateSplitShifted)
-			OBJ_SIZE(NLG, StateSplitExtended)
-			OBJ_SIZE(NLG, ndl::Context)
-			OBJ_SIZE(NLG, aux::Variable)
-			OBJ_SIZE(NLG, ndl::Node)
-			OBJ_SIZE(NLG, Arc)
-			OBJ_SIZE(NLG, Label);
+			OBJ_SIZE(StateCommon<NLG>)
+			OBJ_SIZE(StateSplit<NLG>)
+			OBJ_SIZE(StateSplitShifted<NLG>)
+			OBJ_SIZE(StateSplitExtended<NLG>)
+			OBJ_SIZE(ndl::Context<NLG>)
+			OBJ_SIZE(ndl::context<NLG>::type)
+			OBJ_SIZE(aux::Variable<NLG>)
+			OBJ_SIZE(ndl::Node<NLG>)
+			OBJ_SIZE(Arc<NLG>)
+			OBJ_SIZE(Label<NLG>);
 		}
 #undef	OBJ_SIZE
 #endif
@@ -543,7 +549,7 @@ int nParseApp::compile_grammar ()
 	anta::aux::Tracer<SG> tracer(traveller);
 
 	// Instantiate staging object and set the first source file for import.
-	m_staging. instantiate("nparse.script.Staging");
+	m_staging = m_staging_factory -> createInstance();
 	m_staging -> import(m_grammar_file, true);
 
 	// Load and parse each source file.
@@ -834,6 +840,9 @@ void nParseApp::print_stats (const anta::Traveller<NLG>& a_trav,
 		<< "%\n"
 		   "iteration count: "
 		<< a_iteration_count
+		<< "\n"
+		   "context count: "
+		<< a_trav. context_count()
 		<< "\n"
 		   "trace(s) found: "
 		<< a_trav. get_traced(). size()

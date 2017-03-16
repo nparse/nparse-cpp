@@ -6,7 +6,7 @@ config:
     grammar_pool:      1024 # 1MB for grammar
     input_pool:        8    # 4K for input
 
-case1:
+test1:
     input:             hello world
     traces:            2
     forest:
@@ -17,7 +17,7 @@ case1:
         z.U.y:         world
         z.V:           -1
 
-case2:
+test2:
     input:             goodbye world
     traces:            2
     forest:
@@ -28,7 +28,7 @@ case2:
         y:             world
         z.V:           -1
 
-case3:
+test3:
     input:             hello user
     traces:            1
     forest:

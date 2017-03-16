@@ -2,10 +2,10 @@
  * @file $/include/nparse/specs/nlg/model.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -36,5 +36,14 @@ using namespace anta;
 struct NLG: ndl::extend<model<meta::wide> >::type {};
 
 } // namespace nparse
+
+namespace anta { namespace ndl {
+
+// Disable orphan trace context instances for the NLG model.
+template<> struct allow_orphan_contexts<nparse::NLG> {
+	typedef meta::false_ result_type;
+};
+
+}} // namespace anta::ndl
 
 #endif /* NPARSE_SPECS_NLG_MODEL_HPP_ */

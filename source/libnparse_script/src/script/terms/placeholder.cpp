@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/terms/placeholder.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -165,18 +165,15 @@ class Construct: public IConstruct
 			? 0 : boost::lexical_cast<int>(encode::unwrap(value_str));
 
 		// Instantiate placeholder and add to the LL stack.
-		action_pointer impl(new ActionConstant(range, type, offset));
-		arg. staging. push(impl);
+		arg. staging. push(new ActionConstant(range, type, offset));
 
 		return true;
 	}
 
 	bool create_parametrized (const hnd_arg_t& arg)
 	{
-		action_pointer impl(new ActionParametrized(
-			get_marked_range(arg), 's', arg. staging
-		));
-		arg. staging. push(impl);
+		arg. staging. push(new ActionParametrized(
+					get_marked_range(arg), 's', arg. staging));
 		return true;
 	}
 
@@ -189,6 +186,10 @@ public:
 // <DEBUG_NODE_NAMING>
 		entry_		("Placeholder.Entry")
 // </DEBUG_NODE_NAMING>
+	{
+	}
+
+	void initialize ()
 	{
 		using namespace anta::ndl::terminals;
 
@@ -212,5 +213,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Construct, term_placeholder, nparse.script.terms.Placeholder, 1 )
+PLUGIN(Construct, term_placeholder, nparse.script.terms.Placeholder)

@@ -2,10 +2,10 @@
  * @file $/include/anta/ndl/selectors.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -99,7 +99,7 @@ public:
 #if 0
 /**
  *	An auxiliary type evaluation metafunction that eliminates the unnecessary
- *	copy constructor invokation in case when types node_name<M_>::type and
+ *	copy constructor invocation in case when types node_name<M_>::type and
  *	context_value<M_>::type match each other.
  *	@{ */
 template <typename U_, typename V_>

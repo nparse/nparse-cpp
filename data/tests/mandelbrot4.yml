@@ -6,7 +6,7 @@ config:
     grammar_pool:      1024
     input_pool:        4
 
-case1:
+test1:
     input:             20,9
     check:
         s: |

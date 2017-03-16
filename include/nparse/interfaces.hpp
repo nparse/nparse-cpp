@@ -2,10 +2,10 @@
  * @file $/include/nparse/interfaces.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -35,7 +35,7 @@ namespace nparse {
  *	An intermediate interface that helps to organize instances within a
  *	particular plugin category.
  */
-class IPrioritized: public plugin::IInterface
+class IPrioritized: public plugin::IPluggable
 {
 public:
 	/**
@@ -53,48 +53,39 @@ class IAcceptor
 {
 public:
 	/**
-	 *	The destructor (needed for correct memory disposal).
+	 *	The polymorphic destructor.
 	 */
 	virtual ~IAcceptor () {}
 
 	/**
 	 *	Get a const reference to the actual implementation of the acceptor.
 	 */
-	virtual operator const anta::Acceptor<NLG>& () const = 0;
+	virtual const anta::Acceptor<NLG>& get() const = 0;
+
+	/**
+	 * Convenience inline conversion operator. Intended to be called implicitly.
+	 * NOTE: Making it virtual instead of get() also works, however in that case
+	 *       certain compilers produce false warning messages saying that the
+	 *       method is not going to be called at all.
+	 */
+	operator const anta::Acceptor<NLG>& () const
+	{
+		return get();
+	}
 
 };
 
 /**
- *	An interface for objects that are responsible for instantiation of acceptors
- *	specific to the NLG model using string definitions.
+ *	An interface for the caching aceptor factory.
  */
-class IAcceptorGenerator: public IPrioritized
+class IAcceptorFactory: public IPrioritized
 {
 public:
 	/**
 	 *	Generate an acceptor instance from the given string definition.
 	 */
-	virtual bool generate (const string_t& a_definition,
+	virtual bool create (const string_t& a_definition,
 			const IAcceptor*& a_instance, const std::string& a_path) = 0;
-
-};
-
-/**
- *	An interface for the aceptor factory.
- */
-class IAcceptorFactory: public IAcceptorGenerator
-{
-public:
-	/**
-	 *	Import generator family.
-	 */
-	virtual int import (const std::string& a_family) = 0;
-
-	/**
-	 *	Reorder the inner generator list according to the given suffix list.
-	 */
-	virtual void reorder (const std::vector<std::string>& a_suffix_list,
-			const bool a_make_first) = 0;
 
 };
 
@@ -102,7 +93,7 @@ public:
  *	An interface for objects that represent constructs (pluggable grammatical
  *	modules) of the script grammar.
  */
-class IConstruct: public plugin::IInterface
+class IConstruct: public plugin::IPluggable
 {
 public:
 	/**
@@ -179,13 +170,15 @@ private:
 class IAction
 {
 public:
-	virtual ~IAction () {}
-
-public:
 	/**
 	 *	Common result type.
 	 */
 	typedef IEnvironment::value_type result_type;
+
+	/**
+	 *	The polymorphic destructor.
+	 */
+	virtual ~IAction () {}
 
 	/**
 	 *	Execute a semantic action in the given environment and return a copy of
@@ -290,7 +283,7 @@ private:
  *	intermediate data between the building blocks (constructs) of the script
  *	grammar.
  */
-class IStaging: public plugin::IInterface
+class IStaging
 {
 public:
 	/**
@@ -425,6 +418,19 @@ public:
 };
 
 /**
+ *	An interface for IStaging instance factory.
+ */
+class IStagingFactory: public plugin::IPluggable
+{
+public:
+	/**
+	 *	Create and initialize an instance of IStaging.
+	 */
+	virtual boost::shared_ptr<IStaging> createInstance() = 0;
+
+};
+
+/**
  *	An interface for objects representing operators in the embedded scripting
  *	language.
  */
@@ -448,7 +454,7 @@ public:
  *	An interface for objects that represent functions in the embedded scripting
  *	language.
  */
-class IFunction: public plugin::IInterface
+class IFunction: public plugin::IPluggable
 {
 public:
 	/**

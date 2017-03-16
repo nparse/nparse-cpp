@@ -2,10 +2,10 @@
  * @file $/source/libnparse_script/src/script/grammar.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -38,7 +38,7 @@ using namespace nparse;
 
 class Construct: public IConstruct
 {
-	static const std::string sc_decls_family;
+	static const std::string sc_declaration_ctg;
 	plugin::category<IConstruct> m_decls;
 	plugin::instance<IConstruct> m_comment;
 
@@ -46,8 +46,12 @@ class Construct: public IConstruct
 
 public:
 	Construct ():
-		m_decls (sc_decls_family),
+		m_decls (sc_declaration_ctg),
 		m_comment ("nparse.script.Comment")
+	{
+	}
+
+	void initialize ()
 	{
 		using namespace anta::ndl::terminals;
 
@@ -60,7 +64,7 @@ public:
 				i -> second -> entry(). cluster(),
 				// Label the new arc with the name of the linked rule.
 				anta::Label<SG>(
-					i -> first. substr(sc_decls_family. length() + 1))
+					i -> first. substr(sc_declaration_ctg. length() + 1))
 			);
 		}
 
@@ -75,9 +79,8 @@ public:
 
 };
 
-const std::string Construct::sc_decls_family("nparse.script.decls");
+const std::string Construct::sc_declaration_ctg("nparse.script.decls");
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Construct, script_grammar, nparse.script.Grammar, 1 )
+PLUGIN(Construct, script_grammar, nparse.script.Grammar)

@@ -2,10 +2,10 @@
  * @file $/source/libnparse_factory/src/acceptor_end.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -44,14 +44,14 @@ public:
 
 public:
 	// Overridden from IAcceptor:
-	operator const anta::Acceptor<NLG>& () const
+	const anta::Acceptor<NLG>& get () const
 	{
 		return m_impl;
 	}
 
 };
 
-class Generator: public IAcceptorGenerator
+class AcceptorFactory: public IAcceptorFactory
 {
 public:
 	// Overridden from IPrioritized:
@@ -60,8 +60,8 @@ public:
 		return PRIORITY_END;
 	}
 
-	// Overridden from IAcceptorGenerator:
-	bool generate (const string_t& a_definition, const IAcceptor*& a_instance,
+	// Overridden from IAcceptorFactory:
+	bool create (const string_t& a_definition, const IAcceptor*& a_instance,
 			const std::string&/* a_path*/)
 	{
 		static const string_t sc_def("^$");
@@ -77,5 +77,4 @@ public:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Generator, acceptor_end, nparse.acceptors.End, 1 )
+PLUGIN(AcceptorFactory, acceptor_end, nparse.acceptors.End)

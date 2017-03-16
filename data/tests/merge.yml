@@ -11,13 +11,13 @@ test1.2: { input: "1 beta",  traces: 1, check: { x: "beta"} }
 test1.3: { input: "1 gamma", traces: 1, check: { x: "gamma"} }
 test1.4: { input: "1 delta", traces: 0 }
 
-test2.1: { input: "2 alpha",   traces: 1 } 
-test2.2: { input: "2 beta",    traces: 1 } 
-test2.3: { input: "2 gamma",   traces: 1 } 
-test2.4: { input: "2 delta",   traces: 1 } 
-test2.5: { input: "2 epsilon", traces: 1 } 
-test2.6: { input: "2 zeta",    traces: 1 } 
-test2.7: { input: "2 eta",     traces: 0 } 
+test2.1: { input: "2 alpha",   traces: 1 }
+test2.2: { input: "2 beta",    traces: 1 }
+test2.3: { input: "2 gamma",   traces: 1 }
+test2.4: { input: "2 delta",   traces: 1 }
+test2.5: { input: "2 epsilon", traces: 1 }
+test2.6: { input: "2 zeta",    traces: 1 }
+test2.7: { input: "2 eta",     traces: 0 }
 
 test3.1: { input: "3 alpha beta", traces: 1 }
 test3.2: { input: "3 beta alpha", traces: 1 }
@@ -38,7 +38,7 @@ test4.8: { input: "4 zC", traces: 1 }
 test4.9: { input: "4 Cz", traces: 1 }
 test4.10: { input: "4 D", traces: 0 }
 
-test5.1: { input: "5 dense green forest", traces: 1 } 
+test5.1: { input: "5 dense green forest", traces: 1 }
 test5.2: { input: "5 sparse forest", traces: 1 }
 test5.3: { input: "5 deep blue sea", traces: 1 }
 test5.4: { input: "5 very very unobvious thing", traces: 1 }

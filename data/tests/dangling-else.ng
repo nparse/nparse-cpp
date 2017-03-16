@@ -1,35 +1,35 @@
 S1 {
-	if (condition == 1) result = 'A';
-	else if (condition == 2) result = 'B';
-	else result = 'C';
+    if (condition == 1) result = 'A';
+    else if (condition == 2) result = 'B';
+    else result = 'C';
 };
 
 S2 {
-	if (condition == 1) result = 'A';
-	else { if (condition == 2) result = 'B';
-	else result = 'C'; }
+    if (condition == 1) result = 'A';
+    else { if (condition == 2) result = 'B';
+    else result = 'C'; }
 };
 
 S3 {
-	if (condition > 1)
-		if (condition > 2) 
-			result = 'C';
-		else result = 'B';
-	else result = 'A';
+    if (condition > 1)
+        if (condition > 2)
+            result = 'C';
+        else result = 'B';
+    else result = 'A';
 };
 
 S4 {
-	result = 'A';
-	if (condition > 1)
-		if (condition > 2) 
-			result = 'C';
-		else result = 'B';
+    result = 'A';
+    if (condition > 1)
+        if (condition > 2)
+            result = 'C';
+        else result = 'B';
 };
 
 S5 {
-	result = 'B';
-	if (condition > 1)
-		{ if (condition > 2) 
-			result = 'C'; }
-		else result = 'A';
+    result = 'B';
+    if (condition > 1)
+        { if (condition > 2)
+            result = 'C'; }
+        else result = 'A';
 };

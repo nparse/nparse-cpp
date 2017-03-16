@@ -2,10 +2,10 @@
  * @file $/source/nparse/src/main.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <iostream>
+#if !defined(DEBUG)
+#	include <iostream>
+#endif
+
 #include "nparse_app.hpp"
 
 // Program entry point.
@@ -53,6 +56,6 @@ int main (const int argc, char** argv)
 	}
 #endif
 
-	plugin::manager::instance(). shutdown();
+	plugin::IManager::instance(). shutdown();
 	return res;
 }

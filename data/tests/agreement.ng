@@ -1,16 +1,16 @@
 Quantifier :=
-	{ num ?= 'singular'; }
-	the | a | an | one
-	| 1
-||	{ num ?= 'plural'; }
-	the | some | zero | two | three | four | five
-	| (^\d+ { stop($i == 1); });
+    { num ?= 'singular'; }
+    the | a | an | one
+    | 1
+||  { num ?= 'plural'; }
+    the | some | zero | two | three | four | five
+    | (^\d+ { stop($i == 1); });
 
 Noun :=
-	{ num ?= 'singular'; }
-	cat | dog | mouse | bird
-||	{ num ?= 'plural'; }
-	cats | dogs | mice | birds;
+    { num ?= 'singular'; }
+    cat | dog | mouse | bird
+||  { num ?= 'plural'; }
+    cats | dogs | mice | birds;
 
 Adjective := fluffy | adorable | cute little?;
 
@@ -18,8 +18,8 @@ Conjunction := and | or;
 
 Object := <x:Quantifier> $Adjective? <y:Noun x>
 {
-	self(y);
-	actor = $;
+    self(y);
+    actor = $;
 };
 
 S := <a:Object> ($Conjunction <b:Object>)? ^$;

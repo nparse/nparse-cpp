@@ -2,10 +2,10 @@
  * @file $/source/libnparse_runtime/src/functions/call.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.3
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -90,7 +90,7 @@ private:
 		tmp << "nparse.script.functions." << func;
 
 		// Built-in functions are preferrable.
-		if (! plugin::manager::instance(). is_provided(tmp. str()))
+		if (! plugin::IManager::instance(). factory_exists(tmp. str()))
 		{
 			tmp. str("");
 			tmp. clear();
@@ -100,21 +100,19 @@ private:
 			tmp << func;
 		}
 
-		// Instantiate function.
-		plugin::instance<IFunction> instance;
-		try
-		{
-			instance. instantiate(tmp. str());
-			instance -> link(m_staging, m_namespace);
-		}
-		catch (const plugin::unknown_interface& err)
+		// Try to instantiate the function.
+		plugin::IPluggable* ptr =
+			plugin::IManager::instance(). create(tmp. str());
+		if (ptr == NULL)
 		{
 			// NOTE: Unlike term call, implicit call throws flow control rather
 			//		 than 'undefined function/procedure' exception.
 			throw flow_control(false);
 		}
 
-		return *instance;
+		IFunction* function = dynamic_cast<IFunction*>(ptr);
+		function -> link(m_staging, m_namespace);
+		return *function;
 	}
 
 	IStaging* m_staging;
@@ -124,5 +122,4 @@ private:
 
 } // namespace
 
-PLUGIN_STATIC_EXPORT_SINGLETON(
-		Function, function_call, nparse.script.functions.call, 1 )
+PLUGIN(Function, function_call, nparse.script.functions.call)

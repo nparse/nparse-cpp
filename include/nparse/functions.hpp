@@ -2,10 +2,10 @@
  * @file $/include/nparse/functions.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.7
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex@nparse.com>
+Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -93,8 +93,8 @@ inline anta::dsel::placeholder<SG>::type delta ()
 /**	@} */
 
 /**
- *	An auxiliary functor that is used to sort operator category in priority
- *	ascending order.
+ *	An auxiliary functor that is used to sort plugin category in priority
+ *	ascending order (lower values mean higher priority).
  */
 struct less_priority
 {

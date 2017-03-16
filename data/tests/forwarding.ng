@@ -1,32 +1,32 @@
-Z:		^[a-z]+		> T
-		{
-			type = 'word';
-		},
+Z:      ^[a-z]+     > T
+        {
+            type = 'word';
+        },
 
-		^\d+		> T
-		{
-			type = 'number';
-		};
+        ^\d+        > T
+        {
+            type = 'number';
+        };
 
-S1:		''			& Z
-		{
-			type = 'alpha';
-			push type;
-		},
+S1:     ''          & Z
+        {
+            type = 'alpha';
+            push type;
+        },
 
-		^$			> T
-		{
-			pop type;
-		};
+        ^$          > T
+        {
+            pop type;
+        };
 
-S2:		''			& Z
-		{
-			ctx = self();
-			push ctx;
-		},
+S2:     ''          & Z
+        {
+            ctx = self();
+            push ctx;
+        },
 
-		^$			> T
-		{
-			pop ctx;
-			res = self(ctx).type;
-		};
+        ^$          > T
+        {
+            pop ctx;
+            res = self(ctx).type;
+        };
