@@ -1,0 +1,41 @@
+// function: returns list of variables in the current context
+function f (fA, fB, fC) {
+    _t = '';
+    for each (_k in self())
+        _t += "$_k=(" + ref(_k) + '); ';
+    return _t;
+};
+
+// procedure: returns list of variables in the current context
+procedure p (pA, pB, pC) {
+    _t = '';
+    for each (_k in self())
+        _t += "$_k=(" + ref(_k) + '); ';
+    return _t;
+};
+
+// function returning the result of another function
+function ff (x, y, z) {
+    return f(x, y, z);
+};
+
+// function returning the result of a procedure
+function fp (x, y, z) {
+    return p(x, y, z);
+};
+
+// procedure returning the result of a function
+procedure pf (x, y, z) {
+    return f(x, y, z);
+};
+
+// procedure returning the result of another procedure
+procedure pp (x, y, z) {
+    return p(x, y, z);
+};
+
+// accepts space delimited list of `key=value' pairs and maps them to local
+// variables, then invokes a function/procedure specified at the end of input
+S :=
+    ( '^\w+' '=' '^[^\s]+' { ($2): $ } )*
+    '^\w+' { res: call($, 1, 2, 3) } ^$;

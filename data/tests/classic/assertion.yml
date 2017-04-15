@@ -1,0 +1,16 @@
+script:
+    - assertion.ng
+
+test1:
+    input:             alpha
+    check:
+        word:          alpha
+
+test2:
+    input:             beta
+    check:
+        word:          beta
+
+test3:
+    input:             delta
+    traces:            0

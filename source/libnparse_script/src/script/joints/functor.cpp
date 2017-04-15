@@ -2,21 +2,21 @@
  * @file $/source/libnparse_script/src/script/joints/functor.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -25,13 +25,13 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <nparse/nparse.hpp>
-#include <anta/sas/symbol.hpp>
 #include <anta/sas/test.hpp>
+#include <anta/sas/symbol.hpp>
 #include "../_varname.hpp"
 #include "../../tokenizer.hpp"
-#include "../../static.hpp"
-#include "_priority.hpp"
 #include "../_punct.hpp"
+#include "_priority.hpp"
+#include "../../static.hpp"
 
 namespace {
 
@@ -61,17 +61,17 @@ public:
 			result_type(a_env. create()). swap(init);
 		}
 
-		// Get traveller reference.
-		anta::Traveller<NLG>& traveller = a_env. get_traveller();
+		// Get processor reference.
+		anta::Processor<NLG>& processor = a_env. get_processor();
 
 		// Get current context without doing any instantiation.
-		anta::ndl::Context<NLG>* self = traveller. get_state(). context(NULL);
+		anta::ndl::Context<NLG>* self = processor. get_state(). context(NULL);
 
 		// If the initializer is an array then do context forwarding,
 		// i.e. substitute initializer array for the current context.
 		if (init. is_array())
 		{
-			traveller. get_state(). substitute(&* init. as_array());
+			processor. get_state(). substitute(&* init. as_array());
 		}
 
 		// Otherwise, check if the initializer can be reduced to the positive
@@ -83,10 +83,10 @@ public:
 
 		// Save previous context in a special variable representing the external
 		// context.
-		traveller. ref(zero, true) = a_env. create(self);
+		processor. ref(zero, true) = a_env. create(self);
 
 		// Mark the special variable as pushed.
-		traveller. get_state(). context(&traveller) -> push(zero);
+		processor. get_state(). context(&processor) -> push(zero);
 
 		// Return nothing.
 		return result_type();
@@ -118,12 +118,12 @@ public:
 			throw flow_control(false);
 		}
 
-		// Get traveller reference.
-		anta::Traveller<NLG>& traveller = a_env. get_traveller();
+		// Get processor reference.
+		anta::Processor<NLG>& processor = a_env. get_processor();
 
 		// Get current context, instantiate if it's necessary.
 		anta::ndl::Context<NLG>* self =
-			traveller. get_state(). context(&traveller);
+			processor. get_state(). context(&processor);
 
 		// Pop the special variable that holds the external context.
 		self -> pop(zero);
@@ -133,13 +133,13 @@ public:
 		assert(val. is_array());
 
 		// Substitute restored external context for the current.
-		traveller. get_state(). substitute(&* val. as_array());
+		processor. get_state(). substitute(&* val. as_array());
 
 		// Save previous context as the result in another special variable.
 		if (! m_alias. empty())
 		{
 			const IEnvironment::key_type key(m_alias);
-			traveller. ref(key, true) =
+			processor. ref(key, true) =
 				anta::aux::array<NLG>::type(a_env. create(self));
 		}
 
@@ -294,7 +294,8 @@ public:
 		return PRIORITY_FUNCTOR;
 	}
 
-	void deploy (level_t a_current, level_t a_previous, level_t a_top) const
+	void deploy (level_t a_current, level_t a_previous, const levels_t& a_top)
+		const
 	{
 		using namespace anta::ndl::terminals;
 
@@ -316,10 +317,11 @@ public:
 					)
 				|	pass * m_no_pre_cond > pass * m_no_post_cond
 				)
-			>	space * m_create_functor1 > '>'
+			>	space * m_create_functor1
+			>	'>'
 			)
 		// Inlined (screening) functor: [ a b c ]
-		|	'[' > space > a_top > space * m_create_functor2 > ']';
+		|	'[' > space > a_top. back() > space * m_create_functor2 > ']';
 	}
 
 };

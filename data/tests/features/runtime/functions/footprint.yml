@@ -1,0 +1,7 @@
+script:
+    - footprint.ng
+
+test:
+    input:            "46 193"
+    check:
+        value:        Parsing

@@ -1,31 +1,31 @@
 add_library(nparse_runtime
-	src/static.cpp
-	src/operators/operand.cpp
-	src/operators/subscripting.cpp
-	src/operators/access.cpp
-	src/operators/negation.cpp
-	src/operators/inversion.cpp
-	src/operators/definition.cpp
-	src/operators/prefix.cpp
-	src/operators/postfix.cpp
-	src/operators/arithmetic1.cpp
-	src/operators/arithmetic2.cpp
-	src/operators/relational1.cpp
-	src/operators/relational2.cpp
-	src/operators/logical.cpp
-	src/operators/conditional.cpp
-	src/operators/assignment.cpp
-	src/operators/comma.cpp
-	src/functions/cast.cpp
-	src/functions/self.cpp
-	src/functions/ref.cpp
-	src/functions/call.cpp
-	src/functions/swap.cpp
-	src/functions/flow.cpp
-	src/functions/nth.cpp
-	src/functions/len.cpp
+    src/static.cpp
+    src/operators/operand.cpp
+    src/operators/subscripting.cpp
+    src/operators/access.cpp
+    src/operators/negation.cpp
+    src/operators/inversion.cpp
+    src/operators/definition.cpp
+    src/operators/prefix.cpp
+    src/operators/postfix.cpp
+    src/operators/arithmetic1.cpp
+    src/operators/arithmetic2.cpp
+    src/operators/relational1.cpp
+    src/operators/relational2.cpp
+    src/operators/logical.cpp
+    src/operators/conditional.cpp
+    src/operators/assignment.cpp
+    src/operators/comma.cpp
+    src/functions/cast.cpp
+    src/functions/self.cpp
+    src/functions/ref.cpp
+    src/functions/call.cpp
+    src/functions/swap.cpp
+    src/functions/flow.cpp
+    src/functions/nth.cpp
+    src/functions/len.cpp
 )
 
 target_link_libraries(nparse_runtime
-	nparse_script
+    nparse_script
 )

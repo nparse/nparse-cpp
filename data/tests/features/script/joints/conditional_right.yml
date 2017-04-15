@@ -1,0 +1,38 @@
+script:
+    - conditional_right1.ng
+    - conditional_right2.ng
+
+config:
+    entry_point:       S
+
+test1:
+    input:             delta
+    traces:            1
+
+test2:
+    input:             gamma delta
+    traces:            1
+
+test3:
+    input:             beta gamma delta
+    traces:            1
+
+test4:
+    input:             alpha beta gamma delta
+    traces:            1
+
+test5:
+    input:             alpha beta gamma delta epsilon
+    traces:            0
+
+test6:
+    input:             alpha
+    traces:            0
+
+test7:
+    input:             alpha beta
+    traces:            0
+
+test8:
+    input:             alpha beta gamma
+    traces:            0

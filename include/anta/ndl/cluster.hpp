@@ -2,21 +2,21 @@
  * @file $/include/anta/ndl/cluster.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -32,15 +32,14 @@ namespace anta { namespace ndl {
 /******************************************************************************/
 
 /**
- *	The Cluster template class is used for generation of acceptor network
- *	clusters (that basically are subnetworks with indexed nodes) from
- *	determinative operator-based expressions.
+ *	Cluster<M_> is a template class that represents a special kind of acceptor
+ *	network node that essenially is an isolated subnetwork generated from one or
+ *	more determinative operator-based grammar expressions also referred to as
+ *	joint expressions.
  */
 template <typename M_>
-class Cluster: public Generator<M_>, public Node<M_>
+class Cluster: public Node<M_>, public Generator<M_>
 {
-	typedef boost::ptr_vector<Node<M_> > nodes_type;
-
 public:
 	/**
 	 *	The default constructor.
@@ -59,7 +58,7 @@ public:
 	}
 
 	/**
-	 *	The generating constructor.
+	 *	The network generating constructor.
 	 */
 	Cluster (const JointBase<M_>& a_joint):
 		m_start_index (0)
@@ -68,38 +67,18 @@ public:
 	}
 
 	/**
-	 *	The generating assignment operator.
+	 *	The network generating/augmenting assignment operator.
 	 */
 	uint_t operator= (const JointBase<M_>& a_joint)
 	{
-		return this->generate(a_joint, m_start_index = m_nodes. size());
-	}
-
-private:
-	/**
-	 *	Get a reference to a local (numbered) node.
-	 */
-	Node<M_>& node (const typename nodes_type::size_type a_node_index)
-	{
-		if (a_node_index == m_start_index)
-		{
-			return *this;
-		}
-
-		if (a_node_index - 1 >= m_nodes. size())
-		{
-			assert(a_node_index - 1 == m_nodes. size());
-			m_nodes. push_back(new Node<M_>());
-		}
-
-		return m_nodes[a_node_index - 1];
+		return this -> generate(a_joint, m_start_index = m_nodes. size());
 	}
 
 private:
 	// Overridden from Generator<M_>:
 
 	/**
-	 *	Create an arc between two local (numbered) nodes.
+	 *	Create an arc between two inner network nodes.
 	 */
 	Arc<M_>& link (const uint_t a_node_from, const uint_t a_node_to,
 			const Acceptor<M_>& a_acceptor, const arc_type_t a_arc_type,
@@ -110,7 +89,7 @@ private:
 	}
 
 	/**
-	 *	Create an arc between a local (numbered) node and an outer node.
+	 *	Create an arc between an inner and an outer network nodes.
 	 */
 	Arc<M_>& link (const uint_t a_node_from, const ::anta::Node<M_>& a_node_to,
 			const Acceptor<M_>& a_acceptor, const arc_type_t a_arc_type,
@@ -130,9 +109,9 @@ public:
 		return *this;
 	}
 
-public:
 	/**
-	 *	Get total node count including the cluster itself.
+	 *	Get the total number of nodes in the cluster including the cluster
+	 *	itself.
 	 */
 	uint_t get_node_count () const
 	{
@@ -140,18 +119,60 @@ public:
 	}
 
 	/**
-	 *	Get a constant reference to a local node.
+	 *	Get a constant reference to an inner node by index.
 	 */
 	const Node<M_>& get_node (const uint_t a_node_index) const
 	{
 		if (! a_node_index)
+		{
 			return *this;
+		}
 		else
-			return m_nodes[a_node_index-1];
+		{
+			return m_nodes[a_node_index - 1];
+		}
 	}
 
 private:
+	/**
+	 *  Get a mutable reference to an inner node by index if the node exists, or
+	 *	create a new node, in which case the given index should point to the end
+	 *	of the internal node list.
+	 */
+	Node<M_>& node (const uint_t a_node_index)
+	{
+		if (a_node_index == m_start_index)
+		{
+			return *this;
+		}
+
+		if (a_node_index - 1 >= m_nodes. size())
+		{
+			assert(a_node_index - 1 == m_nodes. size());
+			m_nodes. push_back(new Node<M_>());
+			return m_nodes. back();
+		}
+
+		return m_nodes[a_node_index - 1];
+	}
+
+	/**
+	 *	The container type for inner nodes, i.e. network nodes that belong to
+	 *	this cluster.
+	 */
+	typedef boost::ptr_vector<Node<M_> > nodes_type;
+
+	/**
+	 *	The inner nodes container.
+	 */
 	nodes_type m_nodes;
+
+	/**
+	 *	The starting node index for the current network generation phase.
+	 *
+	 *	This allows clusters to be constructed from several alternative joint
+	 *	expressions, which is also referred to as the rule definition merging.
+	 */
 	uint_t m_start_index;
 
 };

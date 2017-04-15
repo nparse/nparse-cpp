@@ -2,21 +2,21 @@
  * @file $/include/anta/ndl/selectors.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -44,17 +44,17 @@ public:
 	}
 
 	// (selector form, e. g. assign and assume)
-	const typename context_value<M_>::type& operator() (Traveller<M_>& a_trav)
+	const typename context_value<M_>::type& operator() (Processor<M_>& a_proc)
 		const
 	{
 		return context<M_>::def();
 	}
 
 	// (predicate form, e. g. suppose)
-	bool operator() (Traveller<M_>& a_trav,
+	bool operator() (Processor<M_>& a_proc,
 			const typename context_value<M_>::type& a_value) const
 	{
-		return m_negate ^ ((*this)(a_trav) == a_value);
+		return m_negate ^ ((*this)(a_proc) == a_value);
 	}
 
 public:
@@ -82,16 +82,16 @@ class delta
 
 public:
 	// (selector form, e. g. assign and assume)
-	typename context_value<M_>::type operator() (Traveller<M_>& a_trav) const
+	typename context_value<M_>::type operator() (Processor<M_>& a_proc) const
 	{
-		return convert_range(a_trav. get_state(). get_range());
+		return convert_range(a_proc. get_state(). get_range());
 	}
 
 	// (predicate form, e. g. suppose)
-	bool operator() (Traveller<M_>& a_trav,
+	bool operator() (Processor<M_>& a_proc,
 			const typename context_value<M_>::type& a_value) const
 	{
-		return (*this)(a_trav) == a_value;
+		return (*this)(a_proc) == a_value;
 	}
 
 };
@@ -146,20 +146,19 @@ public:
 #endif
 
 	// (selector form, e. g. assign and assume)
-	selector_result_type operator() (Traveller<M_>& a_trav) const
+	selector_result_type operator() (Processor<M_>& a_proc) const
 	{
-		// NOTE: This operator performs an implicit conversion
-		// 		 from node_name<M_>::type to context_value<M_>::type in case
-		// 		 they're different types, or returns a constant reference
-		// 		 otherwise.
-		return a_trav. get_state(). get_arc(). get_target(). get_name();
+		// NOTE: This operator will perform an implicit conversion from
+		//		 node_name<M_>::type to context_value<M_>::type in case if they
+		// 		 are different types, or return a constant reference otherwise.
+		return a_proc. get_state(). get_arc(). get_target(). get_name();
 	}
 
 	// (predicate form, e. g. suppose)
-	bool operator() (Traveller<M_>& a_trav,
+	bool operator() (Processor<M_>& a_proc,
 			const typename context_value<M_>::type& a_value) const
 	{
-		return (*this)(a_trav) == a_value;
+		return (*this)(a_proc) == a_value;
 	}
 
 };
@@ -177,17 +176,17 @@ public:
 	}
 
 	// (selector form, e. g. assign and assume)
-	const typename context_value<M_>::type& operator() (Traveller<M_>& a_trav)
+	const typename context_value<M_>::type& operator() (Processor<M_>& a_proc)
 		const
 	{
 		return m_value;
 	}
 
 	// (predicate form, e. g. suppose)
-	bool operator() (Traveller<M_>& a_trav,
+	bool operator() (Processor<M_>& a_proc,
 			const typename context_value<M_>::type& a_value) const
 	{
-		return (*this)(a_trav) == a_value;
+		return (*this)(a_proc) == a_value;
 	}
 
 private:
@@ -208,17 +207,17 @@ public:
 	}
 
 	// (selector form, e. g. assign and assume)
-	const typename context_value<M_>::type& operator() (Traveller<M_>& a_trav)
+	const typename context_value<M_>::type& operator() (Processor<M_>& a_proc)
 		const
 	{
-		return a_trav. val(m_key);
+		return a_proc. val(m_key);
 	}
 
 	// (predicate form, e. g. suppose)
-	bool operator() (Traveller<M_>& a_trav,
+	bool operator() (Processor<M_>& a_proc,
 			const typename context_value<M_>::type& a_value) const
 	{
-		return (*this)(a_trav) == a_value;
+		return (*this)(a_proc) == a_value;
 	}
 
 private:

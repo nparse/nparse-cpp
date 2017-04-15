@@ -2,21 +2,21 @@
  * @file $/source/nparse-port/src/named_property.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -29,8 +29,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <string>
 #include <map>
-#include <boost/lexical_cast.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
+#include <boost/lexical_cast.hpp>
 #include <encode/encode.hpp>
 
 template <typename T_>
@@ -42,7 +43,7 @@ public:
 	virtual ~named_property_interface () {}
 
 	virtual void set (const bool&) = 0;
-	virtual void set (const int&) = 0;
+	virtual void set (const long&) = 0;
 	virtual void set (const double&) = 0;
 	virtual void set (const std::string&) = 0;
 
@@ -111,9 +112,9 @@ template <>
 class named_property<bool>: public named_property_reference<bool>
 {
 public:
-	void set (const int& a_val)
+	void set (const long& a_val)
 	{
-		self(). set( (a_val != 0) ? true : false );
+		self(). set( (a_val != 0L) ? true : false );
 	}
 
 	void set (const double& a_val)
@@ -124,33 +125,38 @@ public:
 	void set (const std::string& a_val)
 	{
 		if (a_val == "true")
+		{
 			self(). set(true);
-		else
-		if (a_val == "false")
+		}
+		else if (a_val == "false")
+		{
 			self(). set(false);
+		}
 		else
+		{
 			throw std::bad_cast();
+		}
 	}
 
 };
 
 template <>
-class named_property<int>: public named_property_reference<int>
+class named_property<long>: public named_property_reference<long>
 {
 public:
 	void set (const bool& a_val)
 	{
-		self(). set( static_cast<int>(a_val ? 1 : 0) );
+		self(). set(static_cast<long>(a_val ? 1 : 0));
 	}
 
 	void set (const double& a_val)
 	{
-		self(). set( static_cast<int>(a_val) );
+		self(). set(static_cast<long>(a_val));
 	}
 
 	void set (const std::string& a_val)
 	{
-		self(). set( boost::lexical_cast<int>(a_val) );
+		self(). set(boost::lexical_cast<long>(a_val));
 	}
 
 };
@@ -164,7 +170,7 @@ public:
 		self(). set( static_cast<double>(a_val ? 1.0 : 0.0) );
 	}
 
-	void set (const int& a_val)
+	void set (const long& a_val)
 	{
 		self(). set( static_cast<double>(a_val) );
 	}
@@ -185,7 +191,7 @@ public:
 		self(). set( a_val ? "true" : "false" );
 	}
 
-	void set (const int& a_val)
+	void set (const long& a_val)
 	{
 		self(). set( boost::lexical_cast<std::string>(a_val) );
 	}
@@ -231,7 +237,7 @@ public:
 		deliver(a_val);
 	}
 
-	void set (const int& a_val)
+	void set (const long& a_val)
 	{
 		deliver(a_val);
 	}
@@ -252,7 +258,7 @@ class named_property_map
 {
 	typedef boost::ptr_map<std::string, named_property_interface> map_type;
 	map_type m_map;
-	std::auto_ptr<named_property_interface> m_fallback;
+	boost::scoped_ptr<named_property_interface> m_fallback;
 	bool m_changed;
 
 public:
@@ -266,8 +272,8 @@ public:
 	{
 		named_property<T_>* pp = new named_property<T_>();
 		pp -> bind(a_ref);
-#if 1	// std::auto_ptr is a workaround for
-		// https://svn.boost.org/trac/boost/ticket/6089
+#if 1	// NOTE: The usage of std::auto_ptr<..> is a workaround for
+		//		 https://svn.boost.org/trac/boost/ticket/6089
 		m_map. insert(a_name, std::auto_ptr<named_property_interface>(pp));
 #else
 		m_map. insert(a_name, pp);

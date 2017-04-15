@@ -1,0 +1,57 @@
+script:
+    - runtime-operators.ng
+
+config:
+    input_pool:        32
+
+invalid-access-read:
+    config:
+        entry_point:   invalid-access-read
+    input:             ""
+    error:
+        - [ "operator . `access` [val]: cannot be used with this type", 2, 17 ]
+
+invalid-access-write:
+    config:
+        entry_point:   invalid-access-write
+    input:             ""
+    error:
+        - [ "operator . `access` [ref]: cannot be used with this type", 7, 6 ]
+
+invalid-subscript-read:
+    config:
+        entry_point:   invalid-subscript-read
+    input:             ""
+    error:
+        - [ "operator [] `subscript` [val]: cannot be used with this type", 11, 17 ]
+
+invalid-subscript-write:
+    config:
+        entry_point:   invalid-subscript-write
+    input:             ""
+    error:
+        - [ "operator [] `subscript` [ref]: cannot be used with this type", 16, 6 ]
+
+valid-string-subscript-1:
+    config:
+        entry_point:   string-subscript
+        index:         0
+    input:             "abcdef"
+    check:
+        value:         "a"
+
+valid-string-subscript-2:
+    config:
+        entry_point:   string-subscript
+        index:         -1
+    input:             "abcdef"
+    check:
+        value:         "f"
+
+invalid-string-subscript:
+    config:
+        entry_point:   string-subscript
+        index:         10
+    input:             "abcdef"
+    error:
+        - [ "operator [] `subscript` [val]: index is out of string boundary", 20, 18 ]

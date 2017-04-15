@@ -1,0 +1,5 @@
+script:
+    - redefinition.ng
+
+error:
+    - [ "myFunction: function redefinition", 2, 6 ]

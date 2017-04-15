@@ -1,0 +1,5 @@
+script:
+    - syntax-ambiguity.ng
+
+error:
+    - [ "syntax ambiguity", 1, 5 ]

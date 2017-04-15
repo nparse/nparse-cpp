@@ -1,0 +1,41 @@
+script:
+    - inversion.ng
+
+config:
+    input_pool:        32
+
+test1a:
+    config:
+        entry_point:   S1
+        source:        false
+    input:             ""
+    check:
+        result1:       true
+        result2:       false
+
+test1b:
+    config:
+        entry_point:   S1
+        source:        true
+    input:             ""
+    check:
+        result1:       false
+        result2:       true
+
+test1c:
+    config:
+        entry_point:   S1
+        source:        0
+    input:             ""
+    check:
+        result1:       true
+        result2:       false
+
+test1d:
+    config:
+        entry_point:   S1
+        source:        1
+    input:             ""
+    check:
+        result1:       false
+        result2:       true

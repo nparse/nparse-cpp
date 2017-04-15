@@ -1,0 +1,46 @@
+script:
+    - date1.ng
+    - date2.ng
+
+config:
+    entry_point:       Date.S
+
+test1:
+    input:             09 05 1972
+    traces:            1
+    check:
+        res:           September 5th, 1972
+
+test2:
+    input:             02/29/2000
+    traces:            1
+    check:
+        res:           February 29th, 2000
+
+test3:
+    input:             02/29/2001
+    traces:            0
+
+test4:
+    input:             5582
+    traces:            1
+    check:
+        res:           May 5th, 1982
+
+test5:
+    input:             292011
+    traces:            1
+    check:
+        res:           February 9th, 2011
+
+test6:
+    input:             61313
+    traces:            1
+    check:
+        res:           June 13th, 2013
+
+test7:
+    input:             28291
+    traces:            1
+    check:
+        res:           February 28th, 1991

@@ -1,0 +1,22 @@
+script:
+    - expression.ng
+
+test1:
+    input:      11 * 13 + 17 * 19 * 23 * 29 % 31
+    check:
+        value:  165
+
+test2:
+    input:      11 % 13 % 17 * 19 * 23 / 29 + 31
+    check:
+        value:  196
+
+test2:
+    input:      11 + 13 * 17 - 19 - 23 + 29 % 31
+    check:
+        value:  219
+
+test2:
+    input:      11 - 13 + 17 * 19 * 23 / 29 - 31
+    check:
+        value:  223

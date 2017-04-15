@@ -2,21 +2,21 @@
  * @file $/source/libnparse_runtime/src/operators/assignment.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -25,18 +25,16 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "_binary_action.hpp"
-#include "_binary_operator.hpp"
-#include "_priority.hpp"
-#include "../static.hpp"
-
+#include <anta/sas/regex.hpp>
 #include <anta/dsel/rt/equal_to.hpp>
 #include <anta/dsel/rt/not_equal_to.hpp>
-
 #include <anta/dsel/rt/plus.hpp>
 #include <anta/dsel/rt/minus.hpp>
 #include <anta/dsel/rt/multiplies.hpp>
 #include <anta/dsel/rt/divides.hpp>
 #include <anta/dsel/rt/modulus.hpp>
+#include "_priority.hpp"
+#include "../static.hpp"
 
 namespace {
 
@@ -234,30 +232,16 @@ public:
 
 class Operator: public IOperator
 {
-public:
-	// Overridden from IOperator:
-
-	int priority () const
+	template <typename Func_>
+	bool push (const hnd_arg_t& arg) const
 	{
-		return PRIORITY_ASSIGNMENT;
+		arg. staging. push(new Action<Func_>(get_marked_range(arg),
+					arg. staging));
+		return true;
 	}
 
-	void deploy (level_t a_current, level_t a_previous, level_t a_top) const
-	{
-		using namespace anta::ndl::terminals;
-		a_current =
-			a_previous
-		>  ~(	space
-			>	(	"="  * M0 > space > a_current > pass * M1 * m_just_assign
-				|	"?=" * M0 > space > a_current > pass * M1 * m_test_assign
-				|	"+=" * M0 > space > a_current > pass * M1 * m_plus
-				|	"-=" * M0 > space > a_current > pass * M1 * m_minus
-				|	"*=" * M0 > space > a_current > pass * M1 * m_multiplies
-				|	"/=" * M0 > space > a_current > pass * M1 * m_divides
-				|	"%=" * M0 > space > a_current > pass * M1 * m_modulus
-				)
-			);
-	}
+	anta::Label<SG> m_just_assign, m_test_assign, m_plus, m_minus, m_multiplies,
+		m_divides, m_modulus;
 
 public:
 	Operator ()
@@ -271,17 +255,28 @@ public:
 		m_modulus = hnd_t(this, &Operator::push<modulus>);
 	}
 
-private:
-	template <typename Func_>
-	bool push (const hnd_arg_t& arg) const
+public:
+	// Overridden from IOperator:
+
+	int priority () const
 	{
-		arg. staging. push(new Action<Func_>(get_marked_range(arg),
-					arg. staging));
-		return true;
+		return PRIORITY_ASSIGNMENT;
 	}
 
-	anta::Label<SG> m_just_assign, m_test_assign, m_plus, m_minus, m_multiplies,
-		m_divides, m_modulus;
+	void deploy (level_t a_current, level_t a_previous) const
+	{
+		using namespace anta::ndl::terminals;
+		a_current =
+			a_previous
+		>  ~(	re("\\s*=\\s*")    * M0 > a_current > pass * M1 * m_just_assign
+			|	re("\\s*\\?=\\s*") * M0 > a_current > pass * M1 * m_test_assign
+			|	re("\\s*\\+=\\s*") * M0 > a_current > pass * M1 * m_plus
+			|	re("\\s*-=\\s*")   * M0 > a_current > pass * M1 * m_minus
+			|	re("\\s*\\*=\\s*") * M0 > a_current > pass * M1 * m_multiplies
+			|	re("\\s*/=\\s*")   * M0 > a_current > pass * M1 * m_divides
+			|	re("\\s*%=\\s*")   * M0 > a_current > pass * M1 * m_modulus
+			);
+	}
 
 };
 

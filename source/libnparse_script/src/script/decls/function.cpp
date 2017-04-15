@@ -2,21 +2,21 @@
  * @file $/source/libnparse_script/src/script/decls/function.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -26,9 +26,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <sstream>
 #include <nparse/nparse.hpp>
-#include <anta/sas/symbol.hpp>
-#include <anta/sas/string.hpp>
-#include <anta/sas/test.hpp>
+#include <anta/sas/regex.hpp>
+#include "../constructs/return.hpp"
 #include "../_varname.hpp"
 #include "../../static.hpp"
 
@@ -47,21 +46,35 @@ public:
 	result_type evalVal (IEnvironment& a_env,
 			const arguments_type& a_arguments) const
 	{
-		IEnvironment fake_env(a_env. get_traveller(), m_local_only);
-
-		parameters_type::const_iterator p = m_parameters. begin();
-		arguments_type::const_iterator a = a_arguments. begin();
-
-		while (p != m_parameters. end() && a != a_arguments. end())
+		try
 		{
-			fake_env. ref(*p, true) = a -> evalVal(a_env);
-			++ p;
-			++ a;
+			// Create a temporary execution environment.
+			IEnvironment temp_env(a_env. get_processor(), m_local_only);
+
+			// Evaluate function arguments.
+			parameters_type::const_iterator p = m_parameters. begin();
+			arguments_type::const_iterator a = a_arguments. begin();
+			while (p != m_parameters. end() && a != a_arguments. end())
+			{
+				temp_env. ref(*p, true) = a -> evalVal(a_env);
+				++ p;
+				++ a;
+			}
+
+			// Execute function body.
+			result_type result = m_body. evalVal(temp_env);
+
+			// If function body does not return a value then compute return
+			// value of a local variable which's name matches this function.
+			return m_returns_value ? result : temp_env. val(m_name);
 		}
-
-		m_body. evalVal(fake_env);
-
-		return fake_env. val(m_result);
+		catch (const return_control& rc)
+		{
+			// Return a value emitted by an explicit return statement inside the
+			// function body.
+			assert((bool) rc);
+			return rc. result();
+		}
 	}
 
 public:
@@ -69,7 +82,7 @@ public:
 
 	plugin::IPluggable* construct (void* a_address)
 	{
-		// TODO: This is a side effect of multiple inheritance.
+		// @todo: This is a side effect of multiple inheritance.
 		return this;
 	}
 
@@ -85,27 +98,31 @@ public:
 		return true;
 	}
 
-	bool set_body (const action_pointer& a_body)
+	bool set_body (const action_pointer& a_body, const bool a_returns_value)
 	{
 		m_body = a_body;
+		m_returns_value = a_returns_value;
 		return true;
 	}
 
 	std::string get_name () const
 	{
-		return m_result;
+		return m_name;
 	}
 
 public:
 	Function (const std::string& a_name, const bool a_local_only):
-		auto_factory (a_name), m_local_only (a_local_only),
-		m_result (a_name. substr(a_name. find_last_of(".:") + 1))
+		auto_factory (a_name),
+		m_local_only (a_local_only),
+		m_returns_value (false),
+		m_name (a_name. substr(a_name. find_last_of(".:") + 1))
 	{
 	}
 
 private:
 	bool m_local_only;
-	IEnvironment::key_type m_result;
+	bool m_returns_value;
+	IEnvironment::key_type m_name;
 	parameters_type m_parameters;
 	action_pointer m_body;
 
@@ -179,17 +196,26 @@ class Construct: public IConstruct
 	bool set_body (const hnd_arg_t& arg)
 	{
 		assert(m_func != NULL);
-		m_func -> set_body(arg. staging. pop());
+		m_func -> set_body(arg. staging. pop(), false);
 		m_func = NULL; // plugin manager is the owner
 		return true;
 	}
 
-	plugin::instance<IConstruct> m_block;
+	bool set_expr (const hnd_arg_t& arg)
+	{
+		assert(m_func != NULL);
+		m_func -> set_body(arg. staging. pop(), true);
+		m_func = NULL; // plugin manager is the owner
+		return false;
+	}
+
+	plugin::instance<IConstruct> m_block, m_expression;
 	anta::ndl::Rule<SG> entry_;
 
 public:
 	Construct ():
 		m_block ("nparse.script.constructs.Block"),
+		m_expression ("nparse.script.Expression"),
 // <DEBUG_NODE_NAMING>
 		entry_		("Function.Entry")
 // </DEBUG_NODE_NAMING>
@@ -205,14 +231,19 @@ public:
 			doCreateFunction = hnd_t(this, &Construct::create_function),
 			doCreateProcedure = hnd_t(this, &Construct::create_procedure),
 			doAddParameter = hnd_t(this, &Construct::add_parameter),
-			doSetBody = hnd_t(this, &Construct::set_body);
+			doSetBody = hnd_t(this, &Construct::set_body),
+			doSetExpr = hnd_t(this, &Construct::set_expr);
 
 		entry_ =
-			(	"func" > ~lit("tion") > +space > varName * doCreateFunction
-			|	"proc" > ~lit("edure") > +space > varName * doCreateProcedure )
-		>	space
-		>	'(' > ~((space > varName * doAddParameter) % (space > ',')) > space
-		>	')' > space > m_block -> entry() > pass * doSetBody;
+			(	re("(func(tion)?\\>\\s*)?") > varName * doCreateFunction
+			|	re("proc(edure)?\\>\\s*") > varName * doCreateProcedure
+			)
+		>	re("\\s*\\(\\s*")
+		>  ~( (varName * doAddParameter) % re("\\s*,\\s*") )
+		>	re("\\s*\\)\\s*")
+		>	(	m_block -> entry() > pass * doSetBody
+			|	re("=\\s*") > m_expression -> entry() > pass * doSetExpr
+			);
 	}
 
 	const anta::ndl::Rule<SG>& entry (const int) const

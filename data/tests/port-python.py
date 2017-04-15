@@ -4,17 +4,18 @@ import nparse
 
 np = nparse.Parser()
 
-print 'version:             ', np.version()
-print 'load:                ', np.load('port.ng')
-print 'parse:               ', np.parse('hello world')
-print 'status:              ', np.status_str()
+print 'version:               ', np.version()
+print 'load:                  ', np.load('classic/port.ng')
+print 'parse:                 ', np.parse('hello world')
+print 'status:                ', np.status_str()
 
-print 'message count:       ', np.get_message_count()
-print 'trace count:         ', np.get_trace_count()
-print 'iteration count:     ', np.get_iteration_count()
-print 'context count:       ', np.get_context_count()
-print 'state pool usage:    ', np.get_pool_usage(), 'bytes'
-print 'state pool capacity: ', np.get_pool_capacity(), 'bytes'
+print 'message count:         ', np.get_message_count()
+print 'trace count:           ', np.get_trace_count()
+print 'iteration count:       ', np.get_iteration_count()
+print 'context count:         ', np.get_context_count()
+print 'state pool usage:      ', np.get_pool_usage(), 'bytes'
+print 'state pool peak usage: ', np.get_pool_peak_usage(), 'bytes'
+print 'state pool capacity:   ', np.get_pool_capacity(), 'bytes'
 
 while np.next():
     sys.stdout.write(':')

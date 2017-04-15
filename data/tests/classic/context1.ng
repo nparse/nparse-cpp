@@ -1,0 +1,39 @@
+// function: returns list of variables in the current context
+func f (fA, fB, fC) {
+    f = '';
+    for each (_k in self())
+        f += "$_k=(" + ref(_k) + '); ';
+};
+
+// procedure: returns list of variables in the current context
+proc p (pA, pB, pC) {
+    p = '';
+    for each (_k in self())
+        p += "$_k=(" + ref(_k) + '); ';
+};
+
+// function returning the result of another function
+func ff (x, y, z) {
+    ff = f(x, y, z);
+};
+
+// function returning the result of a procedure
+func fp (x, y, z) {
+    fp = p(x, y, z);
+};
+
+// procedure returning the result of a function
+proc pf (x, y, z) {
+    pf = f(x, y, z);
+};
+
+// procedure returning the result of another procedure
+proc pp (x, y, z) {
+    pp = p(x, y, z);
+};
+
+// accepts space delimited list of `key=value' pairs and maps them to local
+// variables, then invokes a function/procedure specified at the end of input
+rule S :=
+    ( '^\w+' '=' '^[^\s]+' { ref($2)=$0; } )*
+    '^\w+' { res = call($0, 1, 2, 3); } ^$;

@@ -2,21 +2,21 @@
  * @file $/source/nparse-test/src/test_dsel_casts.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -93,7 +93,7 @@ namespace {
 struct test_case
 {
 	bool			b;
-	int				i;
+	long			i;
 	double			r;
 	const char*		s;
 	const char*		s1;
@@ -284,16 +284,16 @@ protected:
  *	@{ */
 
 const test_case test_case::entries[] = {
-	{ true,       1,    0.0,       "these",  "true",     "1",  "2.97e8" },
-	{ false,     -1,   1.00,         "are",  "true",    "-1",    "1e-0" },
-	{ true,       0,  -1.00,      "random", "false",    "12",    "0e-1" },
-	{ false,     42,   2.71,      "sample", "false",   "-12", "-0.3e+5" },
-	{ true,     -43,  -3.14,     "strings",  "true",    "42", "-0.3e-5" },
-	{ false,  70846,   1e10,         "---",  "true",   "-42", "0.25e11" },
-	{ true,  -34310,  -1e10,  "should not", "false",  "1000",    "2e-6" },
-	{ false,  46193,  1e-10,     "contain", "false", "-1000",    "13e6" },
-	{ true,    2013, -1e-10, "convertible",  "true",  "1982",     "0.0" },
-	{ false,  -1982,   9.11,      "values",  "true",  "2013",       "0" }
+	{ true,       1L,    0.0,       "these",  "true",     "1",  "2.97e8" },
+	{ false,     -1L,   1.00,         "are",  "true",    "-1",    "1e-0" },
+	{ true,       0L,  -1.00,      "random", "false",    "12",    "0e-1" },
+	{ false,     42L,   2.71,      "sample", "false",   "-12", "-0.3e+5" },
+	{ true,     -43L,  -3.14,     "strings",  "true",    "42", "-0.3e-5" },
+	{ false,  70846L,   1e10,         "---",  "true",   "-42", "0.25e11" },
+	{ true,  -34310L,  -1e10,  "should not", "false",  "1000",    "2e-6" },
+	{ false,  46193L,  1e-10,     "contain", "false", "-1000",    "13e6" },
+	{ true,    2013L, -1e-10, "convertible",  "true",  "1982",     "0.0" },
+	{ false,  -1982L,   9.11,      "values",  "true",  "2013",       "0" }
 };
 
 TYPED_TEST_CASE_P(test_cast);

@@ -1,0 +1,27 @@
+proc lrc () {
+    stop((n = 1 + n) == 10);
+};
+
+T := { lrc(); } (
+        true
+    ||  '(' $T ')'
+    ||  not $F
+    ||  $T ( or|and|is $T || or $F )
+    ||  $F ( or $T || is $F )
+    ||  if $T ,? then $T
+    ||  if $F ,? then $T|$F
+);
+
+F := { lrc(); } (
+        false
+    ||  '(' $F ')'
+    ||  not $T
+    ||  $F ( or|and $F || and|is $T )
+    ||  $T ( and $F || is $F )
+    ||  if $T ,? then $F
+);
+
+S := (
+       $T:P { result = "it is true, that \"$P\""; }
+    || $F:P { result = "it is not true, that \"$P\""; }
+    ) ^$;

@@ -1,0 +1,33 @@
+/*
+ * ./nparse -l -I 2 -g evict.ng -i "alpha omega" -e S1
+ */
+
+S1 := $A1 $B1 ^$;
+//total iteration count: 51
+//state pool usage at exit: 1400 bytes (68.36%)
+//state pool usage at peak: 1736 bytes (84.77%)
+//total evicted size: 2016 bytes (98.44%)
+
+S2 := $A1 $B2 ^$;
+//total iteration count: 51
+//state pool usage at exit: 1176 bytes (57.42%)
+//state pool usage at peak: 1512 bytes (73.83%)
+//total evicted size: 2240 bytes (109.38%)
+
+S3 := $A2 $B1 ^$;
+//total iteration count: 51
+//state pool usage at exit: 1176 bytes (57.42%)
+//state pool usage at peak: 1344 bytes (65.62%)
+//total evicted size: 2240 bytes (109.38%)
+
+S4 := $A2 $B2 ^$;
+//total iteration count: 51
+//state pool usage at exit: 952 bytes (46.48%)
+//state pool usage at peak: 1120 bytes (54.69%)
+//total evicted size: 2464 bytes (120.31%)
+
+A1 := a | al | alp | alph | alpha;
+A2 := alpha | alph | alp | al | a;
+
+B1 := o | om | ome | omeg | omega;
+B2 := omega | omeg | ome | om | o;

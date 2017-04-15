@@ -1,0 +1,225 @@
+script:
+    - runtime-functions.ng
+
+config:
+    input_pool:        32
+
+create-boolean: { config: { entry_point: create-boolean }, input: "", check: { value: false } }
+create-integer: { config: { entry_point: create-integer }, input: "", check: { value: 0 } }
+create-real:    { config: { entry_point: create-real    }, input: "", check: { value: 0.0 } }
+create-string:  { config: { entry_point: create-string  }, input: "", check: { value: "" } }
+create-array:   { config: { entry_point: create-array   }, input: "", check: { value: "{}" } }
+
+cast-boolean:
+    config:
+        entry_point:   cast-boolean
+    input:             ""
+    error:
+        # line and offset provided
+        - [ "std::bad_cast", 22, 13 ]
+
+cast-integer:
+    config:
+        entry_point:   cast-integer
+    input:             ""
+    error:
+        # offset omitted intentionally
+        - [ "bad lexical cast: source type value could not be interpreted as target", 26 ]
+
+cast-real:
+    config:
+        entry_point:   cast-real
+    input:             ""
+    error:
+        # line and offset omitted intentionally
+        - [ "bad lexical cast: source type value could not be interpreted as target" ]
+
+cast-string:
+    config:
+        entry_point:   cast-string
+    input:             ""
+    error:
+        - [ "type cast: invalid argument count", 35, 13 ]
+
+cast-array:
+    config:
+        entry_point:   cast-array
+    input:             ""
+    error:
+        - [ "type cast: invalid argument count", 40, 13 ]
+
+unknown-call:
+    config:
+        entry_point:   unknown-call
+    input:             ""
+    error:
+        - [ "fooBar: undefined function or procedure", 46, 5 ]
+
+call-val-invalid-argument-count:
+    config:
+        entry_point:   call-val-invalid-argument-count
+    input:             ""
+    error:
+        - [ "call [val]: invalid argument count", 50, 9 ]
+
+call-ref-invalid-argument-count:
+    config:
+        entry_point:   call-ref-invalid-argument-count
+    input:             ""
+    error:
+        - [ "call [ref]: invalid argument count", 54, 5 ]
+
+lvalue-absent:
+    config:
+        entry_point:   lvalue-absent
+    input:             ""
+    error:
+        - [ "no l-value: writing to a read-only port", 60, 5 ]
+
+lvalue-present:
+    config:
+        entry_point:   lvalue-present
+    input:             ""
+    check:
+        test:          12345
+
+pass-invalid-argument-count:
+    config:
+        entry_point:   pass-invalid-argument-count
+    input:             ""
+    error:
+        - [ "pass: invalid argument count", 70, 5 ]
+
+stop-invalid-argument-count:
+    config:
+        entry_point:   stop-invalid-argument-count
+    input:             ""
+    error:
+        - [ "stop: invalid argument count", 74, 5 ]
+
+len-invalid-argument-count:
+    config:
+        entry_point:   len-invalid-argument-count
+    input:             ""
+    error:
+        - [ "len: invalid argument count", 78, 13 ]
+
+len-invalid-argument-type:
+    config:
+        entry_point:   len-invalid-argument-type
+    input:             ""
+    error:
+        - [ "len: invalid argument type", 82, 13 ]
+
+nth-invalid-argument-count:
+    config:
+        entry_point:   nth-invalid-argument-count
+    input:             ""
+    error:
+        - [ "nth: invalid argument count", 86, 13 ]
+
+nth-valid-index-read-1:
+    config: { entry_point: nth-invalid-index-read, index: 1 }
+    input:  ""
+    check:  { value: a }
+
+nth-valid-index-read-2:
+    config: { entry_point: nth-invalid-index-read, index: 2 }
+    input:  ""
+    check:  { value: b }
+
+nth-valid-index-read-3:
+    config: { entry_point: nth-invalid-index-read, index: 3 }
+    input:  ""
+    check:  { value: c }
+
+nth-valid-index-write-1:
+    config: { entry_point: nth-invalid-index-write, index: 1, value: test }
+    input:  ""
+    check:  { a: test, b: null, c: null }
+
+nth-valid-index-write-2:
+    config: { entry_point: nth-invalid-index-write, index: 2, value: test }
+    input:  ""
+    check:  { a: null, b: test, c: null }
+
+nth-valid-index-write-3:
+    config: { entry_point: nth-invalid-index-write, index: 3, value: test }
+    input:  ""
+    check:  { a: null, b: null, c: test }
+
+nth-invalid-index-1:
+    config: { entry_point: nth-invalid-index-read, index: 4 }
+    input:  ""
+    error:  [ [ "nth: invalid index", 90, 13 ] ]
+
+nth-invalid-index-2:
+    config: { entry_point: nth-invalid-index-read, index: 0 }
+    input:  ""
+    error:  [ [ "nth: invalid index", 90, 13 ] ]
+
+nth-invalid-index-3:
+    config: { entry_point: nth-invalid-index-read, index: -1 }
+    input:  ""
+    error:  [ [ "nth: invalid index", 90, 13 ] ]
+
+nth-invalid-index-4:
+    config: { entry_point: nth-invalid-index-read, index: ~ }
+    input:  ""
+    error:  [ [ "bad lexical cast: source type value could not be interpreted as target", 90, 13 ] ]
+
+ref-invalid-argument-count-0a:
+    config:
+        entry_point:   ref-invalid-argument-count-0a
+    input:             ""
+    error:
+        - [ "ref [val]: invalid argument count", 98, 13 ]
+
+ref-invalid-argument-count-2a:
+    config:
+        entry_point:   ref-invalid-argument-count-2a
+    input:             ""
+    error:
+        - [ "ref [val]: invalid argument count", 102, 13 ]
+
+ref-invalid-argument-count-0b:
+    config:
+        entry_point:   ref-invalid-argument-count-0b
+    input:             ""
+    error:
+        - [ "ref [ref]: invalid argument count", 106, 5 ]
+
+ref-invalid-argument-count-2b:
+    config:
+        entry_point:   ref-invalid-argument-count-2b
+    input:             ""
+    error:
+        - [ "ref [ref]: invalid argument count", 110, 5 ]
+
+self-invalid-argument-count:
+    config:
+        entry_point:   self-invalid-argument-count
+    input:             ""
+    error:
+        - [ "self: invalid argument count", 114, 5 ]
+
+self-invalid-argument-type:
+    config:
+        entry_point:   self-invalid-argument-type
+    input:             ""
+    error:
+        - [ "self: invalid argument type", 118, 5 ]
+
+swap-invalid-argument-count-0:
+    config:
+        entry_point:   swap-invalid-argument-count-0
+    input:             ""
+    error:
+        - [ "swap: invalid argument count", 122, 5 ]
+
+swap-invalid-argument-count-1:
+    config:
+        entry_point:   swap-invalid-argument-count-1
+    input:             ""
+    error:
+        - [ "swap: invalid argument count", 126, 5 ]

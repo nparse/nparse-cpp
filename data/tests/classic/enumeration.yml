@@ -1,0 +1,278 @@
+script:
+    - enumeration.ng
+
+test1:
+    input:  "<ababa>"
+    traces: 16
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X02 < a b a b a >))
+      - (S (X04 < a b a b a >))
+      - (S (X05 < a b a b a >))
+      - (S (X10 < a b a b a >))
+      - (S (X11 < a b a b a >))
+      - (S (X13 < a b a b a >))
+      - (S (X14 < a b a b a >))
+      - (S (X28 < a b a b a >))
+      - (S (X29 < a b a b a >))
+      - (S (X31 < a b a b a >))
+      - (S (X32 < a b a b a >))
+      - (S (X37 < a b a b a >))
+      - (S (X38 < a b a b a >))
+      - (S (X40 < a b a b a >))
+      - (S (X41 < a b a b a >))
+
+test2:
+    input:  "< ababa>"
+    traces: 8
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X04 < a b a b a >))
+      - (S (X10 < a b a b a >))
+      - (S (X13 < a b a b a >))
+      - (S (X28 < a b a b a >))
+      - (S (X31 < a b a b a >))
+      - (S (X37 < a b a b a >))
+      - (S (X40 < a b a b a >))
+
+test3:
+    input:  "<ababa >"
+    traces: 8
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X02 < a b a b a >))
+      - (S (X10 < a b a b a >))
+      - (S (X11 < a b a b a >))
+      - (S (X28 < a b a b a >))
+      - (S (X29 < a b a b a >))
+      - (S (X37 < a b a b a >))
+      - (S (X38 < a b a b a >))
+
+test4:
+    input:  "< ababa >"
+    traces: 4
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X10 < a b a b a >))
+      - (S (X28 < a b a b a >))
+      - (S (X37 < a b a b a >))
+
+test5:
+    input:  "<a ba ba>"
+    traces: 12
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X02 < a b a b a >))
+      - (S (X19 < a b a b a >))
+      - (S (X20 < a b a b a >))
+      - (S (X22 < a b a b a >))
+      - (S (X23 < a b a b a >))
+      - (S (X28 < a b a b a >))
+      - (S (X29 < a b a b a >))
+      - (S (X46 < a b a b a >))
+      - (S (X47 < a b a b a >))
+      - (S (X49 < a b a b a >))
+      - (S (X50 < a b a b a >))
+
+test6:
+    input:  "< a ba ba>"
+    traces: 6
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X19 < a b a b a >))
+      - (S (X22 < a b a b a >))
+      - (S (X28 < a b a b a >))
+      - (S (X46 < a b a b a >))
+      - (S (X49 < a b a b a >))
+
+test7:
+    input:  "<a ba ba >"
+    traces: 20
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X02 < a b a b a >))
+      - (S (X07 < a b a b a >))
+      - (S (X08 < a b a b a >))
+      - (S (X16 < a b a b a >))
+      - (S (X17 < a b a b a >))
+      - (S (X19 < a b a b a >))
+      - (S (X20 < a b a b a >))
+      - (S (X25 < a b a b a >))
+      - (S (X26 < a b a b a >))
+      - (S (X28 < a b a b a >))
+      - (S (X29 < a b a b a >))
+      - (S (X34 < a b a b a >))
+      - (S (X35 < a b a b a >))
+      - (S (X43 < a b a b a >))
+      - (S (X44 < a b a b a >))
+      - (S (X46 < a b a b a >))
+      - (S (X47 < a b a b a >))
+      - (S (X52 < a b a b a >))
+      - (S (X53 < a b a b a >))
+
+test8:
+    input:  "< a ba ba >"
+    traces: 10
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X07 < a b a b a >))
+      - (S (X16 < a b a b a >))
+      - (S (X19 < a b a b a >))
+      - (S (X25 < a b a b a >))
+      - (S (X28 < a b a b a >))
+      - (S (X34 < a b a b a >))
+      - (S (X43 < a b a b a >))
+      - (S (X46 < a b a b a >))
+      - (S (X52 < a b a b a >))
+
+test9:
+    input:  "<ab ab a>"
+    traces: 12
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X04 < a b a b a >))
+      - (S (X10 < a b a b a >))
+      - (S (X13 < a b a b a >))
+      - (S (X55 < a b a b a >))
+      - (S (X56 < a b a b a >))
+      - (S (X58 < a b a b a >))
+      - (S (X59 < a b a b a >))
+      - (S (X64 < a b a b a >))
+      - (S (X65 < a b a b a >))
+      - (S (X67 < a b a b a >))
+      - (S (X68 < a b a b a >))
+
+test10:
+    input:  "< ab ab a>"
+    traces: 20
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X03 < a b a b a >))
+      - (S (X04 < a b a b a >))
+      - (S (X06 < a b a b a >))
+      - (S (X10 < a b a b a >))
+      - (S (X12 < a b a b a >))
+      - (S (X13 < a b a b a >))
+      - (S (X15 < a b a b a >))
+      - (S (X30 < a b a b a >))
+      - (S (X33 < a b a b a >))
+      - (S (X39 < a b a b a >))
+      - (S (X42 < a b a b a >))
+      - (S (X55 < a b a b a >))
+      - (S (X57 < a b a b a >))
+      - (S (X58 < a b a b a >))
+      - (S (X60 < a b a b a >))
+      - (S (X64 < a b a b a >))
+      - (S (X66 < a b a b a >))
+      - (S (X67 < a b a b a >))
+      - (S (X69 < a b a b a >))
+
+test11:
+    input:  "<ab ab a >"
+    traces: 6
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X10 < a b a b a >))
+      - (S (X55 < a b a b a >))
+      - (S (X56 < a b a b a >))
+      - (S (X64 < a b a b a >))
+      - (S (X65 < a b a b a >))
+
+test12:
+    input:  "< ab ab a >"
+    traces: 10
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X03 < a b a b a >))
+      - (S (X10 < a b a b a >))
+      - (S (X12 < a b a b a >))
+      - (S (X30 < a b a b a >))
+      - (S (X39 < a b a b a >))
+      - (S (X55 < a b a b a >))
+      - (S (X57 < a b a b a >))
+      - (S (X64 < a b a b a >))
+      - (S (X66 < a b a b a >))
+
+test13:
+    input:  "<a b a b a>"
+    traces: 9
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X19 < a b a b a >))
+      - (S (X22 < a b a b a >))
+      - (S (X55 < a b a b a >))
+      - (S (X56 < a b a b a >))
+      - (S (X73 < a b a b a >))
+      - (S (X74 < a b a b a >))
+      - (S (X76 < a b a b a >))
+      - (S (X77 < a b a b a >))
+
+test14:
+    input:  "< a b a b a>"
+    traces: 15
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X03 < a b a b a >))
+      - (S (X19 < a b a b a >))
+      - (S (X21 < a b a b a >))
+      - (S (X22 < a b a b a >))
+      - (S (X24 < a b a b a >))
+      - (S (X30 < a b a b a >))
+      - (S (X48 < a b a b a >))
+      - (S (X51 < a b a b a >))
+      - (S (X55 < a b a b a >))
+      - (S (X57 < a b a b a >))
+      - (S (X73 < a b a b a >))
+      - (S (X75 < a b a b a >))
+      - (S (X76 < a b a b a >))
+      - (S (X78 < a b a b a >))
+
+test15:
+    input:  "<a b a b a >"
+    traces: 15
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X07 < a b a b a >))
+      - (S (X16 < a b a b a >))
+      - (S (X19 < a b a b a >))
+      - (S (X25 < a b a b a >))
+      - (S (X55 < a b a b a >))
+      - (S (X56 < a b a b a >))
+      - (S (X61 < a b a b a >))
+      - (S (X62 < a b a b a >))
+      - (S (X70 < a b a b a >))
+      - (S (X71 < a b a b a >))
+      - (S (X73 < a b a b a >))
+      - (S (X74 < a b a b a >))
+      - (S (X79 < a b a b a >))
+      - (S (X80 < a b a b a >))
+
+test16:
+    input:  "< a b a b a >"
+    traces: 25
+    forest:
+      - (S (X01 < a b a b a >))
+      - (S (X03 < a b a b a >))
+      - (S (X07 < a b a b a >))
+      - (S (X09 < a b a b a >))
+      - (S (X16 < a b a b a >))
+      - (S (X18 < a b a b a >))
+      - (S (X19 < a b a b a >))
+      - (S (X21 < a b a b a >))
+      - (S (X25 < a b a b a >))
+      - (S (X27 < a b a b a >))
+      - (S (X30 < a b a b a >))
+      - (S (X36 < a b a b a >))
+      - (S (X45 < a b a b a >))
+      - (S (X48 < a b a b a >))
+      - (S (X54 < a b a b a >))
+      - (S (X55 < a b a b a >))
+      - (S (X57 < a b a b a >))
+      - (S (X61 < a b a b a >))
+      - (S (X63 < a b a b a >))
+      - (S (X70 < a b a b a >))
+      - (S (X72 < a b a b a >))
+      - (S (X73 < a b a b a >))
+      - (S (X75 < a b a b a >))
+      - (S (X79 < a b a b a >))
+      - (S (X81 < a b a b a >))

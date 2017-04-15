@@ -1,0 +1,7 @@
+script:
+    - eratosphenes.ng
+
+test1:
+    input:             "1st before 10000"
+    check:
+        result:        9973

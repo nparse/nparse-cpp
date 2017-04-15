@@ -1,0 +1,59 @@
+script:
+    - charclass.ng
+
+test_alpha:
+    input:             "1 alpha word"
+    check:
+        X1.alpha:       "word"
+
+test_digit:
+    input:             "1 digit 1234"
+    check:
+        X1.digit:       "1234"
+
+test_upper:
+    input:             "1 upper WORD"
+    check:
+        X1.upper:       "WORD"
+
+test_lower:
+    input:             "1 lower word"
+    check:
+        X1.lower:       "word"
+
+test_alpha_punct:
+    input:             "n alpha punct veni,vidi,vici"
+    check:
+        "Xn.[:alpha:][:punct:]": veni,vidi,vici
+
+test_custom_x2:
+    input:              "2 7a0b8c4d6e"
+    check:
+        X2.value:       "7a0b8c4d6e"
+
+test_custom_x3:
+    input:              "3 3a:4b:3c:1d:0e"
+    check:
+        X3.value:       "3a:4b:3c:1d:0e"
+
+test_custom_x4a:
+    input:              "4 a"
+    traces:             1
+    check:
+        X4.value:       "a"
+
+test_custom_x4b:
+    input:              "4 aeeooo"
+    traces:             1
+    check:
+        X4.value:       "aeeooo"
+
+test_custom_x5a:
+    input:              "5 alphabet"
+    traces:             1
+    check:
+        X5.value:       "alphabet"
+
+test_custom_x5b:
+    input:              "5 lattice"
+    traces:             0
