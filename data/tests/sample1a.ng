@@ -1,5 +1,0 @@
-namespace N1;
-S1 := ^\w+ :w1 ^\w+ :w2 '^$';
-
-namespace N2;
-S1 := $N1.S1;

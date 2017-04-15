@@ -1,7 +1,0 @@
-dict := "red:acceptor-dict-red.txt";
-
-S1 := $dict ^$;
-
-S2 := ($dict { ref($) = res; }) % "," ^$;
-
-S3 := ($dict { ref(res) = $; }) % "," ^$;

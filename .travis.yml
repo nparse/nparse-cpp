@@ -39,5 +39,4 @@ script:
   - cd build
   - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_ENV_VAR=CC -DCMAKE_CXX_COMPILER_ENV_VAR=CXX
   - make -j4
-  - ctest
-
+  - ctest -V

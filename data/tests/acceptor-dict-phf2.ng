@@ -1,7 +1,0 @@
-dict := "phf:acceptor-dict-phf.txt";
-
-S1 := $dict ^$;
-
-S2 := ($dict { ($): res }) % "," ^$;
-
-S3 := ($dict { (res): $ }) % "," ^$;

@@ -1,8 +1,0 @@
-S := (p $X || s $Y) ^$;
-
-X := $D |? $C |? $L;
-Y := $D || $C || $L;
-
-D := ^\d+;
-L := ^\w+;
-C := alpha | beta | gamma | delta;

@@ -1,5 +1,0 @@
-namespace Ext;
-
-func fx (_a, _b) {
-    fx = "<$_a|$_b>";
-};

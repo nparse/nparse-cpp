@@ -1,7 +1,0 @@
-S := $Greeting:x $Object:y ^$ { z = {U:{x, y}, V:-1}; };
-
-Greeting := hello | goodbye | hi | farewell;
-Object := $Entity;
-Entity := $Animate | $Inanimate;
-Animate := user | world;
-Inanimate := space | time | world;
