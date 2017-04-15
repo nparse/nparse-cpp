@@ -1,0 +1,31 @@
+script:
+    - loops-while.ng
+    - loops-do-while.ng
+    - loops-for.ng
+
+config:
+    input_pool:        32
+
+test1:
+    config:
+        entry_point:   loops.C1
+        repeat_number: 101
+    input:             ""
+    check:
+        counter:       101
+
+test2:
+    config:
+        entry_point:   loops.C2
+        repeat_number: 102
+    input:             ""
+    check:
+        counter:       102
+
+test3:
+    config:
+        entry_point:   loops.C3
+        repeat_number: 103
+    input:             ""
+    check:
+        counter:       103

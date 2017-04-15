@@ -1,0 +1,21 @@
+invalid-access-read {
+    value = null.field;
+};
+
+invalid-access-write {
+    x = null;
+    x.field = value;
+};
+
+invalid-subscript-read {
+    value = null['field'];
+};
+
+invalid-subscript-write {
+    x = null;
+    x['field'] = value;
+};
+
+string-subscript := ^.+$ :input {
+    value = input[index];
+};

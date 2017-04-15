@@ -1,0 +1,41 @@
+// list of allowed character classes
+classes :=
+     alnum
+    |alpha
+    |cntrl
+    |digit
+    |graph
+    |lower
+    |print
+    |punct
+    |space
+    |upper
+    |xdigit;
+
+// Rule X1 reads a class definition and stores it in the `class' variable,
+// which is being used in the subsequent instantiation of the character class
+// acceptor.
+X1 := $classes:class "[[:$class:]]{1-99}" { self({ (class): $ }); };
+
+// Rule Xn acts the same way as X1 with the only difference that it allows more
+// than one class definitions.
+Xn :=
+    {class='';}
+    ( $classes {class+="[:$:]";} )+
+    "[$class]{1-99}"
+    { self({ (class): $ }); };
+
+// Rules X2 and X3 represent so-called "compound" character classes.
+X2 := "[0-9a-f]{1-99}":value;
+X3 := "[0-9a-f[:punct:]]{1-99}":value;
+
+// Rule X4 defines the vovel class.
+// (this rule also ensures that length boundaries may be specified in any order)
+X4 := "[aeiouy]{9-1}":value;
+
+// Rule X5 defines a class with intersecting ranges.
+// (this rule also provides limited coverage for utility/range_add)
+X5 := "[a-qm-z]{10-20,1-5,25-30,8}":value;
+
+// The entry point.
+S := (1 <X1> || n <Xn> || 2 <X2> || 3 <X3> || 4 <X4> || 5 <X5>) ^$;

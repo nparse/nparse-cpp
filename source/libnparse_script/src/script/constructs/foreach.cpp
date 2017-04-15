@@ -2,21 +2,21 @@
  * @file $/source/libnparse_script/src/script/constructs/foreach.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -27,11 +27,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <nparse/nparse.hpp>
 #include <nparse/util/linked_action.hpp>
+#include <anta/sas/regex.hpp>
 #include <anta/dsel/rt/assign.hpp>
 #include <anta/dsel/rt/comma.hpp>
-#include <anta/sas/symbol.hpp>
-#include <anta/sas/test.hpp>
-#include <anta/sas/regex.hpp>
 #include "../../static.hpp"
 #include "control.hpp"
 
@@ -40,7 +38,7 @@ namespace {
 using namespace nparse;
 
 template <typename M_>
-struct keys
+struct key_list
 {
 	typedef std::vector<typename anta::ndl::context_key<M_>::type> type;
 
@@ -50,10 +48,10 @@ template <typename M_>
 class key_lister: public std::iterator<std::output_iterator_tag, void, void,
 	void, void>
 {
-	typename keys<M_>::type& m_keys;
+	typename key_list<M_>::type& m_keys;
 
 public:
-	key_lister (typename keys<M_>::type& a_keys):
+	key_lister (typename key_list<M_>::type& a_keys):
 		m_keys (a_keys)
 	{
 	}
@@ -90,15 +88,17 @@ public:
 
 	result_type evalVal (IEnvironment& a_env) const
 	{
-		// Get source array.
-		result_type list = m_list. evalVal(a_env);
+		// Get the loop argument.
+		result_type arg = m_list. evalVal(a_env);
 
-		if (list. is_null())
+		// It is acceptable if the loop argument is null.
+		if (arg. is_null())
 		{
 			return result_type();
 		}
 
-		if (! list. is_array())
+		// However, it is not acceptable if the loop argument is not iterable.
+		if (! arg. is_array())
 		{
 			anta::range<SG>::type where;
 			getLocation(where);
@@ -109,29 +109,36 @@ public:
 					"argument is supposed to be either array or null");
 		}
 
-		// Get array keys.
-		keys<NLG>::type klist;
-		list. as_array() -> list(key_lister<NLG>(klist), false);
+		// Get a mutable reference to the key receiving variable.
+		result_type& key_receiver = m_iter. evalRef(a_env);
 
-		// Get a mutable reference to the key storage (variable).
-		result_type& iter = m_iter. evalRef(a_env);
+		// Collect and store iterable keys.
+		key_list<NLG>::type keys;
+		arg. as_array() -> list(key_lister<NLG>(keys), false);
 
-		// Go through the key list.
-		for (keys<NLG>::type::const_iterator i = klist. begin();
-				i != klist. end(); ++ i)
+		// Iterate through the keys.
+		for (key_list<NLG>::type::const_iterator i = keys. begin();
+				i != keys. end(); ++ i)
 		{
 			try
 			{
-				iter = static_cast<const std::string&>(*i);
+				key_receiver = static_cast<const std::string&>(*i);
 				m_body. evalVal(a_env);
 			}
-			catch (const loop_control_t& lc)
+			catch (const loop_control& lc)
 			{
+				// If the caught loop control signal was not indended for this
+				// loop instance then just let the exception propagate up.
 				if (! lc. target(). empty() && lc. target() != m_loop)
+				{
 					throw;
+				}
 
-				if (lc. exit())
+				// Stop iterations if the signal requires so.
+				if (! lc)
+				{
 					break;
+				}
 			}
 		}
 
@@ -194,11 +201,12 @@ public:
 		reference<SG>::type loop = ref<SG>("loop");
 
 		entry_ =
-			(	(+alnum) [ loop = delta(), true ] > regex("\\A\\s*:\\s*")
-			|	pass [ loop = "", true ] )
-		>	regex("\\Afor\\s*each\\s*\\(\\s*") * M0 > m_expression -> entry()
-		>	regex("\\A\\s*in(?!\\w)\\s*") > m_expression -> entry()
-		>	regex("\\A\\s*\\)\\s*") [ push(loop) ]
+			(	re("\\w+\\>") [ loop = delta(), true ] > re("\\s*:\\s*")
+			|	pass [ loop = "", true ]
+			)
+		>	re("for\\s*each\\s*\\(\\s*") * M0 > m_expression -> entry()
+		>	re("\\s*in(?!\\w)\\s*") > m_expression -> entry()
+		>	re("\\s*\\)\\s*") [ push(loop) ]
 		>	m_statement -> entry()
 		>	pass [ pop(loop) ] * M1 * doCreateAction;
 	}

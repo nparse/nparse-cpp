@@ -2,21 +2,21 @@
  * @file $/source/libnparse_script/src/script/joints/operand.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -25,13 +25,14 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <nparse/nparse.hpp>
-#include <anta/sas/symbol.hpp>
 #include <anta/sas/test.hpp>
+#include <anta/sas/symbol.hpp>
+#include <anta/sas/regex.hpp>
 #include "../_action_string.hpp"
 #include "../_action_range.hpp"
-#include "../../static.hpp"
-#include "_priority.hpp"
 #include "../_punct.hpp"
+#include "_priority.hpp"
+#include "../../static.hpp"
 
 namespace {
 
@@ -84,7 +85,7 @@ public:
 			const_cast<anta::ndl::Context<NLG>*>(target) -> set_ancestor(self);
 		}
 
-		a_env. get_traveller(). get_state(). substitute(target0);
+		a_env. get_processor(). get_state(). substitute(target0);
 
 		return result_type(true);
 	}
@@ -145,12 +146,11 @@ class Operator: public IOperator
 	{
 		// Get the name of the callee subnetwork entry point.
 		const string_t name = Tokenizer::decode(get_accepted_range(arg));
-		// Create assignment semantic action.
-		action_pointer action(new ActionRange(name));
 		// Create a new joint of appropriate compound type.
 		IStaging::joint_pointer joint(
 			anta::ndl::JointCall<NLG>(arg. staging. cluster(name))
-				[ action ]
+				// Create and attach an assignment semantic action.
+				[ new ActionRange(name) ]
 		);
 		// Push the new joint into the LL stack.
 		joint -> set_flavor(0, 1);
@@ -252,7 +252,8 @@ public:
 		return PRIORITY_OPERAND;
 	}
 
-	void deploy (level_t a_current, level_t a_previous, level_t a_top) const
+	void deploy (level_t a_current, level_t a_previous, const levels_t& a_top)
+		const
 	{
 		using namespace anta::ndl::terminals;
 		using boost::proto::lit;
@@ -264,10 +265,10 @@ public:
 
 		|	'$' >
 			(	token<Separator>(PUNCT, true) * m_call1
-			|	space > ':' > token<Separator>(PUNCT, true) * m_call2
+			|	':' > token<Separator>(PUNCT, true) * m_call2
 			)
 
-		|	'(' > space > a_top > space > lit(')') * m_group
+		|	re("\\(\\s*") > a_top. back() > re("\\s*\\)") * m_group
 
 		|	m_block -> entry() > pass * m_inline_block
 		|	m_array -> entry() > pass * m_inline_array

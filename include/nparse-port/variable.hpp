@@ -2,21 +2,21 @@
  * @file $/include/nparse-port/variable.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -41,7 +41,7 @@ struct VariableData;
 struct VariableIteratorData;
 
 /**
- *	An object that represents trace variables.
+ *	A trace variable.
  */
 class Variable
 {
@@ -70,13 +70,13 @@ public:
 	std::size_t id () const;
 
 	bool	get_boolean (const bool a_def = false) const;
-	int		get_integer (const int a_def = 0) const;
+	long	get_integer (const long a_def = 0) const;
 	double	get_real (const double a_def = 0.0) const;
 	char*	get_string (char* a_buf, const int a_len,
 				const char* a_def = "") const;
 
 	bool	as_boolean () const;
-	int		as_integer () const;
+	long	as_integer () const;
 	double	as_real () const;
 	char*	as_string (char* a_buf, const int a_len) const;
 
@@ -86,17 +86,17 @@ public:
 	VariableIterator end () const;
 	int size () const;
 
-	VariableIterator get (const int a_key) const;
+	VariableIterator get (const long a_key) const;
 	VariableIterator get (const char* a_key) const;
 
 private:
-	VariableData* m_;
+	VariableData* m_; /**< implementation dependent variable data */
 
 };
 
 /**
- *	An iterator object that is used to run through associative arrays stored in
- *	trace variables.
+ *	An iterator used to enumerate values in associative arrays stored in trace
+ *	variables.
  */
 class VariableIterator: public std::iterator<std::forward_iterator_tag,
 	Variable>
@@ -140,7 +140,7 @@ public:
 	}
 
 private:
-	VariableIteratorData* m_;
+	VariableIteratorData* m_; /**< implementation dependent iterator data */
 
 };
 

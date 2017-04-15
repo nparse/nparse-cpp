@@ -1,0 +1,37 @@
+script:
+    - definition.ng
+
+config:
+    input_pool:        32
+
+test1:
+    config:
+        entry_point:   S1
+    input:             ""
+    check:
+        testFlag:      true
+        value:         false
+
+test1a:
+    config:
+        entry_point:   S1
+        testFlag:      false
+    input:             ""
+    traces:            0
+
+test1b:
+    config:
+        entry_point:   S1
+        testFlag:      true
+    input:             ""
+    check:
+        testFlag:      true
+        value:         true
+
+test1c:
+    config:
+        entry_point:   S1
+        testFlag:      "text"
+    input:             ""
+    error:
+        - [ "std::bad_cast", 2, 13 ]

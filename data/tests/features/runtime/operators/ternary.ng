@@ -1,0 +1,16 @@
+ternary-read := ^(true|false)$ :input {
+    value = boolean(input) ? left : right;
+};
+
+ternary-write := ^(true|false)$ :input {
+    ( boolean(input) ? left : right ) = value;
+};
+
+ternary-write-left := ^(true|false)$ :input {
+    ( boolean(input) ? left : foo('right') ) = value;
+};
+
+// As of 0.1.7 functions cannot return references.
+func foo(_arg) {
+    foo = ref(_arg);
+};

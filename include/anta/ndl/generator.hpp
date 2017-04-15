@@ -2,21 +2,21 @@
  * @file $/include/anta/ndl/generator.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -27,19 +27,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef ANTA_NDL_GENERATOR_HPP_
 #define ANTA_NDL_GENERATOR_HPP_
 
-// NOTE: Using flat_set here is experimental, std::set also works fine.
-#include <boost/container/flat_set.hpp>
-
 /*
  *	Generator
+ *
+ *	Bunch --<>-- BunchImpl
+ *	BunchSet
  *
  *	LinkBase
  *	  |
  *	  |-- LinkJump
  *	  |
  *	  \-- LinkCall
- *
- *	Bunch
  *
  *	JointBase
  *	  |
@@ -62,10 +60,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *	        \-- JointAlt
  */
 
+// NOTE: The usage of boost::container::flat_set here is strictly experimental
+//		 and can be replaced with std::set if necessary.
+#include <boost/container/flat_set.hpp>
+
 namespace anta { namespace ndl {
 
 // (forward declarations)
+template <typename M_> class Bunch;
 template <typename M_> class BunchImpl;
+template <typename M_> class BunchSet;
+template <typename M_> class LinkBase;
+template <typename M_> class LinkJump;
+template <typename M_> class LinkCall;
 template <typename M_> class JointBase;
 template <typename M_> class JointJump;
 template <typename M_> class JointCall;
@@ -80,21 +87,95 @@ template <typename M_> class JointAlt;
 /******************************************************************************/
 
 /**
- *	Value-copyable bunch (see the definition of the BunchImpl class below).
+ *	Generator<M_> is a template base class for objects that generate acceptor
+ *	network topologies by the process of sequential addition of new nodes and
+ *	creation of arcs between them and already existing nodes.
  */
 template <typename M_>
-class Bunch: public boost::shared_ptr<BunchImpl<M_> >
+class Generator: public Base<Generator<M_>, M_>
 {
 public:
-	Bunch ():
-		boost::shared_ptr<BunchImpl<M_> >(new BunchImpl<M_>())
-	{
-	}
+	/**
+	 *	The polymorphic destructor.
+	 */
+	virtual ~Generator () {}
 
-	Bunch (const int a_init):
-		boost::shared_ptr<BunchImpl<M_> >()
+	/**
+	 *	Create an arc between two inner network nodes.
+	 *
+	 *	@param	a_node_from
+	 *		Source node index
+	 *	@param	a_node_to
+	 *		Destination node index
+	 *	@param	a_acceptor
+	 *		Acceptor for the new arc to be associated with
+	 *	@param	a_arc_type
+	 *		New arc type
+	 *	@param	a_label
+	 *		New arc label
+	 *	@return
+	 *		Reference to the created arc
+	 */
+	virtual Arc<M_>& link (const uint_t a_node_from, const uint_t a_node_to,
+			const Acceptor<M_>& a_acceptor, const arc_type_t a_arc_type,
+			const Label<M_>& a_label) = 0;
+
+	/**
+	 *	Create an arc between an inner and an outer network nodes.
+	 *
+	 *	@param	a_node_from
+	 *		Source node index
+	 *	@param	a_node_to
+	 *		Destination node reference
+	 *	@param	a_acceptor
+	 *		Acceptor for the new arc to be associated with
+	 *	@param	a_arc_type
+	 *		New arc type
+	 *	@param	a_label
+	 *		New arc label
+	 *	@return
+	 *		Reference to the created arc
+	 */
+	virtual Arc<M_>& link (const uint_t a_node_from,
+			const ::anta::Node<M_>& a_node_to, const Acceptor<M_>& a_acceptor,
+			const arc_type_t a_arc_type, const Label<M_>& a_label) = 0;
+
+protected:
+	/**
+	 *	Generate new or augment existing acceptor network topology from the
+	 *	given joint expression.
+	 *
+	 *	@param	a_joint
+	 *		Joint expression
+	 *	@param	a_start_index
+	 *		First available node index
+	 *	@return
+	 *		Next available node index (same as the total number of added nodes)
+	 */
+	uint_t generate (const JointBase<M_>& a_joint,
+			const uint_t a_start_index = 0)
 	{
-		assert(a_init == -1);
+		uint_t next_index = a_start_index;
+		BunchSet<M_> processed;
+		std::queue<Bunch<M_> > queue;
+		queue. push(a_joint. entry());
+		while (! queue. empty())
+		{
+			const Bunch<M_> s0 = queue. front();
+			const uint_t index = s0 -> index(next_index);
+			queue. pop();
+			for (typename BunchImpl<M_>::iterator t = s0 -> begin();
+					t != s0 -> end(); ++ t)
+			{
+				const Bunch<M_> s1 = (*t) -> get_bunch();
+				if (s1 && processed. insert(s1. get()). second)
+				{
+					queue. push(s1);
+				}
+				(*t) -> deploy(*this, index, next_index);
+			}
+		}
+		return next_index;
 	}
 
 };
@@ -102,8 +183,266 @@ public:
 /******************************************************************************/
 
 /**
- *	An auxiliary bunch pointer container that is used to track processed
- *	instances in order to prevent infinite recursion.
+ *	Bunch<M_> template class is a convenience safely value-copyable wrapper for
+ *	BunchImpl<M_> instance pointers with restricted instantiation options.
+ */
+template <typename M_>
+class Bunch: public boost::shared_ptr<BunchImpl<M_> >
+{
+	typedef boost::shared_ptr<BunchImpl<M_> > base_type;
+
+public:
+	/**
+	 *	The constructor for a normal empty bunch.
+	 */
+	Bunch ():
+		base_type(new BunchImpl<M_>())
+	{
+	}
+
+	/**
+	 *	The constructor for an ephemeral bunch.
+	 *
+	 *	@param	a_intent
+	 *		Mandatory integer value that designates the explicit intent to
+	 *		create an ephemeral bunch, so it will not happen by an accident
+	 */
+	Bunch (const int a_intent):
+		base_type()
+	{
+		assert(a_intent == -1);
+	}
+
+};
+
+/******************************************************************************/
+
+/**
+ *	BunchImpl<M_> template class represents a bunch of outgoing links from a
+ *	single acceptor network node.
+ */
+template <typename M_>
+class BunchImpl: public std::list<LinkBase<M_>*>
+{
+	typedef std::list<LinkBase<M_>*> base_type;
+
+public:
+	typedef typename base_type::iterator iterator;
+	typedef typename base_type::const_iterator const_iterator;
+
+public:
+	/**
+	 *	The only constructor.
+	 */
+	BunchImpl ():
+		m_index (0)
+	{
+	}
+
+	/**
+	 *	The destructor.
+	 */
+	~BunchImpl ()
+	{
+		utility::free_all(*this);
+	}
+
+	/**
+	 *	Assign the next index to this bunch iff no index has been assigned yet.
+	 *
+	 *	@param	a_next_index
+	 *		Mutable reference to the next available node index
+	 *	@return
+	 *		Index assigned to this bunch
+	 */
+	uint_t index (uint_t& a_next_index)
+	{
+		if (m_index == 0)
+		{
+			m_index = a_next_index ++;
+		}
+		return m_index;
+	}
+
+	/**
+	 *	Replace all pointers to a particular bunch with a pointer to some other
+	 *	bunch.
+	 *
+	 * 	@param	a_from
+	 * 		Replaceable bunch reference
+	 * 	@param	a_to
+	 *		Replacer bunch reference
+	 * 	@param	a_bs
+	 *		Processed bunch set (recursive protection)
+	 */
+	void replace (const Bunch<M_>& a_from, const Bunch<M_>& a_to,
+			BunchSet<M_>& a_bs)
+	{
+		if (is_recursive(a_bs))
+		{
+			return ;
+		}
+		for (iterator i = this -> begin(); i != this -> end(); ++ i)
+		{
+			(*i) -> replace(a_from, a_to, a_bs);
+		}
+	}
+
+	/**
+	 *	Merge the given bunch into this one.
+	 *
+	 *	@param	a_bunch
+	 *		Mergeable bunch reference
+	 *
+	 *	NOTE: The mergeable bunch is implicitly mutable despite that it is
+	 *		  passed via a constant wrapper reference.
+	 */
+	void merge (const Bunch<M_>& a_bunch)
+	{
+		this -> splice(this -> end(), *a_bunch);
+		assert(a_bunch -> empty());
+	}
+
+	/**
+	 *	Find a unique link to a particular bunch if it exists.
+	 *
+	 *	@param	a_bunch
+	 *		Searcheable bunch reference
+	 *	@param	a_link_ptr
+	 *		Result receiver (a link pointer)
+	 * 	@param	a_bs
+	 *		Processed bunch set (protection)
+	 *	@return
+	 *		True, if the link was not found or it is unique within the target
+	 *		domain (i.e. bunch and its referees), or false otherwise
+	 */
+	bool find_link_to (const Bunch<M_>& a_bunch, LinkBase<M_>*& a_link_ptr,
+			BunchSet<M_>& a_bs) const
+	{
+		// If the call is recursive then this bunch is already being searched.
+		if (is_recursive(a_bs))
+		{
+			return true;
+		}
+		for (const_iterator i = this -> begin(); i != this -> end(); ++ i)
+		{
+			if (! (*i) -> find_link_to(a_bunch, a_link_ptr, a_bs))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 *	Link the given bunch with a simple arc.
+	 *
+	 * 	@param	a_bunch
+	 * 		Bunch to link
+	 * 	@param	a_acceptor
+	 * 		Acceptor to be set on the new arc
+	 * 	@param	a_label
+	 * 		Label for the arc to be marked with
+	 * 	@return
+	 * 		Reference to a new link instance
+	 */
+	LinkBase<M_>& link (const Bunch<M_>& a_bunch,
+			const Acceptor<M_>& a_acceptor = unconditional<M_>(),
+			const Label<M_>& a_label = Label<M_>())
+	{
+		this -> push_back(new LinkJump<M_>(a_bunch, a_acceptor, atSimple,
+					a_label));
+		return *(this -> back());
+	}
+
+	/**
+	 *	Link the given bunch with an invoking arc.
+	 *
+	 *	@param	a_bunch
+	 *		Bunch to link
+	 *	@param	a_arc_type
+	 *		Arc type for the bunch to be linked with
+	 *	@return
+	 *		Reference to a new link instance
+	 */
+	LinkBase<M_>& link (const Bunch<M_>& a_bunch, const arc_type_t a_arc_type)
+	{
+		this -> push_back(new LinkJump<M_>(a_bunch, unconditional<M_>(false),
+					a_arc_type, Label<M_>()));
+		return *(this -> back());
+	}
+
+	/**
+	 *	Link the given outer node with an invoking arc.
+	 *
+	 *	@param	a_node
+	 *		Node to link
+	 *	@return
+	 *		Reference to a new link instance
+	 */
+	LinkBase<M_>& link (const ::anta::Node<M_>& a_node)
+	{
+		this -> push_back(new LinkCall<M_>(a_node));
+		return *(this -> back());
+	}
+
+	/**
+	 *	Set or amend labels of all future arcs for this bunch.
+	 *
+	 *	@param	a_label
+	 *		Label for this bunch to be amdended with
+	 *	@param	a_bs
+	 *		Processed bunch set (protection)
+	 */
+	void set_label (const Label<M_>& a_label, BunchSet<M_>& a_bs)
+	{
+		if (is_recursive(a_bs))
+		{
+			return ;
+		}
+		for (iterator i = this -> begin(); i != this -> end(); ++ i)
+		{
+			(*i) -> set_label(a_label, a_bs);
+		}
+	}
+
+private:
+	/**
+	 *	Check whether the call is topologically recursive, i.e. check if this
+	 *	bunch has already been processed in the current context.
+	 *
+	 *	@param	a_bs
+	 *		Processed bunch set (protection)
+	 *	@return
+	 *		True, if call is recursive, or false otherwise
+	 */
+	bool is_recursive (BunchSet<M_>& a_bs) const
+	{
+		if (a_bs. find(this) != a_bs. end())
+		{
+			return true;
+		}
+		else
+		{
+			a_bs. insert(this);
+			return false;
+		}
+	}
+
+	/**
+	 *	Assigned node index.
+	 */
+	uint_t m_index;
+
+};
+
+/******************************************************************************/
+
+/**
+ *	BunchSet<M_> is an auxiliary container for unique BunchImpl<M_> instance
+ *	pointers. It is used to keep track of already processed bunch instances
+ *	during the acceptor network generation phase in order to handle circular
+ *	links correctly.
  */
 template <typename M_>
 class BunchSet: public boost::container::flat_set<const BunchImpl<M_>*>
@@ -118,94 +457,18 @@ public:
 /******************************************************************************/
 
 /**
- *	Specifies a basic interface for objects that generate network topology by
- *	creating arcs between nodes.
- */
-template <typename M_>
-class Generator: public Base<Generator<M_>, M_>
-{
-public:
-	/**
-	 *	The polymorphic destructor.
-	 */
-	virtual ~Generator () {}
-
-	/**
-	 *	Create an arc between two local (numbered) nodes.
-	 */
-	virtual Arc<M_>& link (const uint_t a_node_from, const uint_t a_node_to,
-			const Acceptor<M_>& a_acceptor, const arc_type_t a_arc_type,
-			const Label<M_>& a_label) = 0;
-
-	/**
-	 *	Create an arc between a local (numbered) node and an outer node.
-	 */
-	virtual Arc<M_>& link (const uint_t a_node_from, const ::anta::Node<M_>&,
-			const Acceptor<M_>& a_acceptor, const arc_type_t a_arc_type,
-			const Label<M_>& a_label) = 0;
-
-protected:
-	/**
-	 *	Generate the network topology from a joint representation.
-	 */
-	uint_t generate (const JointBase<M_>& a_joint, uint_t node_counter = 0)
-	{
-		// Define the list of processed bunches.
-		BunchSet<M_> processed;
-
-		// Define primary and secondary sets of bunches.
-		typedef std::vector<Bunch<M_> > bunches_t;
-		bunches_t s0, s1;
-
-		// Initialize the primary set.
-		s0. push_back(a_joint. entry());
-
-		// Repeat until the primary set is empty.
-		while (! s0. empty())
-		{
-			// Iterate through bunches of the primary set.
-			for (typename bunches_t::iterator s = s0. begin(); s != s0. end();
-					++ s)
-			{
-				// Check if the current bunch hasn't been processed yet.
-				if (! (*s && processed. insert(s -> get()). second))
-					continue;
-				// Determine index of the source node.
-				const uint_t index = (*s) -> index(node_counter);
-				// Iterate through links of the current bunch.
-				for (typename BunchImpl<M_>::iterator t = (*s) -> begin();
-						t != (*s) -> end(); ++ t)
-				{
-					// Store target bunch pointer in the secondary set.
-					s1. push_back((*t) -> get_bunch());
-					// Deploy link between source and target bunches.
-					(*t) -> deploy(*this, index, node_counter);
-				}
-			}
-			// Swap contents of primary and secondary sets,
-			s1. swap(s0);
-			// then clear the secondary set.
-			s1. clear();
-		}
-
-		return node_counter;
-	}
-
-};
-
-/******************************************************************************/
-
-/**
- *	Specifies a basic interface for links between network nodes.
+ *	LinkBase<M_> is a template base class for generator agents that deploy links
+ *	between acceptor network nodes.
  */
 template <typename M_>
 class LinkBase: public Base<LinkBase<M_>, M_>, public Entangled<M_>
 {
-	typedef std::vector<typename action<M_>::type> actions_t;
-
 public:
 	/**
 	 *	The only constructor.
+	 *
+	 *	@param	a_label
+	 *		Initial future arc label
 	 */
 	LinkBase (const Label<M_>& a_label = Label<M_>(true)):
 		m_label (a_label)
@@ -218,7 +481,10 @@ public:
 	virtual ~LinkBase () {}
 
 	/**
-	 *	Set the label of the future arc.
+	 *	Set or amend the label of the future arc.
+	 *
+	 *	@param	a_label
+	 *		Future arc label
 	 */
 	void set_label (const Label<M_>& a_label, BunchSet<M_>& a_bs)
 	{
@@ -227,11 +493,14 @@ public:
 		{
 			bunch -> set_label(a_label, a_bs);
 		}
-		m_label. advance(a_label);
+		m_label. amend(a_label);
 	}
 
 	/**
 	 *	Get the label of the future arc.
+	 *
+	 * 	@return
+	 *		Current value of the future arc label
 	 */
 	const Label<M_>& get_label () const
 	{
@@ -239,40 +508,65 @@ public:
 	}
 
 	/**
-	 *	Find an only link to a particular bunch.
+	 *	Find a unique link to a particular bunch.
+	 *
+	 *	@param	a_bunch
+	 *		Searcheable bunch reference
+	 *	@param	a_link_ptr
+	 *		Result receiver (a link pointer)
+	 * 	@param	a_bs
+	 *		Processed bunch set (protection)
+	 *	@return
+	 *		True, if the link was not found or it is unique within the target
+	 *		domain (i.e. bunch and its referees), or false otherwise
 	 */
-	bool find_link_to (const Bunch<M_>& a_to, LinkBase<M_>*& a_ptr,
+	bool find_link_to (const Bunch<M_>& a_bunch, LinkBase<M_>*& a_link_ptr,
 			BunchSet<M_>& a_bs) // NOTE: non-constant function
 	{
 		Bunch<M_> bunch = get_bunch();
-		if (bunch != a_to)
+		if (bunch != a_bunch)
 		{
 			if (bunch)
 			{
-				return bunch -> find_link_to(a_to, a_ptr, a_bs);
+				// Target bunch is set, but is different from the one that we
+				// are searching for, so we continue searching there.
+				return bunch -> find_link_to(a_bunch, a_link_ptr, a_bs);
 			}
 			else
 			{
+				// This can be a potential match because the target bunch has
+				// not been set yet, so it is safe to assume that the link may
+				// not be unique.
+				assert(a_link_ptr != this);
 				return false;
 			}
 		}
-		else if (! a_ptr)
+		else if (! a_link_ptr)
 		{
-			a_ptr = this;
+			// This is the first match, so we can assume the link is unique.
+			a_link_ptr = this;
 			return true;
 		}
-		else if (a_ptr == this)
+		else if (a_link_ptr == this)
 		{
+			// This is not the first match, however the link pointer is the
+			// same, so we can continue to assume that the link is unique.
 			return true;
 		}
 		else
 		{
+			// There is a different link pointing to the same bunch, that is the
+			// link we have found is not unique.
 			return false;
 		}
 	}
 
 	/**
-	 *	Attach a semantic action to the link object.
+	 *	Attach a semantic action to this link object to be passed to the future
+	 *	arc upon its deployment.
+	 *
+	 *	@param	a_action
+	 *		Semantic action to be passed to the future arc
 	 */
 	void attach_action (const typename action<M_>::type& a_action)
 	{
@@ -281,6 +575,9 @@ public:
 
 	/**
 	 *	Pass the semantic actions to an arc.
+	 *
+	 *	@param	a_arc
+	 *		Arc for the semantic actions to be passed to
 	 */
 	void pass_actions (Arc<M_>& a_arc)
 	{
@@ -293,32 +590,56 @@ public:
 	}
 
 	/**
-	 *	Get a pointer to the target bunch (if there is such one).
+	 *	Get the target bunch if it exists.
+	 *
+	 *	@return
+	 *		Target bunch
 	 */
-	virtual Bunch<M_> get_bunch () const
-	{
-		// NOTE: There is no target bunch by default.
-		return Bunch<M_>(-1);
-	}
+	virtual Bunch<M_> get_bunch () const = 0;
 
 	/**
-	 *	Replace all pointers to a particular bunch in the target domain with a
-	 *	pointer to another bunch.
+	 *	Replace all pointers to a particular bunch with a pointer to some other
+	 *	bunch within the target domain.
+	 *
+	 * 	@param	a_from
+	 * 		Replaceable bunch reference
+	 * 	@param	a_to
+	 *		Replacer bunch reference
+	 * 	@param	a_bs
+	 *		Processed bunch set (protection)
 	 */
 	virtual void replace (const Bunch<M_>& a_from, const Bunch<M_>& a_to,
-			BunchSet<M_>& a_bs)
-	{
-		// NOTE: It does nothing because there is no target domain by default.
-	}
+			BunchSet<M_>& a_bs) = 0;
 
 	/**
-	 *	Deploy a link of a certain type between two network nodes.
+	 *	Deploy the link on the given network node.
+	 *
+	 * 	@param	a_generator
+	 *		Generator reference
+	 * 	@param	a_node_from
+	 *		Source node index
+	 * 	@param	a_start_index
+	 *		Mutable reference to the next available node index
+	 *	@return
+	 *		Deployed arc reference
 	 */
 	virtual Arc<M_>& deploy (Generator<M_>& a_generator,
-			const uint_t a_node_from, uint_t& a_node_counter) = 0;
+			const uint_t a_node_from, uint_t& a_next_index) = 0;
 
 private:
+	/**
+	 *	The label to be set on the future arc when it is deployed.
+	 */
 	Label<M_> m_label;
+
+	/**
+	 *	The container type for the semantic actions.
+	 */
+	typedef std::vector<typename action<M_>::type> actions_t;
+
+	/**
+	 *	The semantic actions container.
+	 */
 	actions_t m_actions;
 
 };
@@ -326,7 +647,8 @@ private:
 /******************************************************************************/
 
 /**
- *	Represents a jump link between two local network nodes.
+ *	LinkJump<M_> template class is a generator agent that connects inner
+ *	acceptor network nodes by deploying links of 'jump' type between them.
  */
 template <typename M_>
 class LinkJump: public LinkBase<M_>
@@ -361,13 +683,13 @@ public:
 	}
 
 	Arc<M_>& deploy (Generator<M_>& a_generator, const uint_t a_node_from,
-			uint_t& a_node_counter)
+			uint_t& a_start_index)
 	{
-		// Generate a link between two local numbered nodes.
+		// Create an arc between two inner network nodes.
 		Arc<M_>& arc = a_generator. link(a_node_from,
-				m_bunch -> index(a_node_counter), *m_acceptor, m_arc_type,
+				m_bunch -> index(a_start_index), *m_acceptor, m_arc_type,
 				this -> get_label());
-		// Pass entanglement identifier to the new arc.
+		// Set entanglement identifier and priority on the new arc.
 		arc. set_entanglement(this -> get_entanglement());
 		arc. set_priority(this -> get_priority());
 		// Pass semantic actions.
@@ -387,7 +709,8 @@ private:
 /******************************************************************************/
 
 /**
- *	Represents a call link between a local network node and an outer node.
+ *	LinkCall<M_> template class is a generator agent that connects inner and
+ *	outer acceptor network nodes by deploying links of 'call' type between them.
  */
 template <typename M_>
 class LinkCall: public LinkBase<M_>
@@ -401,13 +724,25 @@ public:
 public:
 	// Overridden from LinkBase<M_>:
 
-	Arc<M_>& deploy (Generator<M_>& a_generator, const uint_t a_node_from,
-			uint_t& a_node_counter)
+	Bunch<M_> get_bunch () const
 	{
-		// Generate a call link from a local numbered node to an outer node.
+		// There is no target domain, so an emphemeral bunch is returned.
+		return Bunch<M_>(-1);
+	}
+
+	void replace (const Bunch<M_>& a_from, const Bunch<M_>& a_to,
+			BunchSet<M_>& a_bs)
+	{
+		// It does nothing because there is no target domain.
+	}
+
+	Arc<M_>& deploy (Generator<M_>& a_generator, const uint_t a_node_from,
+			uint_t& a_start_index)
+	{
+		// Create an arc between an inner and an outer network nodes.
 		Arc<M_>& arc = a_generator. link(a_node_from, *m_node,
 				unconditional<M_>(false), atExtend, this -> get_label());
-		// Pass entanglement identifier to the new arc.
+		// Set entanglement identifier and priority on the new arc.
 		arc. set_entanglement(this -> get_entanglement());
 		arc. set_priority(this -> get_priority());
 		// Pass semantic actions.
@@ -423,165 +758,9 @@ private:
 /******************************************************************************/
 
 /**
- *	Represents a bunch of outgoing links of a network node.
- */
-template <typename M_>
-class BunchImpl: public std::list<LinkBase<M_>*>
-{
-	typedef std::list<LinkBase<M_>*> base_type;
-
-public:
-	typedef typename base_type::value_type value_type;
-	typedef typename base_type::iterator iterator;
-	typedef typename base_type::const_iterator const_iterator;
-
-public:
-	/**
-	 *	The only constructor.
-	 */
-	BunchImpl ():
-		m_index (0)
-	{
-	}
-
-	/**
-	 *	The destructor.
-	 */
-	~BunchImpl ()
-	{
-		utility::free_all(*this);
-	}
-
-	/**
-	 *	Assign an index to the bunch (if it hasn't been done already) and return
-	 *	its value.
-	 */
-	uint_t index (uint_t& counter)
-	{
-		if (m_index == 0)
-		{
-			m_index = (counter ++);
-		}
-		return m_index;
-	}
-
-	/**
-	 *	Replace all of the pointers to a particular bunch with a pointer to
-	 *	another bunch.
-	 */
-	void replace (const Bunch<M_>& a_from, const Bunch<M_>& a_to,
-			BunchSet<M_>& a_bs)
-	{
-		if (is_call_recursive(a_bs))
-		{
-			return ;
-		}
-		for (iterator i = this -> begin(); i != this -> end(); ++ i)
-		{
-			(*i) -> replace(a_from, a_to, a_bs);
-		}
-	}
-
-	/**
-	 *	Merge two bunches into one.
-	 */
-	void merge (const Bunch<M_>& a_bunch)
-	{
-		this -> splice(this -> end(), *a_bunch);
-		assert(a_bunch -> empty());
-	}
-
-	/**
-	 *	Find an only link to a particular bunch.
-	 */
-	bool find_link_to (const Bunch<M_>& a_to, LinkBase<M_>*& a_ptr,
-			BunchSet<M_>& a_bs) const
-	{
-		if (is_call_recursive(a_bs))
-		{
-			return true;
-		}
-		for (const_iterator i = this -> begin(); i != this -> end(); ++ i)
-		{
-			if (! (*i) -> find_link_to(a_to, a_ptr, a_bs))
-				return false;
-		}
-		return true;
-	}
-
-	/**
-	 *	Link a local bunch by appending a simple arc.
-	 */
-	LinkBase<M_>& link (const Bunch<M_>& a_bunch,
-			const Acceptor<M_>& a_acceptor = unconditional<M_>(),
-			const Label<M_>& a_label = Label<M_>())
-	{
-		this -> push_back(new LinkJump<M_>(a_bunch, a_acceptor, atSimple,
-					a_label));
-		return *(this -> back());
-	}
-
-	/**
-	 *	Link a local bunch by appending an invoking arc.
-	 */
-	LinkBase<M_>& link (const Bunch<M_>& a_bunch, const arc_type_t a_arc_type)
-	{
-		this -> push_back(new LinkJump<M_>(a_bunch, unconditional<M_>(false),
-					a_arc_type, Label<M_>()));
-		return *(this -> back());
-	}
-
-	/**
-	 *	Link an outer node by appending an invoking arc.
-	 */
-	LinkBase<M_>& link (const ::anta::Node<M_>& a_node)
-	{
-		this -> push_back(new LinkCall<M_>(a_node));
-		return *(this -> back());
-	}
-
-	/**
-	 *	Set the labels of the future arcs for the whole bunch.
-	 */
-	void set_label (const Label<M_>& a_label, BunchSet<M_>& a_bs)
-	{
-		if (is_call_recursive(a_bs))
-		{
-			return ;
-		}
-		for (iterator i = this -> begin(); i != this -> end(); ++ i)
-		{
-			(*i) -> set_label(a_label, a_bs);
-		}
-	}
-
-private:
-	/**
-	 *	Check whether the call is topologically recursive.
-	 */
-	bool is_call_recursive (BunchSet<M_>& a_bs) const
-	{
-		if (a_bs. find(this) != a_bs. end())
-		{
-			return true;
-		}
-		else
-		{
-			a_bs. insert(this);
-			return false;
-		}
-	}
-
-private:
-	uint_t m_index;
-
-};
-
-/******************************************************************************/
-
-/**
- *	Specifies a basic interface for objects (joints) that are used for defining
- *	the topology of a network.
+ *	JointBase<M_> is a template base class for objects that constitute joint
+ *	expressions and generate distinctive functional elements in acceptor network
+ *	topology.
  */
 template <typename M_>
 class JointBase: public Base<JointBase<M_>, M_>
@@ -593,12 +772,18 @@ public:
 	virtual ~JointBase() {}
 
 	/**
-	 *	Get a reference to the entry bunch.
+	 *	Get the entry bunch.
+	 *
+	 *	@return
+	 *		Value-copyable bunch pointer
 	 */
 	virtual Bunch<M_> entry () const = 0;
 
 	/**
-	 *	Get a reference to the exit bunch.
+	 *	Get the exit bunch.
+	 *
+	 *	@return
+	 *		Value-copyable bunch pointer
 	 */
 	virtual Bunch<M_> exit () const = 0;
 
@@ -728,15 +913,15 @@ public:
 		BunchSet<M_> bs;
 		if (entry() -> find_link_to(exit(), link, bs))
 		{
-			// If there is only one link to the exit bunch then the semantic
-			// action is being attached to that link.
+			// If there is one unique link to the exit bunch then the semantic
+			// action is being attached to that link instance.
 			link -> attach_action(a_action);
 			return JointAlt<M_>(entry(), exit());
 		}
 		else
 		{
 			// Otherwise, the semantic action is being attached to a new link
-			// object that connects the exit bunch and an additional bunch.
+			// instance that connects the exit bunch and an additional bunch.
 			return JointAlt<M_>(entry(), exit(), a_action);
 		}
 	}
@@ -744,7 +929,7 @@ public:
 	/**
 	 *	Operator for assignment of the accepted range to a trace variable.
 	 */
-	JointStmt<M_> operator>> (const typename context_key<M_>::type& a_key) const
+	JointStmt<M_> operator> (const typename context_key<M_>::type& a_key) const
 	{
 		return (*this)(action_assign<M_, delta<M_> >(a_key, delta<M_>()));
 	}
@@ -764,7 +949,8 @@ public:
 /******************************************************************************/
 
 /**
- *	Represents two local interconnected nodes.
+ *	JointJump<M_> is an instantiable base class for joint expression elements
+ *	that generate connected inner nodes.
  */
 template <typename M_>
 class JointJump: public JointBase<M_>
@@ -801,7 +987,8 @@ private:
 /******************************************************************************/
 
 /**
- *	Represents a call to an outer node.
+ *	JointCall<M_> is a joint expression element that generates call to an outer
+ *	(foreign) node.
  */
 template <typename M_>
 class JointCall: public JointJump<M_>
@@ -823,7 +1010,8 @@ private:
 /******************************************************************************/
 
 /**
- *	Represents a sequence of local nodes.
+ *	JointSeq<M_> is a joint expression element that generates sequence of inner
+ *	nodes.
  */
 template <typename M_>
 class JointSeq: public JointBase<M_>
@@ -855,14 +1043,15 @@ private:
 /******************************************************************************/
 
 /**
- *	Represents a statement (a typified call to a local node).
+ *	JointStmt<M_> is a joint expression element that generates a statement, i.e.
+ *	a specialized call to an inner node.
  */
 template <typename M_>
 class JointStmt: public JointJump<M_>
 {
 public:
 	/**
-	 *	Constructor: creates an arc of a special type.
+	 *	Constructor: creates an arc of the given type.
 	 */
 	JointStmt (const Bunch<M_>& a_entry, const arc_type_t a_arc_type):
 		JointJump<M_> ()
@@ -873,7 +1062,7 @@ public:
 	}
 
 	/**
-	 *	Constructor: attaches an action to the entry.
+	 *	Constructor: attaches the given semantic action to the entry.
 	 */
 	JointStmt (const typename action<M_>::type& a_action,
 			const Bunch<M_>& a_entry):
@@ -886,7 +1075,7 @@ public:
 	}
 
 	/**
-	 *	Constructor: attaches an action to the exit.
+	 *	Constructor: attaches the given semantic action to the exit.
 	 */
 	JointStmt (const Bunch<M_>& a_entry,
 			const typename action<M_>::type& a_action):
@@ -905,7 +1094,8 @@ private:
 /******************************************************************************/
 
 /**
- *	Represents the Kleene star operator.
+ *	JointKleene<M_> is a joint expression element that generates a structural
+ *	equivalent of the Kleene star operator.
  */
 template <typename M_>
 class JointKleene: public JointJump<M_>
@@ -937,7 +1127,8 @@ private:
 /******************************************************************************/
 
 /**
- *	Represents the enumeration operator.
+ *	JointEnum<M_> is a joint expression element that generates a structural
+ *	equivalent of the enumeration operator.
  */
 template <typename M_>
 class JointEnum: public JointJump<M_>
@@ -983,7 +1174,8 @@ private:
 /******************************************************************************/
 
 /**
- *	Represents the nonassociative undefined order operator.
+ *	JointPerm<M_> is a joint expression element that generates a structural
+ *	equivalent of the non-associative permutation operator.
  */
 template <typename M_>
 class JointPerm: public JointJump<M_>
@@ -1026,7 +1218,8 @@ private:
 /******************************************************************************/
 
 /**
- *	Represents the optional prefix or suffix operator.
+ *	JointAffx<M_> is a joint expression element that generates a structural
+ *	equivalent of the optional "prefix or suffix" operator.
  */
 template <typename M_>
 class JointAffx: public JointJump<M_>
@@ -1073,7 +1266,8 @@ private:
 /******************************************************************************/
 
 /**
- *	Represents an altered sequence of local nodes.
+ *	JointAlt<M_> is a joint expression element that generates a structural
+ *	equivalent of the ateration operator.
  */
 template <typename M_>
 class JointAlt: public JointSeq<M_>

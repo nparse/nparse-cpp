@@ -1,0 +1,125 @@
+script:
+    - dangling-else.ng
+
+config:
+    input_pool:        32
+
+test1a:
+    config:
+        entry_point:   S1
+        condition:     1
+    input:             ""
+    check:
+        result:        "A"
+
+test1b:
+    config:
+        entry_point:   S1
+        condition:     2
+    input:             ""
+    check:
+        result:        "B"
+
+test1c:
+    config:
+        entry_point:   S1
+        condition:     3
+    input:             ""
+    check:
+        result:        "C"
+
+test2a:
+    config:
+        entry_point:   S2
+        condition:     1
+    input:             ""
+    check:
+        result:        "A"
+
+test2b:
+    config:
+        entry_point:   S2
+        condition:     2
+    input:             ""
+    check:
+        result:        "B"
+
+test2c:
+    config:
+        entry_point:   S2
+        condition:     3
+    input:             ""
+    check:
+        result:        "C"
+
+test3a:
+    config:
+        entry_point:   S3
+        condition:     1
+    input:             ""
+    check:
+        result:        "A"
+
+test3b:
+    config:
+        entry_point:   S3
+        condition:     2
+    input:             ""
+    check:
+        result:        "B"
+
+test3c:
+    config:
+        entry_point:   S3
+        condition:     3
+    input:             ""
+    check:
+        result:        "C"
+
+test4a:
+    config:
+        entry_point:   S4
+        condition:     1
+    input:             ""
+    check:
+        result:        "A"
+
+test4b:
+    config:
+        entry_point:   S4
+        condition:     2
+    input:             ""
+    check:
+        result:        "B"
+
+test4c:
+    config:
+        entry_point:   S4
+        condition:     3
+    input:             ""
+    check:
+        result:        "C"
+
+test5a:
+    config:
+        entry_point:   S5
+        condition:     1
+    input:             ""
+    check:
+        result:        "A"
+
+test5b:
+    config:
+        entry_point:   S5
+        condition:     2
+    input:             ""
+    check:
+        result:        "B"
+
+test5c:
+    config:
+        entry_point:   S5
+        condition:     3
+    input:             ""
+    check:
+        result:        "C"

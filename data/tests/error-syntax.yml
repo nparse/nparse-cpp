@@ -1,6 +1,0 @@
-script:
-    - error-0001.ng
-    - error-0002.ng
-
-error:
-    - "syntax error"

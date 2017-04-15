@@ -2,21 +2,21 @@
  * @file $/include/anta/_aux/tracer.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -33,7 +33,7 @@ namespace anta { namespace aux {
 
 /**
  *	The Tracer is a helper object that is used for exporting the analysis traces
- *	from the analysis state traveller.
+ *	from the analysis state processor.
  */
 template <typename M_>
 class Tracer: public Base<Tracer<M_>, M_>
@@ -42,8 +42,8 @@ public:
 	/**
 	 *	The only constructor.
 	 */
-	Tracer (const Traveller<M_>& a_traveller):
-		m_traveller (a_traveller), m_next (false), m_step (false)
+	Tracer (const Processor<M_>& a_processor):
+		m_processor (a_processor), m_next (false), m_step (false)
 	{
 	}
 
@@ -54,12 +54,12 @@ public:
 	bool next ()
 	{
 		if (! m_next)
-			m_trace_it = m_traveller. get_traced(). begin();
+			m_trace_it = m_processor. get_traced(). begin();
 		else
 			++ m_trace_it;
 
 		m_next = false;
-		for ( ; m_trace_it != m_traveller. get_traced(). end(); ++ m_trace_it)
+		for ( ; m_trace_it != m_processor. get_traced(). end(); ++ m_trace_it)
 		{
 			m_trace. clear();
 			const State<M_>* s;
@@ -194,11 +194,11 @@ public:
 	}
 
 private:
-	const Traveller<M_>& m_traveller;
+	const Processor<M_>& m_processor;
 	bool m_next, m_step;
 	typedef std::vector<const anta::State<M_>*> trace_t;
 	trace_t m_trace;
-	typename Traveller<M_>::traced_type::const_iterator m_trace_it;
+	typename Processor<M_>::traced_type::const_iterator m_trace_it;
 	typename trace_t::const_reverse_iterator m_state_it;
 
 };

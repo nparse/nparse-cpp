@@ -23,8 +23,8 @@ add_sources(${test_sources} ${test_headers})
 include_directories(${YAML_CPP_SOURCE_DIR}/test)
 
 add_executable(run-tests
-	${test_sources}
-	${test_headers}
+    ${test_sources}
+    ${test_headers}
 )
 set_target_properties(run-tests PROPERTIES
   COMPILE_FLAGS "${yaml_c_flags} ${yaml_cxx_flags} ${yaml_test_flags}"

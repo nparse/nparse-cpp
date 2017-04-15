@@ -2,21 +2,21 @@
  * @file $/include/anta/sas/regex.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -26,8 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #ifndef ANTA_SAS_REGEX_HPP_
 #define ANTA_SAS_REGEX_HPP_
-
-#include <assert.h>
 
 #if defined(NPARSE_REGEX_XPRESSIVE)
 #	include <boost/xpressive/xpressive.hpp>
@@ -55,19 +53,11 @@ public:
 			const typename range<M_>::type& E, typename spectrum<M_>::type& S)
 		const
 	{
-		if (m_match)
+		rx::match_results<typename iterator<M_>::type> m;
+		if (rx::regex_search(E. second, C. second, m, m_regex,
+					rx::match_continuous))
 		{
-			if (rx::regex_match(E. first, E. second, m_regex))
-				S. push(E. first, E. second);
-		}
-		else
-		{
-			rx::match_results<typename iterator<M_>::type> m;
-			if (rx::regex_search(E. second, C. second, m, m_regex))
-			{
-			//	assert( m[0]. first == E. second );
-				S. push(m[0]. first, m[0]. second);
-			}
+			S. push(m[0]. first, m[0]. second);
 		}
 	}
 
@@ -79,8 +69,7 @@ public:
 #endif
 	typedef typename string<M_>::type string_type;
 
-	RegEx (const string_type& a_pattern, const bool a_match = false):
-		m_match (a_match),
+	RegEx (const string_type& a_pattern):
 #if defined(NPARSE_REGEX_XPRESSIVE)
 		m_regex (regex_type::compile(a_pattern))
 #else
@@ -90,7 +79,6 @@ public:
 	}
 
 private:
-	bool m_match;
 	regex_type m_regex;
 
 };
@@ -139,7 +127,7 @@ using namespace detail;
 using namespace sas;
 
 template <typename Def_>
-typename proto::terminal<regex_config<Def_> >::type regex (const Def_& a_def)
+typename proto::terminal<regex_config<Def_> >::type re (const Def_& a_def)
 {
 	const typename proto::terminal<regex_config<Def_> >::type res =
 		{ regex_config<Def_>(a_def) };

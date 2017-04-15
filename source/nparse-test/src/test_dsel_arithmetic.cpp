@@ -2,21 +2,21 @@
  * @file $/source/nparse-test/src/test_dsel_arithmetic.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -120,7 +120,7 @@ public:
 	bool operator() (const typename anta::ndl::context<M_>::type&,
 			const typename anta::ndl::context<M_>::type&) const
 	{
-		throw std::logic_error("Contexts (and arrays) are incomparable.");
+		throw std::logic_error("contexts (and arrays) are incomparable");
 	}
 
 };
@@ -172,104 +172,104 @@ static const anta::aux::unified_null_type null = anta::aux::unified_null_type();
 
 static const test_case<M2> entries[] = {
 //    (f)   Throws?     u:       v:   u (f) v --> f(u, v)
-	{ '+',   false,       1,       2,       3 },
-	{ '+',   false,     "1",       2,    "12" },
-	{ '+',   false,       1,    "+2",       3 },
-	{ '+',   false,       1,    "-2",      -1 },
+	{ '+',   false,      1L,      2L,      3L },
+	{ '+',   false,     "1",      2L,    "12" },
+	{ '+',   false,      1L,    "+2",      3L },
+	{ '+',   false,      1L,    "-2",     -1L },
 	{ '+',   false,     "a",     "b",    "ab" },
-	{ '+',   false,       1,     2.5,       3 },
-	{ '+',   false,     2.5,       1,     3.5 },
+	{ '+',   false,      1L,     2.5,      3L },
+	{ '+',   false,     2.5,      1L,     3.5 },
 	{ '+',   false,     1.7,     4.3,     6.0 },
 	{ '+',   false,     3.1,"4.159e-2",3.14159},
 	{ '+',    true,    null,    true,    null },
 	{ '+',    true,    true,    null,    null },
-	{ '+',    true,    null,    1000,    null },
-	{ '+',   false,    1000,    null,    1000 },
+	{ '+',    true,    null,   1000L,    null },
+	{ '+',   false,   1000L,    null,   1000L },
 	{ '+',    true,    null,    -1.1,    null },
 	{ '+',   false,    -1.1,    null,    -1.1 },
 	{ '+',    true,    null,    "ab",    null },
 	{ '+',   false,    "ab",    null,    "ab" },
 	{ '+',    true,    null,    null,    null },
 
-	{ '-',   false,       1,       2,      -1 },
-	{ '-',    true,     "1",       2,    null },
-	{ '-',   false,       1,    "+2",      -1 },
-	{ '-',   false,       1,    "-2",       3 },
+	{ '-',   false,      1L,      2L,     -1L },
+	{ '-',    true,     "1",      2L,    null },
+	{ '-',   false,      1L,    "+2",     -1L },
+	{ '-',   false,      1L,    "-2",      3L },
 	{ '-',    true,     "a",     "b",    null },
-	{ '-',   false,       1,     2.5,      -1 },
-	{ '-',   false,     2.5,       1,     1.5 },
+	{ '-',   false,      1L,     2.5,     -1L },
+	{ '-',   false,     2.5,      1L,     1.5 },
 	{ '-',   false,     1.7,     4.3,    -2.6 },
 	{ '-',   false,     3.1,"4.159e-2",3.05841},
 	{ '-',    true,    null,    true,    null },
 	{ '-',    true,    true,    null,    null },
-	{ '-',    true,    null,    1000,    null },
-	{ '-',   false,    1000,    null,    1000 },
+	{ '-',    true,    null,   1000L,    null },
+	{ '-',   false,   1000L,    null,   1000L },
 	{ '-',    true,    null,    -1.1,    null },
 	{ '-',   false,    -1.1,    null,    -1.1 },
 	{ '-',    true,    null,    "ab",    null },
 	{ '-',    true,    "ab",    null,    null },
 	{ '-',    true,    null,    null,    null },
 
-	{ '*',   false,       6,       7,      42 },
-	{ '*',   false,     2.5,       2,     5.0 },
-	{ '*',   false,       2,     2.5,     5.0 },
+	{ '*',   false,      6L,      7L,     42L },
+	{ '*',   false,     2.5,      2L,     5.0 },
+	{ '*',   false,      2L,     2.5,     5.0 },
 	{ '*',   false,     2.5,     2.5,    6.25 },
-	{ '*',    true,       6,     "7",    null },
+	{ '*',    true,      6L,     "7",    null },
 	{ '*',    true,     2.5,     "2",    null },
-	{ '*',    true,       2,   "2.5",    null },
+	{ '*',    true,      2L,   "2.5",    null },
 	{ '*',    true,     2.5,   "2.5",    null },
-	{ '*',    true,     "6",       7,    null },
-	{ '*',    true,   "2.5",       2,    null },
+	{ '*',    true,     "6",      7L,    null },
+	{ '*',    true,   "2.5",      2L,    null },
 	{ '*',    true,     "2",     2.5,    null },
 	{ '*',    true,   "2.5",     2.5,    null },
 	{ '*',    true,    null,    true,    null },
 	{ '*',    true,    true,    null,    null },
-	{ '*',   false,    null,    1000,       0 },
-	{ '*',   false,    1000,    null,       0 },
+	{ '*',   false,    null,   1000L,      0L },
+	{ '*',   false,   1000L,    null,      0L },
 	{ '*',   false,    null,    -1.1,     0.0 },
 	{ '*',   false,    -1.1,    null,     0.0 },
 	{ '*',    true,    null,    "ab",    null },
 	{ '*',    true,    "ab",    null,    null },
 	{ '*',    true,    null,    null,    null },
 
-	{ '/',   false,      10,       4,       2 },
-	{ '/',   false,    10.0,       4,     2.5 },
-	{ '/',   false,      10,     4.0,     2.5 },
+	{ '/',   false,     10L,      4L,      2L },
+	{ '/',   false,    10.0,      4L,     2.5 },
+	{ '/',   false,     10L,     4.0,     2.5 },
 	{ '/',   false,    10.0,     4.0,     2.5 },
-	{ '/',    true,      10,     "4",    null },
+	{ '/',    true,     10L,     "4",    null },
 	{ '/',    true,    10.0,     "4",    null },
-	{ '/',    true,      10,   "4.0",    null },
+	{ '/',    true,     10L,   "4.0",    null },
 	{ '/',    true,    10.0,   "4.0",    null },
-	{ '/',    true,    "10",       4,    null },
-	{ '/',    true,  "10.0",       4,    null },
+	{ '/',    true,    "10",      4L,    null },
+	{ '/',    true,  "10.0",      4L,    null },
 	{ '/',    true,    "10",     4.0,    null },
 	{ '/',    true,  "10.0",     4.0,    null },
 	{ '/',    true,    null,    true,    null },
 	{ '/',    true,    true,    null,    null },
-	{ '/',   false,    null,    1000,       0 },
-	{ '/',    true,    1000,    null,    null }, // dbz
+	{ '/',   false,    null,   1000L,      0L },
+	{ '/',    true,   1000L,    null,    null }, // dbz
 	{ '/',   false,    null,    -1.1,     0.0 },
 	{ '/',    true,    -1.1,    null,    null }, // dbz
 	{ '/',    true,    null,    "ab",    null },
 	{ '/',    true,    "ab",    null,    null },
 	{ '/',    true,    null,    null,    null },
 
-	{ '%',   false,      10,       4,       2 },
-	{ '%',   false,    10.0,       4,     2.0 },
-	{ '%',   false,      10,     4.0,     2.0 },
+	{ '%',   false,     10L,      4L,      2L },
+	{ '%',   false,    10.0,      4L,     2.0 },
+	{ '%',   false,     10L,     4.0,     2.0 },
 	{ '%',   false,    10.0,     4.0,     2.0 },
-	{ '%',    true,      10,     "4",    null },
+	{ '%',    true,     10L,     "4",    null },
 	{ '%',    true,    10.0,     "4",    null },
-	{ '%',    true,      10,   "4.0",    null },
+	{ '%',    true,     10L,   "4.0",    null },
 	{ '%',    true,    10.0,   "4.0",    null },
-	{ '%',    true,    "10",       4,    null },
-	{ '%',    true,  "10.0",       4,    null },
+	{ '%',    true,    "10",      4L,    null },
+	{ '%',    true,  "10.0",      4L,    null },
 	{ '%',    true,    "10",     4.0,    null },
 	{ '%',    true,  "10.0",     4.0,    null },
 	{ '%',    true,    null,    true,    null },
 	{ '%',    true,    true,    null,    null },
-	{ '%',   false,    null,    1000,       0 },
-	{ '%',    true,    1000,    null,    null }, // dbz
+	{ '%',   false,    null,   1000L,      0L },
+	{ '%',    true,   1000L,    null,    null }, // dbz
 	{ '%',   false,    null,    -1.1,     0.0 },
 	{ '%',    true,    -1.1,    null,    null }, // dbz
 	{ '%',    true,    null,    "ab",    null },

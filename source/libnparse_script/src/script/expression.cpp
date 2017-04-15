@@ -2,21 +2,21 @@
  * @file $/source/libnparse_script/src/script/expression.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -39,9 +39,11 @@ using namespace nparse;
 class Construct: public IConstruct
 {
 	static const std::string sc_operator_ctg;
+
 	typedef plugin::category<IOperator> operators_t;
 	operators_t m_operators;
-	boost::ptr_vector<anta::ndl::Rule<SG> > levels_;
+
+	IOperator::levels_t levels_;
 
 public:
 	Construct ():
@@ -73,16 +75,19 @@ public:
 			i -> second -> deploy(
 				levels_[index],
 				index ? levels_[index - 1] : levels_[index],
-				levels_. back()
+				levels_
 			);
 		}
 	}
 
 	const anta::ndl::Rule<SG>& entry (const int a_level) const
 	{
-		// The top level (which is the comma operator) is considered to be the
-		// entry rule.
-		return *(levels_. begin() + (levels_. size() + a_level - 1));
+		// The top level for expression is considered to be the comma operator.
+		// However, in certain cases it leads to syntactic ambiguity, e.g.
+		// function calls use comma to separate arguments.
+		IOperator::levels_t::const_reverse_iterator top = levels_. rbegin();
+		std::advance(top, -a_level);
+		return *top;
 	}
 
 };

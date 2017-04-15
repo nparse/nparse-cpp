@@ -2,21 +2,21 @@
  * @file $/source/nparse-port/src/variable.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -153,7 +153,7 @@ bool Variable::get_boolean (const bool a_def) const
 		: a_def;
 }
 
-int Variable::get_integer (const int a_def) const
+long Variable::get_integer (const long a_def) const
 {
 	return (m_ && m_ -> entry. second. is_integer())
 		? m_ -> entry. second. as_integer()
@@ -197,9 +197,9 @@ bool Variable::as_boolean () const
 	return m_ ? m_ -> entry. second. as_boolean() : false;
 }
 
-int Variable::as_integer () const
+long Variable::as_integer () const
 {
-	return m_ ? m_ -> entry. second. as_integer() : 0;
+	return m_ ? m_ -> entry. second. as_integer() : 0L;
 }
 
 double Variable::as_real () const
@@ -277,7 +277,7 @@ int Variable::size () const
 	return 0;
 }
 
-VariableIterator Variable::get (const int a_key) const
+VariableIterator Variable::get (const long a_key) const
 {
 	VariableIterator it = begin();
 	it. seek(a_key);

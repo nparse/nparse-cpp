@@ -1,0 +1,6 @@
+script:
+    - syntax-error1.ng
+    - syntax-error2.ng
+
+error:
+    - "syntax error"

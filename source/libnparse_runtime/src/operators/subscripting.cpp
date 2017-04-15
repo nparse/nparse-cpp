@@ -2,21 +2,21 @@
  * @file $/source/libnparse_runtime/src/operators/subscripting.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -25,9 +25,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <algorithm>
-#include <nparse/nparse.hpp>
 #include "_binary_action.hpp"
 #include "_binary_operator.hpp"
+#include <anta/sas/regex.hpp>
 #include "_priority.hpp"
 #include "../static.hpp"
 
@@ -56,11 +56,11 @@ public:
 		}
 
 		// If the object is a string then the index represents an offset.
-		else
-		if (u. is_string())
+		else if (u. is_string())
 		{
 			const nparse::nlg_string_t u_str = u. as_string();
 			const int_t index = v. as_integer();
+
 			if (index >= 0)
 			{
 				if (index < static_cast<int_t>(u_str. size()))
@@ -70,15 +70,15 @@ public:
 					return result_type(offset, offset + 1);
 				}
 			}
-			else
-			if (-index <= static_cast<int_t>(u_str. size()))
+			else if (-index <= static_cast<int_t>(u_str. size()))
 			{
 				const nparse::nlg_string_t::const_iterator offset =
 					u_str. begin() + u_str. size() + index;
 				return result_type(offset, offset + 1);
 			}
+
 			throw ex::runtime_error()
-				<< ex::function("subscript/read")
+				<< ex::function("operator [] `subscript` [val]")
 				<< ex::message("index is out of string boundary");
 		}
 
@@ -86,7 +86,7 @@ public:
 		else
 		{
 			throw ex::runtime_error()
-				<< ex::function("subscript/read")
+				<< ex::function("operator [] `subscript` [val]")
 				<< ex::message("cannot be used with this type");
 		}
 	}
@@ -110,7 +110,7 @@ public:
 		else
 		{
 			throw ex::runtime_error()
-				<< ex::function("subscript/write")
+				<< ex::function("operator [] `subscript` [ref]")
 				<< ex::message("cannot be used with this type");
 		}
 	}
@@ -174,21 +174,23 @@ private:
 
 class Operator: public BinaryOperator
 {
-public:
-	// Overridden from IOperator:
-
-	void deploy (level_t a_current, level_t a_previous, level_t a_top) const
+	bool push_substring (const hnd_arg_t& arg)
 	{
-		using namespace anta::ndl::terminals;
-		a_current = a_previous
-			>  *(	space
-				>	'[' * M0 > space > a_top > space
-				>	(	']' * M1 * m_action
-					|	':'	> space > a_top > space > ']' * M1 * m_substring
-					)
-				);
+		arg. staging. push(new ActionSubstring(get_marked_range(arg),
+					arg. staging));
+		return true;
 	}
 
+	anta::Label<SG> m_substring;
+
+public:
+	Operator ():
+		BinaryOperator (PRIORITY_SUBSCRIPTING, "[]")
+	{
+		m_substring = hnd_t(this, &Operator::push_substring);
+	}
+
+public:
 	// Overridden from BinaryOperator:
 
 	IAction* create_action (const anta::range<SG>::type& a_range,
@@ -197,21 +199,21 @@ public:
 		return new Action(a_range, a_staging);
 	}
 
-private:
-	anta::Label<SG> m_substring;
-
-	bool push_substring (const hnd_arg_t& arg)
-	{
-		arg. staging. push(new ActionSubstring(get_marked_range(arg),
-					arg. staging));
-		return true;
-	}
-
 public:
-	Operator ():
-		BinaryOperator (PRIORITY_SUBSCRIPTING, "[]")
+	// Overridden from IOperator:
+
+	void deploy (level_t a_current, level_t a_previous, const levels_t& a_top)
+		const
 	{
-		m_substring = hnd_t(this, &Operator::push_substring);
+		using namespace anta::ndl::terminals;
+		a_current =
+			a_previous
+		>  *(	re("\\s*\\[\\s*") * M0 > a_top. back()
+			>	(	re("\\s*]") * M1 * m_action
+				|	re("\\s*:\\s*")	> a_top. back()
+						> re("\\s*]") * M1 * m_substring
+				)
+			);
 	}
 
 };

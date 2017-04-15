@@ -1,0 +1,24 @@
+function foo() {
+    foo = 'Foo';
+};
+
+function bar() {
+    bar = 'Bar';
+};
+
+S1a {
+    value = ( foo(), bar() ); // value <- 'Bar'
+};
+
+S1b {
+    // Comma operator ',' has lower priority than any assignment operator.
+    value =   foo(), bar()  ; // value <- 'Foo'
+};
+
+S2a {
+    value = ( foo(), bar(), 'Baz' ); // value <- 'Baz'
+};
+
+S2b {
+    value =   foo(), bar(), 'Baz'  ; // value <- 'Foo'
+};

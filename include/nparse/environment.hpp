@@ -2,21 +2,21 @@
  * @file $/include/nparse/environment.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.6
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -65,9 +65,9 @@ struct is_global_functor<hashed_string>
 } // namespace
 
 // The only constructor.
-IEnvironment::IEnvironment (anta::Traveller<NLG>& a_traveller,
+IEnvironment::IEnvironment (anta::Processor<NLG>& a_processor,
 		const bool a_local_only):
-	m_traveller (a_traveller), m_local_only (a_local_only), m_local_context ()
+	m_processor (a_processor), m_local_only (a_local_only), m_local_context ()
 {
 }
 
@@ -76,16 +76,16 @@ IEnvironment::~IEnvironment ()
 {
 }
 
-// Get the traveller.
-anta::Traveller<NLG>& IEnvironment::get_traveller () const
+// Get the processor.
+anta::Processor<NLG>& IEnvironment::get_processor () const
 {
-	return m_traveller;
+	return m_processor;
 }
 
 // Get the current context.
 anta::ndl::Context<NLG>* IEnvironment::self (const bool a_create) const
 {
-	return m_traveller. get_state(). context(a_create ? &m_traveller : NULL);
+	return m_processor. get_state(). context(a_create ? &m_processor : NULL);
 }
 
 // Get a mutable reference to a trace variable from the local context.
@@ -94,7 +94,7 @@ IEnvironment::value_type& IEnvironment::ref (const key_type& a_key,
 {
 	if (!m_local_only && is_global(a_key))
 	{
-		return m_traveller. ref(a_key, a_reset);
+		return m_processor. ref(a_key, a_reset);
 	}
 	else
 	{
@@ -111,7 +111,7 @@ const IEnvironment::value_type& IEnvironment::val (const key_type& a_key) const
 {
 	if (!m_local_only && is_global(a_key))
 	{
-		return m_traveller. val(a_key);
+		return m_processor. val(a_key);
 	}
 	else
 	if (m_local_context. get() != NULL)
@@ -128,7 +128,7 @@ const IEnvironment::value_type& IEnvironment::val (const key_type& a_key) const
 anta::ndl::context<NLG>::type IEnvironment::create (
 		const anta::ndl::Context<NLG>* a_ancestor) const
 {
-	return anta::ndl::context<NLG>::type(m_traveller. create(a_ancestor));
+	return anta::ndl::context<NLG>::type(m_processor. create(a_ancestor));
 }
 
 } // namespace nparse

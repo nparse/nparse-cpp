@@ -2,21 +2,21 @@
  * @file $/source/nparse-port/src/parser.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -51,11 +51,11 @@ struct ParserData
 	plugin::instance<IConstruct> grammar;
 	plugin::instance<IStagingFactory> staging_factory;
 	boost::shared_ptr<IStaging> staging;
-	int grammar_pool;
-	int input_pool;
+	long grammar_pool;
+	long input_pool;
 	std::string input_swap;
 	std::string entry_point;
-	int entry_label;
+	long entry_label;
 
 	// initial values of trace variables
 	typedef std::map<
@@ -64,7 +64,7 @@ struct ParserData
 	init_t init;
 
 	// active elements
-	boost::scoped_ptr<anta::Traveller<NLG> > traveller;
+	boost::scoped_ptr<anta::Processor<NLG> > processor;
 	boost::scoped_ptr<anta::aux::Tracer<NLG> > tracer;
 
 	// messages
@@ -103,22 +103,26 @@ struct ParserData
 
 	void activate ()
 	{
-		traveller. reset(new anta::Traveller<NLG>(
-			staging -> cluster(entry_point), entry_label));
+		processor. reset(new anta::Processor<NLG>(
+			staging -> cluster(entry_point), static_cast<int>(entry_label)));
 #if defined(NPARSE_SWAP_FILE)
 		if (! input_swap. empty())
-			traveller -> set_swap_file(input_swap);
+		{
+			processor -> set_swap_file(input_swap);
+		}
 #endif
-		traveller -> set_capacity(input_pool << 10);
-		tracer. reset(new anta::aux::Tracer<NLG>(*traveller));
+		processor -> set_capacity(input_pool << 10);
+		tracer. reset(new anta::aux::Tracer<NLG>(*processor));
 	}
 
 	bool validate (const Parser::status_t a_status)
 	{
-		if (status == a_status)
-			return true;
-		status = Parser::stLogicError;
-		return false;
+		if (status != a_status)
+		{
+			status = Parser::stLogicError;
+			return false;
+		}
+		return true;
 	}
 
 	// syntax error
@@ -141,7 +145,7 @@ struct ParserData
 		status = Parser::stSyntaxError;
 	}
 
-	typedef anta::Traveller<SG>::traced_type traced_t;
+	typedef anta::Processor<SG>::traced_type traced_t;
 
 	// syntax ambiguity
 	void report (const traced_t& a_traced)
@@ -285,12 +289,12 @@ void Parser::load (const char* a_filename, const char* a_grammar)
 	if (! m_ -> validate(stReady))
 		return;
 
-	anta::Traveller<SG> traveller(m_ -> grammar -> entry());
-	anta::aux::Tracer<SG> tracer(traveller);
+	anta::Processor<SG> processor(m_ -> grammar -> entry());
+	anta::aux::Tracer<SG> tracer(processor);
 
-	traveller. set_capacity(m_ -> grammar_pool << 10);
-	traveller. get_observer(). set_trace_max(3);
-	traveller. get_observer(). set_queue_max(1);
+	processor. set_capacity(m_ -> grammar_pool << 10);
+	//processor. get_observer(). set_max_trace_count(16);
+	//processor. get_observer(). set_max_trace_depth(3);
 
 	if (a_filename)
 	{
@@ -317,21 +321,21 @@ void Parser::load (const char* a_filename, const char* a_grammar)
 				src. second = &* grammar. end();
 			}
 
-			traveller. run(src. first, src. second);
+			processor. run(src. first, src. second);
 
-			switch (traveller. get_traced(). size())
+			switch (processor. get_traced(). size())
 			{
 			case 1:
 				break;
 
 			case 0:
 				// syntax error
-				m_ -> report(traveller. get_observer());
+				m_ -> report(processor. get_observer());
 				return;
 
 			default:
 				// syntax ambiguity
-				m_ -> report(traveller. get_traced());
+				m_ -> report(processor. get_traced());
 				return;
 			}
 
@@ -343,7 +347,7 @@ void Parser::load (const char* a_filename, const char* a_grammar)
 			}
 
 			tracer. rewind();
-			traveller. reset();
+			processor. reset();
 
 			if (m_ -> status == stReady)
 			{
@@ -375,7 +379,9 @@ void Parser::load (const char* a_filename, const char* a_grammar)
 bool Parser::parse (const wchar_t* a_input, const int a_len)
 {
 	if (! m_ -> validate(stSteady))
+	{
 		return false;
+	}
 
 	if (m_ -> config. changed())
 	{
@@ -386,15 +392,15 @@ bool Parser::parse (const wchar_t* a_input, const int a_len)
 	try
 	{
 		m_ -> status = stRunning;
-		m_ -> traveller -> init(
+		m_ -> processor -> init(
 				a_input,
 				a_input + (a_len ? a_len : wcslen(a_input)));
 		for (ParserData::init_t::const_iterator i = m_ -> init. begin();
 				i != m_ -> init. end(); ++ i)
 		{
-			m_ -> traveller -> ref(i -> first) = i -> second;
+			m_ -> processor -> ref(i -> first) = i -> second;
 		}
-		m_ -> iteration_count = m_ -> traveller -> run();
+		m_ -> iteration_count = m_ -> processor -> run();
 		m_ -> first_trace = m_ -> tracer -> next();
 		m_ -> status = stCompleted;
 		return true;
@@ -418,7 +424,9 @@ bool Parser::parse (const wchar_t* a_input, const int a_len)
 bool Parser::next ()
 {
 	if (! m_ -> validate(stCompleted))
+	{
 		return false;
+	}
 
 	if (m_ -> first_trace)
 	{
@@ -432,7 +440,9 @@ bool Parser::next ()
 bool Parser::step ()
 {
 	if (! m_ -> validate(stCompleted))
+	{
 		return false;
+	}
 
 	m_ -> shift = 0;
 
@@ -471,7 +481,9 @@ bool Parser::step ()
 void Parser::rewind ()
 {
 	if (! m_ -> validate(stCompleted))
+	{
 		return;
+	}
 
 	m_ -> tracer -> rewind();
 	m_ -> first_trace = m_ -> tracer -> next();
@@ -503,9 +515,9 @@ void Parser::reset ()
 			m_ -> tracer -> rewind();
 		}
 
-		if (m_ -> traveller)
+		if (m_ -> processor)
 		{
-			m_ -> traveller -> reset();
+			m_ -> processor -> reset();
 		}
 
 		break;
@@ -515,7 +527,9 @@ void Parser::reset ()
 Variable Parser::get (const char* a_variable) const
 {
 	if (! m_ -> validate(stCompleted))
+	{
 		return Variable(NULL);
+	}
 
 	typedef anta::ndl::context_key<NLG>::type key_type;
 	typedef anta::ndl::context_value<NLG>::type value_type;
@@ -551,7 +565,9 @@ Variable Parser::get (const char* a_variable) const
 int Parser::label () const
 {
 	if (! m_ -> validate(stCompleted))
+	{
 		return 0;
+	}
 
 	try
 	{
@@ -567,7 +583,9 @@ int Parser::label () const
 char* Parser::node (char* a_buf, const int a_len) const
 {
 	if (! m_ -> validate(stCompleted) || a_len <= 0)
+	{
 		return a_buf;
+	}
 
 	try
 	{
@@ -590,7 +608,9 @@ char* Parser::node (char* a_buf, const int a_len) const
 char* Parser::text (char* a_buf, const int a_len) const
 {
 	if (! m_ -> validate(stCompleted) || a_len <= 0)
+	{
 		return a_buf;
+	}
 
 	try
 	{
@@ -619,7 +639,7 @@ void Parser::set (const char* a_variable, const bool a_value)
 	m_ -> config[ a_variable ] = a_value;
 }
 
-void Parser::set (const char* a_variable, const int a_value)
+void Parser::set (const char* a_variable, const long a_value)
 {
 	m_ -> config[ a_variable ] = a_value;
 }
@@ -677,7 +697,7 @@ const char* Parser::get_location (const int a_index, int* a_line, int* a_offset)
 unsigned long Parser::get_trace_count () const
 {
 	return m_ -> validate(stCompleted)
-		? static_cast<unsigned long>(m_ -> traveller -> get_traced(). size())
+		? static_cast<unsigned long>(m_ -> processor -> get_traced(). size())
 		: 0;
 }
 
@@ -691,21 +711,28 @@ unsigned long Parser::get_iteration_count () const
 unsigned long Parser::get_context_count () const
 {
 	return m_ -> validate(stCompleted)
-		? static_cast<unsigned long>(m_ -> traveller -> context_count())
+		? static_cast<unsigned long>(m_ -> processor -> context_count())
 		: 0;
 }
 
 unsigned long Parser::get_pool_usage () const
 {
 	return m_ -> validate(stCompleted)
-		? static_cast<unsigned long>(m_ -> traveller -> get_usage())
+		? static_cast<unsigned long>(m_ -> processor -> get_usage())
+		: 0;
+}
+
+unsigned long Parser::get_pool_peak_usage () const
+{
+	return m_ -> validate(stCompleted)
+		? static_cast<unsigned long>(m_ -> processor -> get_peak_usage())
 		: 0;
 }
 
 unsigned long Parser::get_pool_capacity () const
 {
 	return m_ -> validate(stCompleted)
-		? static_cast<unsigned long>(m_ -> traveller -> get_capacity())
+		? static_cast<unsigned long>(m_ -> processor -> get_capacity())
 		: 0;
 }
 

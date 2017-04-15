@@ -2,21 +2,21 @@
  * @file $/source/libnparse_script/src/script/constructs/switch.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -27,13 +27,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stack>
 #include <nparse/nparse.hpp>
 #include <nparse/util/linked_action.hpp>
+#include <anta/sas/test.hpp>
+#include <anta/sas/symbol.hpp>
+#include <anta/sas/regex.hpp>
 #include <anta/dsel/rt/assign.hpp>
 #include <anta/dsel/rt/comma.hpp>
 #include <anta/dsel/rt/equal_to.hpp>
-#include <anta/sas/symbol.hpp>
-#include <anta/sas/string.hpp>
-#include <anta/sas/test.hpp>
-#include <anta/sas/regex.hpp>
 #include "../../static.hpp"
 #include "control.hpp"
 
@@ -75,19 +74,31 @@ public:
 				}
 			}
 		}
-		catch (const loop_control_t& lc)
+		catch (const loop_control& lc)
 		{
-			if (! lc. target(). empty() && lc. target() != m_loop)
-				throw;
-
-			if (! lc. exit())
+			if (lc. target(). empty() || lc. target() == m_loop)
 			{
-				anta::range<SG>::type where;
-				getLocation(where);
-				throw ex::runtime_error()
-					<< ex::function("switch")
-					<< ex::location(where)
-					<< ex::message("continue operator is not appropriate");
+				if (! lc)
+				{
+					// The caught loop control signal represents a completely
+					// legit break statement inside a switch statement.
+				}
+				else
+				{
+					anta::range<SG>::type where;
+					getLocation(where);
+					throw ex::runtime_error()
+						<< ex::function("switch")
+						<< ex::location(where)
+						<< ex::message("continue operator cannot be used for"
+								" switch statement");
+				}
+			}
+			else
+			{
+				// The caught loop control signal was not intended for this
+				// switch statement.
+				throw;
 			}
 		}
 
@@ -222,14 +233,14 @@ public:
 		reference<SG>::type loop = ref<SG>("loop");
 
 		entry_ =
-			(	(+alnum) [ loop = delta(), true ] > space > ':' > space
+			(	(+alnum) [ loop = delta(), true ] > re("\\s*:\\s*")
 			|	pass [ loop = "", true ]
 			)
-		>	regex("\\Aswitch\\s*\\(\\s*") * M0 > m_expression -> entry()
-		>	regex("\\A\\s*\\)\\s*\\{\\s*") [ push(loop) ] *M1* doCreateCondition
-		>  *(	(	regex("\\Acase(\\s+|(?![_[:alnum:]]))")
+		>	re("switch\\s*\\(\\s*") * M0 > m_expression -> entry()
+		>	re("\\s*\\)\\s*\\{\\s*") [ push(loop) ] *M1* doCreateCondition
+		>  *(	(	re("case\\>\\s*")
 						> m_expression -> entry() > space * doCreateCase
-				|	regex("\\Adefault\\s*") * doCreateDefault
+				|	re("default\\>\\s*") * doCreateDefault
 				)
 			>	':'
 			>	space % (m_statement -> entry() > pass * doCreateAction)

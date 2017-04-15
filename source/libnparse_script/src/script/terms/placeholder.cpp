@@ -2,21 +2,21 @@
  * @file $/source/libnparse_script/src/script/terms/placeholder.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -27,8 +27,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <nparse/nparse.hpp>
 #include <nparse/util/linked_action.hpp>
 #include <nparse/util/offset_state.hpp>
-#include <anta/sas/symbol.hpp>
-#include <anta/sas/test.hpp>
 #include <anta/sas/regex.hpp>
 #include "../../static.hpp"
 
@@ -49,7 +47,7 @@ public:
 		result_type res;
 
 		const anta::State<NLG>* s = offset_state<NLG>(
-				& a_env. get_traveller(). get_state(), offset(a_env));
+				& a_env. get_processor(). get_state(), offset(a_env));
 
 		if (!s) throw flow_control(false);
 
@@ -138,12 +136,13 @@ private:
 
 class Construct: public IConstruct
 {
-	bool create_constant (const hnd_arg_t& arg)
+	bool create_fixed (const hnd_arg_t& arg)
 	{
 		anta::range<SG>::type range = get_accepted_range(arg);
+		assert(static_cast<char>(*range. first) == '$');
 
 		// Identify enforced type.
-		char type = static_cast<char>(*range. first);
+		char type = static_cast<char>(*(++ range. first));
 		switch (type)
 		{
 		case 'b': // boolean
@@ -156,6 +155,7 @@ class Construct: public IConstruct
 			break;
 
 		default:
+			type = 's';
 			break;
 		}
 
@@ -170,10 +170,16 @@ class Construct: public IConstruct
 		return true;
 	}
 
-	bool create_parametrized (const hnd_arg_t& arg)
+	bool create_parametric (const hnd_arg_t& arg)
 	{
+		anta::range<SG>::type range = get_accepted_range(arg);
+		assert(static_cast<char>(*range. first) == '$');
+
+		// Identify enforced type.
+		char type = static_cast<char>(*(++ range. first));
+
 		arg. staging. push(new ActionParametrized(
-					get_marked_range(arg), 's', arg. staging));
+					get_marked_range(arg), type, arg. staging));
 		return true;
 	}
 
@@ -194,13 +200,14 @@ public:
 		using namespace anta::ndl::terminals;
 
 		anta::Label<SG>
-			doCreateConstant = hnd_t(this, &Construct::create_constant),
-			doCreateParametrized = hnd_t(this, &Construct::create_parametrized);
+			doFixed = hnd_t(this, &Construct::create_fixed),
+			doParametric = hnd_t(this, &Construct::create_parametric);
 
-		entry_ = '$' >
-			(	regex("^[bifdrs]?\\d*") * doCreateConstant
-			|	'(' * M0 > space > m_expression -> entry() > space
-				> ')' * M1 * doCreateParametrized
+		entry_ =
+			re("\\$[bifdrs]?\\d*") * doFixed
+		|	(	re("\\$[bifdrs]?\\s*\\(\\s*") * M0
+			>	m_expression -> entry()
+			>	re("\\s*\\)") * M1 * doParametric
 			);
 	}
 

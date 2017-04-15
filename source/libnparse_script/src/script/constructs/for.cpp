@@ -2,21 +2,21 @@
  * @file $/source/libnparse_script/src/script/constructs/for.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@nparse.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -26,11 +26,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <algorithm>
 #include <nparse/nparse.hpp>
+#include <anta/sas/test.hpp>
+#include <anta/sas/regex.hpp>
 #include <anta/dsel/rt/assign.hpp>
 #include <anta/dsel/rt/comma.hpp>
-#include <anta/sas/symbol.hpp>
-#include <anta/sas/string.hpp>
-#include <anta/sas/test.hpp>
 #include "../../static.hpp"
 #include "control.hpp"
 
@@ -56,6 +55,7 @@ public:
 		}
 
 		while (m_condition ? m_condition. evalVal(a_env). as_boolean() : true)
+		{
 			try
 			{
 				m_body. evalVal(a_env);
@@ -65,14 +65,22 @@ public:
 					m_increment. evalVal(a_env);
 				}
 			}
-			catch (const loop_control_t& lc)
+			catch (const loop_control& lc)
 			{
+				// If the caught loop control signal was not indended for this
+				// loop instance then just let the exception propagate up.
 				if (! lc. target(). empty() && lc. target() != m_loop)
+				{
 					throw;
+				}
 
-				if (lc. exit())
+				// Stop iterations if the signal requires so.
+				if (! lc)
+				{
 					break;
+				}
 			}
+		}
 
 		return result_type();
 	}
@@ -144,23 +152,34 @@ public:
 			incr = ref<SG>("incr"); // increment defined
 
 		entry_ =
-			(	(+alnum) [ loop = delta(), true ] > space > ':' > space
+			(	(+alnum) [ loop = delta(), true ] > re("\\s*:\\s*")
 			|	pass [ loop = "", true ]
 			)
-		>	"for" > space > '('
-			> space > (
-					m_expression -> entry() > space [ init = true ]
-				|	pass [ init = false, true ] ) > ';'
-			> space > (
-					m_expression -> entry() > space [ cond = true ]
-				|	pass [ cond = false, true ] ) > ';'
-			> space > (
-					m_expression -> entry() > space [ incr = true ]
-				|	pass [ incr = false, true ] ) > ')'
-		>	space [ push(loop), push(init), push(cond), push(incr) ]
+		>	re("for\\s*\\(\\s*")
+		>	(	m_expression -> entry() > pass [ init = true ]
+			|	pass [ init = false, true ]
+			)
+		>	re("\\s*;\\s*")
+		>	(	m_expression -> entry() > pass [ cond = true ]
+			|	pass [ cond = false, true ]
+			)
+		>	re("\\s*;\\s*")
+		>	(	m_expression -> entry() > pass [ incr = true ]
+			|	pass [ incr = false, true ]
+			)
+		>	re("\\s*\\)\\s*") [
+				push(loop),
+				push(init),
+				push(cond),
+				push(incr)
+			]
 		>	m_statement -> entry()
-		>	pass [ pop(loop), pop(init), pop(cond), pop(incr) ]
-				* doCreateAction;
+		>	pass [
+				pop(loop),
+				pop(init),
+				pop(cond),
+				pop(incr)
+			] * doCreateAction;
 	}
 
 	const anta::ndl::Rule<SG>& entry (const int) const
