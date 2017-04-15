@@ -1,0 +1,14 @@
+script:
+    - loops-foreach.ng
+
+config:
+    input_pool:        32
+
+test1:
+    config:
+        entry_point:    loops.C1
+    input:      ""
+    check:
+        result.May:         5
+        result.July:        7
+        result.September:   9

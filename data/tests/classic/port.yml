@@ -1,0 +1,34 @@
+script:
+    - port.ng
+
+test1:
+    input:             hello world
+    traces:            2
+    forest:
+        - (S (Greeting hello) (Object (Entity (Inanimate world))))
+        - (S (Greeting hello) (Object (Entity (Animate world))))
+    check:
+        z.U.x:         hello
+        z.U.y:         world
+        z.V:           -1
+
+test2:
+    input:             goodbye world
+    traces:            2
+    forest:
+        - (S (Greeting goodbye) (Object (Entity (Inanimate world))))
+        - (S (Greeting goodbye) (Object (Entity (Animate world))))
+    check:
+        x:             goodbye
+        y:             world
+        z.V:           -1
+
+test3:
+    input:             hello user
+    traces:            1
+    forest:
+        - (S (Greeting hello) (Object (Entity (Animate user))))
+    check:
+        x:             hello
+        y:             user
+        z.V:           -1

@@ -2,21 +2,21 @@
  * @file $/source/nparse/src/nparse_app.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -27,11 +27,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <locale>
 #include <boost/program_options.hpp>
-#include <boost/chrono.hpp>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <plugin/static.hpp>
-#include <utility/free.hpp>
+#include <util/free.hpp>
 #include "nparse_app.hpp"
 #include "tracer_nlg.hpp"
 #include "serializer.hpp"
@@ -44,8 +43,12 @@ static const bool force_utf8 = true;
 
 using namespace nparse;
 namespace fs = boost::filesystem;
+namespace ch = boost::chrono;
 
-typedef anta::Traveller<SG>::traced_type traced_t;
+typedef anta::Processor<SG>::traced_type traced_t;
+
+typedef ch::high_resolution_clock::time_point timepoint_t;
+typedef ch::duration<double> dt_t;
 
 /**
  *	(nparse/std exception adapter)
@@ -66,7 +69,7 @@ class nparse_error: public std::runtime_error
 			const int* val;
 			info << "\n\tin " << *str;
 			val = boost::get_error_info<ex::line>(a_error);
-			if (val) info << " at line " << *val;
+			if (val) info << " on line " << *val;
 			val = boost::get_error_info<ex::offset>(a_error);
 			if (val) info << ", offset " << *val;
 		}
@@ -125,9 +128,13 @@ void rethrow (const traced_t& a_traced, const IStaging& a_staging)
 	{
 		state_t s = *t;
 		while (s != NULL && cache. insert(s). second)
+		{
 			s = s -> get_ancestor();
+		}
 		if (s != NULL)
+		{
 			ambiguous. insert(s -> get_range(). second);
+		}
 	}
 
 	ex::syntax_error error;
@@ -186,88 +193,80 @@ bool nParseApp::configure (const int argc, char** argv)
 		("help,h",				"Print this help message and exit")
 		("version,v",			"Print version infomation")
 		("config,c",			po::value<std::string>(),
-								"Configuration file")
+								"Load configuration from [file]")
 		("locale,L",			po::value<std::string>()
-		 							-> default_value(""),
-		 						"Set specific internal locale")
+									-> default_value(""),
+								"Set internal [locale]")
 		("grammar-file,g",		po::value<std::string>()
-		 							-> default_value("grammar.ng"),
-								"Grammar script file")
+									-> default_value("grammar.ng"),
+								"Load grammar from [file]")
 		("grammar-pool,G",		po::value<long>()
-		 							-> default_value(16 << 10),
-		 						"Pool size (in Kb) for the script parser")
+									-> default_value(16 << 10),
+								"Set grammar pool size [Kb]")
 		("input-text,i",		po::value<std::string>(),
-								"Input text, given as an argument")
+								"Read input from command line")
 		("input-file,f",		po::value<std::string>(),
-								"Input text, given as a local file")
+								"Read input from [file]")
 		("input-pool,I",		po::value<long>()
-		 							-> default_value(1 << 10),
-		 						"Pool size (in Kb) for the input text parser")
-		("input-batch,b",		po::value<bool>()
-									-> default_value(true),
-								"Treat the input data as a series of"
-		 						" independent entries separated by the new line"
-								" character")
+									-> default_value(1 << 10),
+								"Set input pool size [Kb]")
 #if defined(NPARSE_SWAP_FILE)
 		("input-swap,w",		po::value<std::string>()
-		 							-> default_value(""),
-								"Use a local swap file to store pool data for"
-								" the input text parser")
+									-> default_value(""),
+								"Store parser pool data in local [file]")
 #endif
+		("input-batch,b",		po::value<bool>()
+									-> default_value(true),
+								"Treat input as series of independent entries"
+								" separated by new line character")
 		("entry-point,e",		po::value<std::string>()
-		 							-> default_value("S"),
-								"Grammar entry point")
+									-> default_value("S"),
+								"Set grammar entry point [name]")
 		("entry-label,E",		po::value<int>()
-		 							-> default_value(1),
-		 						"Entry arc label")
+									-> default_value(1),
+								"Set entry arc [label]")
 #if defined(DEBUG_PRINT)
 		("debug-print,d",		po::value<std::string>()
-		 							-> default_value("")
+									-> default_value("")
 									-> implicit_value("1"),
-		 						"Produce and forward debug output from the"
-								" acceptor network traversal algorithm to the"
-								" specified stream")
+								"Print debug log to [stream]")
 #endif
 		("trace-print,t",		po::value<std::string>()
-		 							-> default_value("")
+									-> default_value("")
 									-> implicit_value("1"),
-		 						"Print parser traces to the specified stream")
+								"Print parser traces to [stream]")
 		("trace-format,T",		po::value<std::string>()
-		 							-> default_value(
+									-> default_value(
 								"%i\\t%j\\t%label\\t%node\\t%text\\t%list\\n"),
-		 						"Defines line format for the trace log,\n"
-								"where allowed placeholders are:\n"
-								"  \\t     tab\n"
-								"  \\n     line break\n"
-								"  %i     trace number\n"
-								"  %j     state number\n"
+								"Set trace format using placeholders:\n"
+								"  \\t	   tab\n"
+								"  \\n	   line break\n"
+								"  %i	  trace number\n"
+								"  %j	  state number\n"
 								"  %label transition label\n"
+								"  %type  transition type\n"
 								"  %node  target node name\n"
 								"  %text  accepted text\n"
 								"  %list  trace variable list\n"
-								"  %type  transition type\n"
-								"  %:name particular variable name"
+								"  %:var  trace variable `var` value"
 								)
 		("state-print,s",		po::value<std::string>()
-		 							-> default_value("")
-		 							-> implicit_value("1"),
-		 						"Print all trace variables corresponding to the"
-								" terminal states to the specified stream")
-		("out,o",				po::value<std::vector<std::string> >()
-		 							-> multitoken(),
-		 						"Print particular trace variables to STDOUT"
-								" without doing any special formatting")
-		("tree,x",				po::value<std::string>()
-		 							-> default_value("")
+									-> default_value("")
 									-> implicit_value("1"),
-								"Print syntax trees corresponding to the parsed"
-								" content to the specified stream")
+								"Print final trace variables to [stream]")
+		("out,o",				po::value<std::vector<std::string> >()
+									-> multitoken(),
+								"Print specific trace variable value to STDOUT"
+								" as-is (without formatting)")
+		("tree,x",				po::value<std::string>()
+									-> default_value("")
+									-> implicit_value("1"),
+								"Print syntax trees to [stream]")
 		("log,l",				po::value<std::string>()
-		 							-> default_value("")
+									-> default_value("")
 									-> implicit_value("2"),
-		 						"Print the status information to the specified"
-		 						" stream\n\n"
-								"An input/output stream can be specified as\n"
+								"Print execution log to [stream]\n\n"
+								"* An output stream can be specified as\n"
 							//	"  0 or STDIN   input stream\n"
 								"  1 or STDOUT  output stream\n"
 								"  2 or STDERR  error stream\n"
@@ -379,7 +378,9 @@ bool nParseApp::configure (const int argc, char** argv)
 				i != other. end(); ++ i)
 		{
 			if (! boost::regex_match(*i, matches, sc_init))
+			{
 				throw std::runtime_error("unrecongized command line option");
+			}
 			m_init[matches[2]. str()] = matches[4]. str();
 		}
 	}
@@ -390,7 +391,9 @@ bool nParseApp::configure (const int argc, char** argv)
 		// Try to open the config file for reading.
 		std::ifstream config_file(vm["config"]. as<std::string>(). c_str());
 		if (! config_file)
+		{
 			throw std::runtime_error("unable to read config file");
+		}
 
 		// Read configuration options.
 		parsed = po::parse_config_file(config_file, desc, true);
@@ -469,37 +472,17 @@ bool nParseApp::configure (const int argc, char** argv)
 	m_log = vm["log"]. as<std::string>();
 
 	if (vm. count("out"))
+	{
 		m_out = vm["out"]. as<std::vector<std::string> >();
+	}
 
 	return true;
 }
 
 int nParseApp::execute ()
 {
-	using namespace boost::chrono;
-	typedef process_real_cpu_clock::time_point timepoint_t;
-	typedef duration<double> ms_t;
-
-	const timepoint_t tp0 = process_real_cpu_clock::now();
-
 	compile_grammar();
-
-	const timepoint_t tp1 = process_real_cpu_clock::now();
-
 	parse_input_text();
-
-	const timepoint_t tp2 = process_real_cpu_clock::now();
-
-	if (! m_log. empty())
-	{
-		std::ostream& log = *open_file(m_log);
-		duration_short(log) << std::setprecision(4)
-			<< "build time: "
-			<< duration_cast<ms_t>(tp1 - tp0) << '\n'
-			<< "parse time: "
-			<< duration_cast<ms_t>(tp2 - tp1) << '\n';
-	}
-
 	return 0;
 }
 
@@ -509,13 +492,11 @@ std::ostream* nParseApp::open_file (const std::string& a_name)
 	{
 		return &std::cout;
 	}
-	else
-	if (a_name == "2" || a_name == "STDERR")
+	else if (a_name == "2" || a_name == "STDERR")
 	{
 		return &std::cerr;
 	}
-//	else
-//	if (a_name == "3" || a_name == "STDLOG")
+//	else if (a_name == "3" || a_name == "STDLOG")
 //	{
 //		return &std::clog;
 //	}
@@ -539,14 +520,14 @@ int nParseApp::compile_grammar ()
 	// Instantiate script grammar object.
 	plugin::instance<IConstruct> grammar("nparse.script.Grammar");
 
-	// Create traveller and link it to the script grammar's entry point.
-	anta::Traveller<SG> traveller(grammar -> entry());
-	traveller. set_capacity(m_grammar_pool);
-	traveller. get_observer(). set_trace_max(3);
-	traveller. get_observer(). set_queue_max(1);
+	// Create processor and link it to the script grammar's entry point.
+	anta::Processor<SG> processor(grammar -> entry());
+	processor. set_capacity(m_grammar_pool);
+	//processor. get_observer(). set_max_trace_count(16);
+	//processor. get_observer(). set_max_trace_depth(3);
 
-	// Create tracer and link it to the traveller.
-	anta::aux::Tracer<SG> tracer(traveller);
+	// Create tracer and link it to the processor.
+	anta::aux::Tracer<SG> tracer(processor);
 
 	// Instantiate staging object and set the first source file for import.
 	m_staging = m_staging_factory -> createInstance();
@@ -555,17 +536,21 @@ int nParseApp::compile_grammar ()
 	// Load and parse each source file.
 	try
 	{
+		const timepoint_t t0 = ch::high_resolution_clock::now();
+
 		bool first = true;
 		anta::range<SG>::type src;
 		while (m_staging -> load(src))
 		{
 			// Launch source file parsing.
-			traveller. run(src. first, src. second);
+			processor. run(src. first, src. second);
 
 			// Count traces.
 			int traces_count = 0;
 			while (tracer. next())
+			{
 				++ traces_count;
+			}
 			tracer. rewind();
 
 			// Report syntax error/ambiguity errors.
@@ -576,19 +561,21 @@ int nParseApp::compile_grammar ()
 
 			case 0:
 				// syntax error
-				rethrow(traveller. get_observer(), *m_staging);
+				rethrow(processor. get_observer(), *m_staging);
 				break;
 
 			default:
 				// syntax ambiguity
-				rethrow(traveller. get_traced(), *m_staging);
+				rethrow(processor. get_traced(), *m_staging);
 				break;
 			}
 
 			// Execture source code (generate the acceptor network).
 			tracer. next();
 			while (tracer. step())
+			{
 				tracer -> get_arc(). get_label(). execute(*m_staging, *tracer);
+			}
 
 			// Log successul source loading.
 			if (! m_log. empty())
@@ -597,16 +584,20 @@ int nParseApp::compile_grammar ()
 				int line, offset;
 				m_staging -> identify(src. first, file, line, offset);
 
+				const timepoint_t t1 = ch::high_resolution_clock::now();
 				std::ostream& log = *open_file(m_log);
-				log << "loaded: " << file << " ("
+				log << std::fixed
 					<< std::setprecision(2)
-					<< 1e2 * traveller. get_usage() / traveller. get_capacity()
-					<< "%)\n";
+					<< "loaded: " << file << " ("
+					<< 1e2 * processor. get_usage() / processor. get_capacity();
+				ch::duration_short(log)
+					<< std::setprecision(4)
+					<< "%, " << ch::duration_cast<dt_t>(t1 - t0) << ")\n";
 			}
 
 			// Reset intermediate objects.
 			tracer. rewind();
-			traveller. reset();
+			processor. reset();
 
 			// Get and save the first namespace (it happens to be the last
 			// namespace declared in the first imported script file).
@@ -615,12 +606,24 @@ int nParseApp::compile_grammar ()
 				const string_t& namespace_ = m_staging -> getNamespace();
 				if (! namespace_. empty() &&
 						m_entry_point. find('.') == m_entry_point. npos)
+				{
 					m_entry_point = encode::string(namespace_) + m_entry_point;
+				}
 				first = false;
 			}
 
 			// Reset namespace.
 			m_staging -> setNamespace();
+		}
+
+		if (! m_log. empty())
+		{
+			const timepoint_t t1 = ch::high_resolution_clock::now();
+			std::ostream& log = *open_file(m_log);
+			ch::duration_short(log)
+				<< std::setprecision(4)
+				<< "build time: "
+				<< ch::duration_cast<dt_t>(t1 - t0) << '\n';
 		}
 	}
 	catch (const std::bad_alloc&)
@@ -637,21 +640,25 @@ int nParseApp::compile_grammar ()
 
 int nParseApp::parse_input_text ()
 {
-	// Create traveller and link it to the compiled grammar's entry point.
-	anta::Traveller<NLG> traveller(m_staging -> cluster(m_entry_point),
+	// Create processor and link it to the compiled grammar's entry point.
+	anta::Processor<NLG> processor(m_staging -> cluster(m_entry_point),
 			m_entry_label);
 #if defined(NPARSE_SWAP_FILE)
 	if (! m_input_swap. empty())
-		traveller. set_swap_file(m_input_swap);
+	{
+		processor. set_swap_file(m_input_swap);
+	}
 #endif
-	traveller. set_capacity(m_input_pool);
+	processor. set_capacity(m_input_pool);
 #if defined(DEBUG_PRINT)
 	if (! m_debug_print. empty())
-		traveller. get_observer(). link(open_file(m_debug_print));
+	{
+		processor. get_observer(). link(open_file(m_debug_print));
+	}
 #endif
 
-	// Create tracer and link it to the traveller.
-	TracerNLG tracer(traveller);
+	// Create tracer and link it to the processor.
+	TracerNLG tracer(processor);
 	tracer. format(m_trace_format);
 
 	std::string buf;
@@ -665,21 +672,24 @@ int nParseApp::parse_input_text ()
 		src. first = &* line. begin();
 		src. second = src. first + line. size();
 
-		// Initialize the traveller.
-		traveller. init(src. first, src. second);
+		// Initialize the processor.
+		processor. init(src. first, src. second);
 
 		// Assign initial values to trace variables.
 		for (init_t::const_iterator i = m_init. begin(); i != m_init. end();
 				++ i)
 		{
-			traveller. ref(i -> first) = i -> second;
+			processor. ref(i -> first) = i -> second;
 		}
 
 		// Parse input text.
-		anta::uint_t iteration_count = 0;
+		dt_t parse_time = ch::seconds(0);
+		anta::uint_t total_iteration_count = 0;
 		try
 		{
-			iteration_count = traveller. run();
+			const timepoint_t t0 = ch::high_resolution_clock::now();
+			total_iteration_count = processor. run();
+			parse_time = ch::high_resolution_clock::now() - t0;
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -697,17 +707,17 @@ int nParseApp::parse_input_text ()
 		print_syntax_tree(tracer);
 
 		// Print final states.
-		print_final_states(traveller);
+		print_final_states(processor);
 
 		// Print explicitly specified variables.
-		print_variables(traveller);
+		print_variables(processor);
 
 		// Print statistics.
-		print_stats(traveller, iteration_count);
+		print_stats(processor, parse_time, total_iteration_count);
 
 		// Reset intermediate objects (not really necessary here).
 		tracer. rewind();
-		traveller. reset();
+		processor. reset();
 	}
 
 	return 0;
@@ -716,7 +726,9 @@ int nParseApp::parse_input_text ()
 void nParseApp::print_traces (TracerNLG& a_trac)
 {
 	if (m_trace_print. empty())
+	{
 		return;
+	}
 
 	std::ostream& out = *open_file(m_trace_print);
 
@@ -725,18 +737,22 @@ void nParseApp::print_traces (TracerNLG& a_trac)
 		while (a_trac. step())
 		{
 			if (a_trac. type() == 1)
+			{
 				out << a_trac. print();
+			}
 		}
 	}
 }
 
-void nParseApp::print_final_states (const anta::Traveller<NLG>& a_trav)
+void nParseApp::print_final_states (const anta::Processor<NLG>& a_proc)
 {
-	typedef anta::Traveller<NLG>::traced_type traced_t;
-	const traced_t& traced = a_trav. get_traced();
+	typedef anta::Processor<NLG>::traced_type traced_t;
+	const traced_t& traced = a_proc. get_traced();
 
 	if (m_state_print. empty() || traced. empty())
+	{
 		return;
+	}
 
 	Serializer<NLG> serializer;
 	serializer << YAML::BeginSeq;
@@ -749,13 +765,15 @@ void nParseApp::print_final_states (const anta::Traveller<NLG>& a_trav)
 	*open_file(m_state_print) << serializer. c_str() << '\n';
 }
 
-void nParseApp::print_variables (const anta::Traveller<NLG>& a_trav)
+void nParseApp::print_variables (const anta::Processor<NLG>& a_proc)
 {
-	typedef anta::Traveller<NLG>::traced_type traced_t;
-	const traced_t& traced = a_trav. get_traced();
+	typedef anta::Processor<NLG>::traced_type traced_t;
+	const traced_t& traced = a_proc. get_traced();
 
 	if (m_out. empty() || traced. empty())
+	{
 		return;
+	}
 
 	std::ostream& out = *open_file("STDOUT");
 
@@ -775,7 +793,9 @@ void nParseApp::print_variables (const anta::Traveller<NLG>& a_trav)
 void nParseApp::print_syntax_tree (TracerNLG& a_trac)
 {
 	if (m_syntax_tree. empty())
+	{
 		return;
+	}
 
 	std::ostream& out = *open_file(m_syntax_tree);
 
@@ -792,8 +812,14 @@ void nParseApp::print_syntax_tree (TracerNLG& a_trac)
 					a_trac -> get_arc(). get_target(). get_name();
 				if (! name. empty())
 				{
-					if (first) first = false;
-					else out << ' ';
+					if (first)
+					{
+						first = false;
+					}
+					else
+					{
+						out << ' ';
+					}
 					out << '(' << name;
 				}
 
@@ -803,7 +829,9 @@ void nParseApp::print_syntax_tree (TracerNLG& a_trac)
 				const nlg_string_t text(
 					range. first, range. second);
 				if (! text. empty())
+				{
 					out << ' ' << text;
+				}
 			}
 			break;
 
@@ -812,8 +840,7 @@ void nParseApp::print_syntax_tree (TracerNLG& a_trac)
 			{
 				const anta::State<NLG>* s = a_trac. relative("<:");
 				// Determine if the parenthesis refers to a named rule.
-				if (s != NULL &&
-					!s -> get_arc(). get_target(). get_name(). empty())
+				if (s && ! s -> get_arc(). get_target(). get_name(). empty())
 				{
 					out << ')';
 				}
@@ -826,25 +853,41 @@ void nParseApp::print_syntax_tree (TracerNLG& a_trac)
 	}
 }
 
-void nParseApp::print_stats (const anta::Traveller<NLG>& a_trav,
-		const anta::uint_t a_iteration_count)
+void nParseApp::print_stats (const anta::Processor<NLG>& a_proc,
+		const dt_t& a_parse_time, const anta::uint_t a_total_iteration_count)
 {
 	if (m_log. empty())
+	{
 		return;
+	}
 
-	std::ostream& out = *open_file(m_log);
+	std::ostream& log = *open_file(m_log);
 
-	out << "state pool usage: "
+	ch::duration_short(log)
+		<< std::setprecision(4)
+		<< "parse time: "
+		<< a_parse_time
 		<< std::setprecision(2)
-		<< 1e2 * a_trav. get_usage() / a_trav. get_capacity()
-		<< "%\n"
+		<< "\n"
+		   "trace count: "
+		<< a_proc. get_traced(). size()
+		<< "\n"
 		   "iteration count: "
-		<< a_iteration_count
+		<< a_total_iteration_count
 		<< "\n"
 		   "context count: "
-		<< a_trav. context_count()
+		<< a_proc. context_count()
 		<< "\n"
-		   "trace(s) found: "
-		<< a_trav. get_traced(). size()
-		<< "\n";
+		   "state pool usage at exit: "
+		<< a_proc. get_usage() << " bytes ("
+		<< 1e2 * a_proc. get_usage() / a_proc. get_capacity()
+		<< "%)\n"
+		   "state pool usage at peak: "
+		<< a_proc. get_peak_usage() << " bytes ("
+		<< 1e2 * a_proc. get_peak_usage() / a_proc. get_capacity()
+		<< "%)\n"
+		   "total evicted size: "
+		<< a_proc. get_evicted_size() << " bytes ("
+		<< 1e2 * a_proc. get_evicted_size() / a_proc. get_capacity()
+		<< "%)\n";
 }

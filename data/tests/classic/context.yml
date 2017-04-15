@@ -1,0 +1,67 @@
+script:
+    - context1.ng
+    - context2.ng
+    - context3.ng
+
+config:
+    entry_point:       S
+
+test1:
+    input:             alpha=A beta=B ff
+    check:
+        alpha:         A
+        beta:          B
+        fA:            null
+        fB:            null
+        fC:            null
+        pA:            null
+        pB:            null
+        pC:            null
+        x:             null
+        y:             null
+        z:             null
+
+test2:
+    input:             alpha=A beta=B fp
+    check:
+        alpha:         A
+        beta:          B
+        fA:            null
+        fB:            null
+        fC:            null
+        pA:            1
+        pB:            2
+        pC:            3
+        x:             null
+        y:             null
+        z:             null
+
+test3:
+    input:             alpha=A beta=B pf
+    check:
+        alpha:         A
+        beta:          B
+        fA:            null
+        fB:            null
+        fC:            null
+        pA:            null
+        pB:            null
+        pC:            null
+        x:             1
+        y:             2
+        z:             3
+
+test4:
+    input:             alpha=A beta=B pp
+    check:
+        alpha:         A
+        beta:          B
+        fA:            null
+        fB:            null
+        fC:            null
+        pA:            1
+        pB:            2
+        pC:            3
+        x:             1
+        y:             2
+        z:             3

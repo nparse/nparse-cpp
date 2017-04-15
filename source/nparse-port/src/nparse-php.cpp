@@ -2,21 +2,21 @@
  * @file $/source/nparse-port/src/nparse-php.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -341,7 +341,7 @@ PHP_METHOD(nParse, set)
 		break;
 
 	case IS_LONG:
-		parser. set( a_name, (int) Z_LVAL_P(a_value) );
+		parser. set( a_name, static_cast<long>(Z_LVAL_P(a_value)) );
 		break;
 
 	case IS_DOUBLE:
@@ -461,6 +461,13 @@ PHP_METHOD(nParse, get_pool_usage)
 		) -> impl -> get_pool_usage() );
 }
 
+PHP_METHOD(nParse, get_pool_peak_usage)
+{
+	RETURN_LONG( static_cast<nparse_object*>(
+				zend_object_store_get_object(getThis() TSRMLS_CC)
+		) -> impl -> get_pool_peak_usage() );
+}
+
 PHP_METHOD(nParse, get_pool_capacity)
 {
 	RETURN_LONG( static_cast<nparse_object*>(
@@ -494,6 +501,7 @@ zend_function_entry global_nparse_methods[] = {
 	PHP_ME(nParse, get_iteration_count,	arginfo_nParse__void,			ZEND_ACC_PUBLIC)
 	PHP_ME(nParse, get_context_count,	arginfo_nParse__void,			ZEND_ACC_PUBLIC)
 	PHP_ME(nParse, get_pool_usage,		arginfo_nParse__void,			ZEND_ACC_PUBLIC)
+	PHP_ME(nParse, get_pool_peak_usage,	arginfo_nParse__void,			ZEND_ACC_PUBLIC)
 	PHP_ME(nParse, get_pool_capacity,	arginfo_nParse__void,			ZEND_ACC_PUBLIC)
 	{ NULL, NULL, NULL }
 };

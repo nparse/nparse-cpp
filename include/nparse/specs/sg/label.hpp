@@ -2,21 +2,21 @@
  * @file $/include/nparse/specs/sg/label.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -111,9 +111,9 @@ public:
 		return !(m_str. empty() && m_int == 0 && m_hnd. empty());
 	}
 
-	void advance (const Label& a_modifier)
+	void amend (const Label& a_modifier)
 	{
-		// Never advance void labels.
+		// Never amend void labels.
 		if (! is_actual())
 		{
 			return ;
@@ -128,7 +128,7 @@ public:
 			return ;
 		}
 
-		// Advancing the string value of the label.
+		// Amending the string value of the label.
 		if (! a_modifier. m_str. empty())
 		{
 			if (m_str == ".")
@@ -141,13 +141,13 @@ public:
 			}
 		}
 
-		// Advancing the integer value of the label.
+		// Amending the integer value of the label.
 		if (m_int == 0 && a_modifier. m_int != 0)
 		{
 			m_int = a_modifier. m_int;
 		}
 
-		// Advancing the attached callback of the label.
+		// Amending the attached callback of the label.
 		if (m_hnd. empty() && ! a_modifier. m_hnd. empty())
 		{
 			m_hnd = a_modifier. m_hnd;

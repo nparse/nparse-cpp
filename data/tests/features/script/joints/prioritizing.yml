@@ -1,0 +1,44 @@
+script:
+    - prioritizing1.ng
+    - prioritizing2.ng
+
+config:
+    entry_point:       S1
+
+test1:
+    input:             "alpha"
+    traces:            1
+    forest:
+        - "(S1 (A alpha))"
+
+test2:
+    input:             "alpha beta"
+    traces:            0
+
+test3:
+    input:             "alp ha beta"
+    traces:            1
+    forest:
+        - "(S1 (B (D alp ha beta)))"
+
+test4:
+    config:
+        entry_point:   S2
+    input:             "alpha"
+    traces:            1
+    forest:
+        - "(S2 (A alpha))"
+
+test5:
+    config:
+        entry_point:   S2
+    input:             "alpha beta"
+    traces:            0
+
+test6:
+    config:
+        entry_point:   S2
+    input:             "alp ha beta"
+    traces:            1
+    forest:
+        - "(S2 (D alp ha beta))"

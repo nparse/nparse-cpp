@@ -2,21 +2,21 @@
  * @file $/include/anta/ndl/actions.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -37,15 +37,15 @@ namespace anta { namespace ndl {
 template <typename M_>
 struct action
 {
-	typedef utility::callback<bool, Traveller<M_>&> type;
+	typedef utility::callback<bool, Processor<M_>&> type;
 
 };
 
 /**
- *	The semantic action performer.
+ *	The semantic action executor.
  */
 template <typename M_>
-class ActionPerformer
+class ActionExecutor
 {
 public:
 	/**
@@ -62,7 +62,7 @@ public:
 	}
 
 	/**
-	 *	Attach a semantic action to the performer.
+	 *	Attach a semantic action to the executor.
 	 */
 	void attach (const typename action<M_>::type& a_action)
 	{
@@ -70,21 +70,23 @@ public:
 	}
 
 	/**
-	 *	Sequentially perform the attached semantic actions.
+	 *	Sequentially execute attached semantic actions.
 	 */
-	bool entry (Traveller<M_>& a_trav) const
+	bool execute (Processor<M_>& a_proc) const
 	{
 		for (typename actions_type::const_iterator i = m_actions. begin();
 				i != m_actions. end(); ++ i)
 		{
-			if (! (*i)(a_trav))
+			if (! (*i)(a_proc))
+			{
 				return false;
+			}
 		}
 		return true;
 	}
 
 private:
-	actions_type m_actions; /**< The list of attached semantic actions. */
+	actions_type m_actions; /**< list of attached semantic actions */
 
 };
 
@@ -144,9 +146,9 @@ public:
 	{
 	}
 
-	bool operator() (Traveller<M_>& a_trav) const
+	bool operator() (Processor<M_>& a_proc) const
 	{
-		a_trav. ref(m_key, true) = m_selector(a_trav); // reset = true
+		a_proc. ref(m_key, true) = m_selector(a_proc); // reset = true
 		return true;
 	}
 
@@ -170,21 +172,21 @@ public:
 	{
 	}
 
-	bool operator() (Traveller<M_>& a_trav) const
+	bool operator() (Processor<M_>& a_proc) const
 	{
 		// Get a pointer to a trace variable identified by the key.
 		const typename context_value<M_>::type* pval = NULL;
-		if (a_trav. get_state(). is_defined(m_key, pRef<M_>(pval)))
+		if (a_proc. get_state(). is_defined(m_key, pRef<M_>(pval)))
 		{
 			// If there is such a variable then compare its value to the one
 			// provided by the selector.
-			return (*pval == m_selector(a_trav));
+			return (*pval == m_selector(a_proc));
 		}
 		else
 		{
 			// Otherwise, define a new variable identified by the key and assign
 			// the value provided by the selector to it.
-			a_trav. ref(m_key, true) = m_selector(a_trav); // reset = true
+			a_proc. ref(m_key, true) = m_selector(a_proc); // reset = true
 			return true;
 		}
 	}
@@ -209,14 +211,14 @@ public:
 	{
 	}
 
-	bool operator() (Traveller<M_>& a_trav) const
+	bool operator() (Processor<M_>& a_proc) const
 	{
 		// Get a pointer to a trace variable identified by the key.
 		const typename context_value<M_>::type* pval = NULL;
-		if (a_trav. get_state(). is_defined(m_key, pRef<M_>(pval)))
+		if (a_proc. get_state(). is_defined(m_key, pRef<M_>(pval)))
 		{
 			// If there is such a variable then apply the predicate to it.
-			return m_predicate(a_trav, *pval);
+			return m_predicate(a_proc, *pval);
 		}
 		return false;
 	}
@@ -241,9 +243,9 @@ public:
 	{
 	}
 
-	bool operator() (Traveller<M_>& a_trav) const
+	bool operator() (Processor<M_>& a_proc) const
 	{
-		return m_negate ^ a_trav. get_state(). is_defined(m_key, pTrue());
+		return m_negate ^ a_proc. get_state(). is_defined(m_key, pTrue());
 	}
 
 public:
@@ -271,10 +273,10 @@ public:
 	{
 	}
 
-	bool operator() (Traveller<M_>& a_trav) const
+	bool operator() (Processor<M_>& a_proc) const
 	{
 		const typename ::anta::range<M_>::type& r =
-			a_trav. get_state(). get_range();
+			a_proc. get_state(). get_range();
 		return m_predicate(r. second - r. first);
 	}
 
@@ -296,9 +298,9 @@ public:
 	{
 	}
 
-	bool operator() (Traveller<M_>& a_trav) const
+	bool operator() (Processor<M_>& a_proc) const
 	{
-		return a_trav. get_state(). context(&a_trav) -> push(m_key);
+		return a_proc. get_state(). context(&a_proc) -> push(m_key);
 	}
 
 private:
@@ -319,9 +321,9 @@ public:
 	{
 	}
 
-	bool operator() (Traveller<M_>& a_trav) const
+	bool operator() (Processor<M_>& a_proc) const
 	{
-		return a_trav. get_state(). context(&a_trav) -> pop(m_key);
+		return a_proc. get_state(). context(&a_proc) -> pop(m_key);
 	}
 
 private:

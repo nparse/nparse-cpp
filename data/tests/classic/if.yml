@@ -1,0 +1,25 @@
+script:
+    - if.ng
+
+config:
+    input_pool:        32
+
+testT:
+    config:
+        condition:     true
+    input:             ""
+    check:
+        result1:       T
+        result2:       T
+        result3:       F
+        result4:       T
+
+testF:
+    config:
+        condition:     false
+    input:             ""
+    check:
+        result1:       F
+        result2:       F
+        result3:       T
+        result4:       F

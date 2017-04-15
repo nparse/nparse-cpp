@@ -1,0 +1,23 @@
+script:
+    - forwarding.ng
+
+config:
+    input_pool:        32
+
+test1:
+    config:   { entry_point: S1 }
+    input:    12345
+    check:
+        type: alpha
+
+test2a:
+    config:   { entry_point: S2 }
+    input:    12345
+    check:
+        res: number
+
+test2b:
+    config:   { entry_point: S2 }
+    input:    abcde
+    check:
+        res: word

@@ -1,0 +1,173 @@
+script:
+    - concat.ng
+
+config:
+    input_pool:        32
+
+test1a.S:
+    config:
+        entry_point:   S1
+    input:             "  flat  tire  "
+    traces:            1
+    forest:
+        - (S1 flat tire)
+
+test1b.S:
+    config:
+        entry_point:   S1
+    input:             "  flattire  "
+    traces:            1
+    forest:
+        - (S1 flat tire)
+
+test2a.S:
+    config:
+        entry_point:   S2
+    input:             "  flat  tire  "
+    traces:            0
+
+test2b.S:
+    config:
+        entry_point:   S2
+    input:             "  flattire  "
+    traces:            1
+    forest:
+        - (S2 flat tire)
+
+test3a.S:
+    config:
+        entry_point:   S3
+    input:             "  flat  tire  "
+    traces:            1
+    forest:
+        - (S3 flat tire)
+
+test3b.S:
+    config:
+        entry_point:   S3
+    input:             "  flattire  "
+    traces:            0
+
+test1a.V:
+    config:
+        entry_point:   V1
+    input:             "  flat  tire  "
+    traces:            1
+    forest:
+        - (V1 flat tire)
+
+test1b.V:
+    config:
+        entry_point:   V1
+    input:             "  flattire  "
+    traces:            1
+    forest:
+        - (V1 flat tire)
+
+test2a.V:
+    config:
+        entry_point:   V2
+    input:             "  flat  tire  "
+    traces:            0
+
+test2b.V:
+    config:
+        entry_point:   V2
+    input:             "  flattire  "
+    traces:            1
+    forest:
+        - (V2 flat tire)
+
+test3a.V:
+    config:
+        entry_point:   V3
+    input:             "  flat  tire  "
+    traces:            1
+    forest:
+        - (V3 flat tire)
+
+test3b.V:
+    config:
+        entry_point:   V3
+    input:             "  flattire  "
+    traces:            0
+
+test1a.V:
+    config:
+        entry_point:   V1
+    input:             "  flat  tire  "
+    traces:            1
+    forest:
+        - (V1 flat tire)
+
+test1b.V:
+    config:
+        entry_point:   V1
+    input:             "  flattire  "
+    traces:            1
+    forest:
+        - (V1 flat tire)
+
+test2a.V:
+    config:
+        entry_point:   V2
+    input:             "  flat  tire  "
+    traces:            0
+
+test2b.V:
+    config:
+        entry_point:   V2
+    input:             "  flattire  "
+    traces:            1
+    forest:
+        - (V2 flat tire)
+
+test3a.V:
+    config:
+        entry_point:   V3
+    input:             "  flat  tire  "
+    traces:            1
+    forest:
+        - (V3 flat tire)
+
+test3b.V:
+    config:
+        entry_point:   V3
+    input:             "  flattire  "
+    traces:            0
+
+test4a:
+    config:
+        entry_point:   T
+    input:             "1 test"
+    traces:            0
+
+test4b:
+    config:
+        entry_point:   T
+    input:             "1 test  "
+    traces:            1
+
+test4c:
+    config:
+        entry_point:   T
+    input:             "2 test"
+    traces:            1
+
+test4d:
+    config:
+        entry_point:   T
+    input:             "2 test  "
+    traces:            0
+
+test4e:
+    config:
+        entry_point:   T
+    input:             "3 test"
+    traces:            1
+
+test4f:
+    config:
+        entry_point:   T
+    input:             "3 test  "
+    traces:            0 # trailing `#' operator is implicit

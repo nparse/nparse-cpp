@@ -1,0 +1,30 @@
+script:
+    - sample1a.ng
+    - sample1b.ng
+
+config:
+    entry_point:       S
+    grammar_pool:      1024 # 1MB for grammar
+    input_pool:        4    # 4K for input
+
+test1:
+    config:
+        entry_point:   N1.S1
+    input:             hello world
+    traces:            1  # number of found traces
+    iterations:        7  # number of performed iterations
+#   usage:             11 # pool usage rate (%)
+    check:
+        w1:            hello
+        w2:            world
+
+test2:
+    config:
+        entry_point:   N2.S1
+    input:             goodbye world
+    traces:            1
+    iterations:        11
+#   usage:             19
+    check:
+        w1:            goodbye
+        w2:            world

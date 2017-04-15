@@ -2,21 +2,21 @@
  * @file $/source/libnparse_script/src/script/_action_string.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.2
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2013 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -51,7 +51,7 @@ class ActionString: public IAction
 				const int a_offset = 0)
 		{
 			const anta::State<NLG>* s = offset_state<NLG>(
-				& a_environment. get_traveller(). get_state(), a_offset);
+				& a_environment. get_processor(). get_state(), a_offset);
 			if (!s) throw flow_control(false);
 			const anta::range<NLG>::type& r = s -> get_range();
 			return nlg_string_t(r. first,  r. second);
@@ -59,15 +59,15 @@ class ActionString: public IAction
 
 	};
 
-	// A specialization for the Traveller class.
+	// A specialization for the Processor class.
 	template <typename Void_>
-	struct get_range<anta::Traveller<NLG>, Void_>
+	struct get_range<anta::Processor<NLG>, Void_>
 	{
-		static nlg_string_t f (const anta::Traveller<NLG>& a_traveller,
+		static nlg_string_t f (const anta::Processor<NLG>& a_processor,
 				const int a_offset = 0)
 		{
 			const anta::State<NLG>* s = offset_state<NLG>(
-				& a_traveller. get_state(), a_offset);
+				& a_processor. get_state(), a_offset);
 			if (!s) throw flow_control(false);
 			const anta::range<NLG>::type& r = s -> get_range();
 			return nlg_string_t(r. first,  r. second);
@@ -161,7 +161,7 @@ public:
 	}
 
 private:
-	string_t m_string; /**< Stored string pattern. */
+	string_t m_string; /**< stored string pattern */
 
 };
 

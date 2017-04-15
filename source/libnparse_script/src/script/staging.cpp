@@ -2,21 +2,21 @@
  * @file $/source/libnparse_script/src/script/staging.cpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -28,7 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <boost/unordered_map.hpp>
 #include <nparse/nparse.hpp>
-#include <utility/free.hpp>
+#include <util/free.hpp>
 #include "../static.hpp"
 #include "../source_tree.hpp"
 
@@ -117,7 +117,7 @@ public:
 			if (! m_factory -> create(a_def, instance, path))
 			{
 				// NOTE: Yes, it's a logic error!
-				throw std::logic_error("unable to create acceptor from"
+				throw std::logic_error("unable to create an acceptor from"
 						" the given definition");
 			}
 			const std::pair<acceptors_t::iterator, bool> p =
@@ -147,6 +147,12 @@ public:
 		return top;
 	}
 
+	action_pointer top () const
+	{
+		assert(! m_action_stack. empty());
+		return m_action_stack. back();
+	}
+
 	void swap (std::vector<action_pointer>& a_av)
 	{
 		m_action_stack. swap(a_av);
@@ -172,7 +178,9 @@ public:
 		try
 		{
 			if (! m_st. load(r))
+			{
 				return false;
+			}
 		}
 		catch (const std::exception& err_)
 		{
@@ -205,7 +213,9 @@ public:
 	{
 		m_namespace = a_namespace;
 		if (! m_namespace. empty())
+		{
 			m_namespace. append(1, L'.');
+		}
 	}
 
 	const string_t& getNamespace () const
@@ -235,19 +245,25 @@ public:
 	{
 		// Check whether the exception has been bound to a file already.
 		if (boost::get_error_info<ex::file>(a_error))
+		{
 			return;
+		}
 
 		// Check whether the exception has location information.
 		const anta::range<SG>::type* pin =
 			boost::get_error_info<ex::location>(a_error);
 		if (! pin)
+		{
 			return;
+		}
 
 		// Try to identify location.
 		std::string file;
 		int line, offset;
 		if (! identify(pin -> first, file, line, offset))
+		{
 			return;
+		}
 
 		// Add file/line/offset to the exception.
 		a_error << ex::file(file) << ex::line(line) << ex::offset(offset);

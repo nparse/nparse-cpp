@@ -1,0 +1,5 @@
+script:
+    - sequencing-composition.ng
+
+error:
+    - [ "unable to compose sequencing modifiers", 1, 8 ]

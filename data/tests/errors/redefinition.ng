@@ -1,0 +1,3 @@
+func myFunction(_x) { myFunction = "${_x}"; };
+func myFunction(_x) { myFunction = "${_x}"; };
+S := ^\w+ :x { y: myFunction(x) } ^$;

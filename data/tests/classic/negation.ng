@@ -1,0 +1,23 @@
+// negation of prioritization
+S1 := !( alpha beta gamma |? '^\d+'+ ) '^\w+'* ^$;
+
+// alternation of negations
+T1 := !(a  l  p  h  a) '^\w+'+;
+T2 := !alpha '^\w+'+;
+S2 := ($T1 | $T2) ^$;
+
+// prioritization of negations
+S3 := ($T1 |? $T2) ^$;
+S4 := ($T2 |? $T1) ^$;
+
+// paradox: nested negations
+// S5 appears to be able to accept 'alpha', but in reality it is not
+S5 := !$T1 '^\w+' ^$;
+
+// qequential negations
+T3 := a l p h a;
+T4 := b e t a;
+S6 := !$T3 !$T4 '^\w+' ^$;
+
+// negation of alternation
+S7 := !($T3 | $T4) '^\w+' ^$;

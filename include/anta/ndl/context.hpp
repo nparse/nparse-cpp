@@ -2,21 +2,21 @@
  * @file $/include/anta/ndl/context.hpp
  *
 This file is a part of the "nParse" project -
-        a general purpose parsing framework, version 0.1.7
+        a general purpose parsing framework, version 0.1.8
 
 The MIT License (MIT)
-Copyright (c) 2007-2017 Alex S Kudinov <alex.s.kudinov@gmail.com>
- 
+Copyright (c) 2007-2017 Alex Kudinov <alex.s.kudinov@gmail.com>
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
 the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -231,8 +231,10 @@ public:
 	Context* derive () const
 	{
 		if (m_owner == NULL)
+		{
 			throw std::logic_error("derivation is impossible because this"
 					" Context instance does not have an owner");
+		}
 		return m_owner -> create(this);
 	}
 
@@ -280,7 +282,9 @@ public:
 			typename variables_t::const_iterator found_at =
 				c -> m_variables. find(a_key);
 			if (found_at != c -> m_variables. end())
+			{
 				return a_predicate(found_at -> second);
+			}
 		}
 		return false;
 	}
@@ -297,7 +301,9 @@ private:
 			typename variables_t::const_iterator found_at =
 				c -> m_variables. find(a_key);
 			if (found_at != c -> m_variables. end())
+			{
 				return found_at -> second;
+			}
 		}
 		return context<M_>::def();
 	}
@@ -319,10 +325,14 @@ private:
 		{
 			// Check if the key is "special".
 			if (a_pair. first. empty())
+			{
 				return true;
+			}
 			// Check if the key has been passed already.
 			if (! m_passed. insert(a_pair. first). second)
+			{
 				return true;
+			}
 			// If none of the conditions is met then approve copy.
 			return false;
 		}
@@ -374,17 +384,19 @@ public:
 		{
 			total += c -> m_variables. size();
 			if (a_last_only)
+			{
 				break;
+			}
 		}
 		return total;
 	}
 
 private:
-	const Context* m_ancestor; /**< Ancestor context. */
-	ContextOwner<M_>* m_owner; /**< Context's owner. */
+	const Context* m_ancestor; /**< ancestor context */
+	ContextOwner<M_>* m_owner; /**< context's owner */
 
 	typedef boost::unordered_map<key_type, value_type> variables_t;
-	variables_t m_variables; /**< Local trace variable map. */
+	variables_t m_variables; /**< local trace variable map */
 
 #if defined(ANTA_NDL_STACKING)
 private:
@@ -392,7 +404,7 @@ private:
 	static const uint_t FLAG_POP = 2;
 
 	typedef boost::unordered_map<key_type, int> marks_t;
-	marks_t m_marks; /**< Marked trace variables. */
+	marks_t m_marks; /**< marked trace variables */
 
 	/**
 	 *	Mark the given variable.
@@ -409,7 +421,9 @@ private:
 		}
 
 		if ((found_at -> second & a_mark_flags) != 0)
+		{
 			throw std::logic_error("the variable has been marked already");
+		}
 
 		found_at -> second |= a_mark_flags;
 	}
@@ -465,8 +479,10 @@ public:
 
 		const Context* ancestor = find(a_key);
 		if (ancestor == NULL)
+		{
 			throw std::logic_error("trying to pop a variable that has not been"
 				" pushed");
+		}
 
 		ref(a_key, true) = ancestor -> val(a_key);
 		return true;
@@ -496,7 +512,7 @@ public:
 };
 
 /**
- *	The trace context owner, i.e. the holder object for trace contexts.
+ *	The trace context owner, i.e. the creator/holder object for trace contexts.
  */
 template <typename M_>
 class ContextOwner: public pool<M_>::type
@@ -507,9 +523,33 @@ public:
 	 */
 	Context<M_>* create (const Context<M_>* a_ancestor)
 	{
-		void* ptr = this -> allocate(sizeof(Context<M_>));
+		void* ptr = pool<M_>::type::allocate(sizeof(Context<M_>));
 		m_instances. push_back(new(ptr) Context<M_>(a_ancestor, this));
 		return m_instances. back();
+	}
+
+	/**
+	 *	Destroy a previously created instance of the Context class.
+	 */
+	bool destroy (Context<M_>* a_context)
+	{
+		// NOTE: This function is designed to be called by the analysis state
+		//		 rollback mechanism, which tries to recycle recently allocated
+		//		 memory first by means of removing last created objects.
+		//		 When this function is called, usually there is a guarantee that
+		//		 the provided context instance resides at the end of the memory
+		//		 pool, which, presumably, makes it the last or close to the last
+		//		 instance in the instance list.
+		typename instances_t::reverse_iterator i = std::find(
+				m_instances. rbegin(), m_instances. rend(), a_context);
+		if (i != m_instances. rend())
+		{
+			(*i) -> ~Context<M_>();
+			std::advance(i, 1);
+			m_instances. erase(i. base());
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -517,15 +557,13 @@ public:
 	 */
 	void reset ()
 	{
-		if (! m_instances. empty())
+		// NOTE: Recently created contexts are the first to go.
+		for (typename instances_t::reverse_iterator
+				i = m_instances. rbegin(); i != m_instances. rend(); ++ i)
 		{
-			for (typename instances_t::iterator i = m_instances. begin();
-					i != m_instances. end(); ++ i)
-			{
-				(*i) -> ~Context<M_>();
-			}
-			m_instances. clear();
+			(*i) -> ~Context<M_>();
 		}
+		m_instances. clear();
 	}
 
 	/**

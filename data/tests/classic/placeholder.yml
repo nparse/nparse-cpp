@@ -1,0 +1,76 @@
+script:
+    - placeholder1.ng
+    - placeholder2.ng
+
+config:
+    input_pool:        32
+
+test1:
+    config:
+        entry_point:   S1
+    input:             10, 20, 30, 40, 50
+    check:
+        res:           504030
+
+test2:
+    config:
+        entry_point:   S2
+    input:             10, 20, 30, 40, 50
+    check:
+        res:           120
+
+test3:
+    config:
+        entry_point:   S3
+    input:             10, 20, 30, 40, 50
+    check:
+        res:           <50><40><30>
+
+test4:
+    config:
+        entry_point:   S4
+    input:             alpha beta gamma
+    check:
+        res:           gamma-beta-alpha
+
+test5.1:
+    config:
+        entry_point:   S5
+    input:             alpha beta gamma 1
+    check:
+        res:           gamma
+test5.2:
+    config:
+        entry_point:   S5
+    input:             alpha beta gamma 2
+    check:
+        res:           beta
+test5.3:
+    config:
+        entry_point:   S5
+    input:             alpha beta gamma 3
+    check:
+        res:           alpha
+
+test6:
+    config:
+        entry_point:   S6
+    input:             alpha beta gamma delta epsilon
+    check:
+        res:           epsilon-delta-gamma-beta-alpha
+
+test7a:
+    config:
+        entry_point:   S7a
+    input:             alpha beta gamma delta epsilon
+    check:
+        res:           epsilon--delta--gamma--beta--alpha
+    comment:           Calls inevitably produce empty placeholders.
+
+test7b:
+    config:
+        entry_point:   S7b
+    input:             alpha beta gamma delta epsilon
+    check:
+        res:           epsilon--delta--gamma--beta--alpha
+    comment:           Calls inevitably produce empty placeholders.

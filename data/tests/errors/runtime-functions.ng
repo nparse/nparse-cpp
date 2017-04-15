@@ -1,0 +1,127 @@
+create-boolean {
+    value = boolean(); // constructs false
+};
+
+create-integer {
+    value = integer(); // constructs 0
+};
+
+create-real {
+    value = real(); // constructs 0.0
+};
+
+create-string {
+    value = string(); // constructs ""
+};
+
+create-array {
+    value = array(); // constructs {}
+};
+
+cast-boolean {
+    value = boolean('invalid boolean value');
+};
+
+cast-integer {
+    value = integer('invalid integer value');
+};
+
+cast-real {
+    value = real('invalid real value');
+};
+
+cast-string {
+    /* invalid argument count */
+    value = string(0, 1);
+};
+
+cast-array {
+    /* invalid argument count */
+    value = array(0, 1);
+};
+
+// func fooBar(_a) { /* undefined */ };
+
+unknown-call {
+    fooBar(1);
+};
+
+call-val-invalid-argument-count {
+    x = call();
+};
+
+call-ref-invalid-argument-count {
+    call() = null;
+};
+
+func bar(_name) { bar = ref(_name); };
+
+lvalue-absent {
+    bar() = 54321;
+};
+
+proc foo(_name, _value) { ref(_name) = _value; };
+
+lvalue-present {
+    foo('test', 12345);
+};
+
+pass-invalid-argument-count {
+    pass(0, 1);
+};
+
+stop-invalid-argument-count {
+    stop(0, 1);
+};
+
+len-invalid-argument-count {
+    value = len();
+};
+
+len-invalid-argument-type {
+    value = len(10);
+};
+
+nth-invalid-argument-count {
+    value = nth(1);
+};
+
+nth-invalid-index-read {
+    value = nth(index, 'a', 'b', 'c');
+};
+
+nth-invalid-index-write {
+    nth(index, a, b, c) = value;
+};
+
+ref-invalid-argument-count-0a {
+    value = ref();
+};
+
+ref-invalid-argument-count-2a {
+    value = ref('a', 'b');
+};
+
+ref-invalid-argument-count-0b {
+    ref() = value;
+};
+
+ref-invalid-argument-count-2b {
+    ref('a', 'b') = value;
+};
+
+self-invalid-argument-count {
+    self({}, {});
+};
+
+self-invalid-argument-type {
+    self(null);
+};
+
+swap-invalid-argument-count-0 {
+    swap();
+};
+
+swap-invalid-argument-count-1 {
+    swap('a');
+};

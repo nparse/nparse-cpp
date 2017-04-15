@@ -1,0 +1,58 @@
+script:
+    - ternary.ng
+
+config:
+    input_pool:        32
+
+ternary-read-left:
+    config:
+        entry_point:   ternary-read
+        left:          "1-Left"
+        right:         "0-Right"
+    input:             "true"
+    check:
+        value:         "1-Left"
+
+ternary-read-right:
+    config:
+        entry_point:   ternary-read
+        left:          "1-Left"
+        right:         "0-Right"
+    input:             "false"
+    check:
+        value:         "0-Right"
+
+ternary-write-left-1:
+    config:
+        entry_point:   ternary-write
+        value:         "1-Left"
+    input:             "true"
+    check:
+        left:          "1-Left"
+        right:         null
+
+ternary-write-left-2:
+    config:
+        entry_point:   ternary-write-left
+        value:         "101-Left"
+    input:             "true"
+    check:
+        left:          "101-Left"
+        right:         null
+
+ternary-write-right:
+    config:
+        entry_point:   ternary-write
+        value:         "0-Right"
+    input:             "false"
+    check:
+        left:          null
+        right:         "0-Right"
+
+ternary-write-right-2:
+    config:
+        entry_point:   ternary-write-left
+        value:         "0-Right"
+    input:             "false"
+    error:
+        - [ "no l-value: writing to a read-only port", 10, 31 ]

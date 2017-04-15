@@ -1,0 +1,17 @@
+S {
+    if (condition) result1 = 'T'; else result1 = 'F';
+
+    result2 = 'F';
+    if (condition) result2 = 'T';
+
+    result3 = 'F';
+    if (condition) {} else result3 = 'T';
+
+    if (condition) {
+        result4 = 'T';
+    }
+    else {
+        result4 = 'F';
+    }
+
+};

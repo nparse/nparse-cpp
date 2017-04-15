@@ -1,0 +1,16 @@
+S1 := flat tire ^$;
+S2 := flat # tire ^$;
+S3 := flat _ tire ^$;
+
+U1 := # flat tire ^$;
+U2 := # flat # tire ^$;
+U3 := # flat _ tire ^$;
+
+V1 := _ flat tire ^$;
+V2 := _ flat # tire ^$;
+V3 := _ flat _ tire ^$;
+
+T1 := test _;
+T2 := test #;
+T3 := test;
+T  := (1 $T1 || 2 $T2 || 3 $T3) # ^$;

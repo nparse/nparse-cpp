@@ -1,0 +1,12 @@
+script:
+    - comma1.ng
+    - comma2.ng
+    - comma3.ng
+
+config:
+    input_pool:        32
+
+test1a: { config: { entry_point: S1a }, input: "", check: { value: "Bar" } }
+test1b: { config: { entry_point: S1b }, input: "", check: { value: "Foo" } }
+test2a: { config: { entry_point: S2a }, input: "", check: { value: "Baz" } }
+test2b: { config: { entry_point: S2b }, input: "", check: { value: "Foo" } }

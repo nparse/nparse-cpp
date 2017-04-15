@@ -1,0 +1,1 @@
+S := ^\d+ _ ^\d+ { value: footprint($i1, $i0)[ 337 : 344 ] };
