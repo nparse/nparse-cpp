@@ -1,0 +1,56 @@
+/* "A" is a simple auxiliary rule that consumes an alphanumeric sequence and
+ * assigns its value to a trace variable named "arg".
+ * This rule uses a native RegEx feature known as the marked groups.
+ */
+rule A := ^(?<arg>\w+);
+
+/* "P1" is a rule that consumes prefix 'p1' followed by an alphanumeric sequence
+ * which's value gets passed to the trace variable "arg" by means of the
+ * referenced rule "A".
+ * The last terminal in the rule "P1" enclosed in curly brackets is a semantic
+ * action that defines trace variable "res" with a value returned from the call
+ * to "p". Since "p" is a procedure, it has access to the trace context, which
+ * makes previously defined "arg" visible in "p", and therefore the value of the
+ * trace variable "arg" gets assigned to "res".
+ */
+proc p() = arg;
+rule P1 := p1 $A { res: p() };
+
+/* Similar to "P1", "F1" is a rule that consumes prefix 'f1' followed by an
+ * alphanumeric sequence.
+ * The last terminal in the rule "F1" defines trace variable "res" with a value
+ * returned from the call to "f". Since "f" is a function, it does not have
+ * access to the trace context, which renders "arg" undefined in "f", and
+ * therefore the trace variable "res" gets assigned to null.
+ */
+func f() = arg;
+rule F1 := f1 $A { res: f() };
+
+/* "F2" is a variation of "F1" that passes the value of the trace variable "arg"
+ * to function "f". However, since function "f" does not declare any arguments,
+ * the returned value that gets assigned to "res" is still null.
+ */
+rule F2 := f2 $A { res: f(arg) };
+
+/* "F3" is another variation of "F1" that calls function "g" instead of "f".
+ * Unlike function "f", function "g" declares an agument named "arg" which's
+ * value is returned from the function, so in this case, the trace variable
+ * "res" finally receives the value of the previously consumed alphanumeric
+ * sequence stored in the trace variable "arg".
+ */
+func g(arg) = arg;
+rule F3 := f3 $A { res: g(arg) };
+
+/* Finally, "F4" demonstrates the fact that procedures always have access to the
+ * trace context, even if called from inside a function.
+ */
+func h() = p();
+rule F4 := f4 $A { res: h() };
+
+/* "S" is a rule that combines "P1", "F1", "F2", "F3" and "F4" using the
+ * alternation operator `|` that has a higher priority than the implicit
+ * sequencing operator (therefore, no parentheses necessary).
+ * Regardless of which rule matches, its inner trace context gets assigned to
+ * the same trace variable named "q" in the outer context.
+ */
+rule S :=  <q:P1>|<q:F1>|<q:F2>|<q:F3>|<q:F4>  ^$;

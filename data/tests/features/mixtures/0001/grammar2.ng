@@ -1,0 +1,2 @@
+S := alpha <T {x: "^(?'x'\d+)"} x[0] == x[-1]> omega ^$ { result: T.x[len(T.x):0] };
+T := '<' "$x" '>';

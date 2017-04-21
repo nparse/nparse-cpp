@@ -32,7 +32,8 @@ namespace anta { namespace dsel { namespace {
 /******************************************************************************/
 
 /**
- *
+ *	A metafunction that checks whether the given type is comparable, that is,
+ *	provides implementations for comparison operators equal-to and not-equal-to.
  */
 template <typename M_, typename Type_>
 struct comparable: boost::mpl::contains<
@@ -44,7 +45,9 @@ struct comparable: boost::mpl::contains<
 		>, Type_> {};
 
 /**
- *
+ *	A metafunction that checks whether the given type is ordered, that is,
+ *	provides implementations for comparison operators less, less-or-equal,
+ *	greater and greater-or-equal.
  */
 template <typename M_, typename Type_>
 struct ordered: boost::mpl::contains<

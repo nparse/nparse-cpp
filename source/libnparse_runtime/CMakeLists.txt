@@ -1,8 +1,7 @@
 add_library(nparse_runtime
     src/static.cpp
     src/operators/operand.cpp
-    src/operators/subscripting.cpp
-    src/operators/access.cpp
+    src/operators/subscript.cpp
     src/operators/negation.cpp
     src/operators/inversion.cpp
     src/operators/definition.cpp
@@ -24,6 +23,7 @@ add_library(nparse_runtime
     src/functions/flow.cpp
     src/functions/nth.cpp
     src/functions/len.cpp
+    src/functions/typeof.cpp
 )
 
 target_link_libraries(nparse_runtime

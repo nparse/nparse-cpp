@@ -155,7 +155,7 @@ public:
 				unconditional<M_>(a_repeating), a_jump. arc_type, a_label);
 		return *this;
 	}
-	/**	}@ */
+	/**	@} */
 
 public:
 	//

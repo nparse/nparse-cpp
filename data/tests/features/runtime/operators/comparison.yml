@@ -1,0 +1,2081 @@
+script:
+    - comparison1.ng
+
+test1_null_equal_to_null:
+    input:             "null == null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "null"
+
+test2_null_not_equal_to_null:
+    input:             "null != null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "null"
+
+test3_null_equal_to_boolean:
+    input:             "null == boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "boolean"
+
+test4_null_not_equal_to_boolean:
+    input:             "null != boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "boolean"
+
+test5_boolean_equal_to_null:
+    input:             "boolean false == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "null"
+
+test6_boolean_not_equal_to_null:
+    input:             "boolean false != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "null"
+
+test7_null_equal_to_boolean:
+    input:             "null == boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "boolean"
+
+test8_null_not_equal_to_boolean:
+    input:             "null != boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "boolean"
+
+test9_boolean_equal_to_null:
+    input:             "boolean true == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "null"
+
+test10_boolean_not_equal_to_null:
+    input:             "boolean true != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "null"
+
+test11_null_equal_to_integer:
+    input:             "null == integer -1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "integer"
+
+test12_null_not_equal_to_integer:
+    input:             "null != integer -1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "integer"
+
+test13_integer_equal_to_null:
+    input:             "integer -1 == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "null"
+
+test14_integer_not_equal_to_null:
+    input:             "integer -1 != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "null"
+
+test15_null_equal_to_integer:
+    input:             "null == integer 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "integer"
+
+test16_null_not_equal_to_integer:
+    input:             "null != integer 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "integer"
+
+test17_integer_equal_to_null:
+    input:             "integer 0 == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "null"
+
+test18_integer_not_equal_to_null:
+    input:             "integer 0 != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "null"
+
+test19_null_equal_to_integer:
+    input:             "null == integer 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "integer"
+
+test20_null_not_equal_to_integer:
+    input:             "null != integer 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "integer"
+
+test21_integer_equal_to_null:
+    input:             "integer 1 == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "null"
+
+test22_integer_not_equal_to_null:
+    input:             "integer 1 != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "null"
+
+test23_null_equal_to_real:
+    input:             "null == real -1.0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "real"
+
+test24_null_not_equal_to_real:
+    input:             "null != real -1.0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "real"
+
+test25_real_equal_to_null:
+    input:             "real -1.0 == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "null"
+
+test26_real_not_equal_to_null:
+    input:             "real -1.0 != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "null"
+
+test27_null_equal_to_real:
+    input:             "null == real 0.0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "real"
+
+test28_null_not_equal_to_real:
+    input:             "null != real 0.0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "real"
+
+test29_real_equal_to_null:
+    input:             "real 0.0 == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "null"
+
+test30_real_not_equal_to_null:
+    input:             "real 0.0 != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "null"
+
+test31_null_equal_to_real:
+    input:             "null == real 1.0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "real"
+
+test32_null_not_equal_to_real:
+    input:             "null != real 1.0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "real"
+
+test33_real_equal_to_null:
+    input:             "real 1.0 == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "null"
+
+test34_real_not_equal_to_null:
+    input:             "real 1.0 != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "null"
+
+test35_null_equal_to_string:
+    input:             "null == string false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "string"
+
+test36_null_not_equal_to_string:
+    input:             "null != string false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "string"
+
+test37_string_equal_to_null:
+    input:             "string false == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "null"
+
+test38_string_not_equal_to_null:
+    input:             "string false != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "null"
+
+test39_null_equal_to_string:
+    input:             "null == string true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "string"
+
+test40_null_not_equal_to_string:
+    input:             "null != string true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "string"
+
+test41_string_equal_to_null:
+    input:             "string true == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "null"
+
+test42_string_not_equal_to_null:
+    input:             "string true != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "null"
+
+test43_null_equal_to_string:
+    input:             "null == string null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "string"
+
+test44_null_not_equal_to_string:
+    input:             "null != string null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "string"
+
+test45_string_equal_to_null:
+    input:             "string null == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "null"
+
+test46_string_not_equal_to_null:
+    input:             "string null != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "null"
+
+test47_null_equal_to_array:
+    input:             "null == array i"
+    traces:            1
+    check:
+        result:        false
+        type0:         "null"
+        type1:         "array"
+
+test48_null_not_equal_to_array:
+    input:             "null != array i"
+    traces:            1
+    check:
+        result:        true
+        type0:         "null"
+        type1:         "array"
+
+test49_array_equal_to_null:
+    input:             "array i == null"
+    traces:            1
+    check:
+        result:        false
+        type0:         "array"
+        type1:         "null"
+
+test50_array_not_equal_to_null:
+    input:             "array i != null"
+    traces:            1
+    check:
+        result:        true
+        type0:         "array"
+        type1:         "null"
+
+test51_boolean_equal_to_boolean:
+    input:             "boolean false == boolean False"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test52_boolean_not_equal_to_boolean:
+    input:             "boolean false != boolean False"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test53_boolean_equal_to_boolean:
+    input:             "boolean False == boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test54_boolean_not_equal_to_boolean:
+    input:             "boolean False != boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test55_boolean_equal_to_boolean:
+    input:             "boolean true == boolean True"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test56_boolean_not_equal_to_boolean:
+    input:             "boolean true != boolean True"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test57_boolean_equal_to_boolean:
+    input:             "boolean True == boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test58_boolean_not_equal_to_boolean:
+    input:             "boolean True != boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test59_boolean_equal_to_boolean:
+    input:             "boolean false == boolean no"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test60_boolean_not_equal_to_boolean:
+    input:             "boolean false != boolean no"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test61_boolean_equal_to_boolean:
+    input:             "boolean no == boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test62_boolean_not_equal_to_boolean:
+    input:             "boolean no != boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test63_boolean_equal_to_boolean:
+    input:             "boolean true == boolean yes"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test64_boolean_not_equal_to_boolean:
+    input:             "boolean true != boolean yes"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test65_boolean_equal_to_boolean:
+    input:             "boolean yes == boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test66_boolean_not_equal_to_boolean:
+    input:             "boolean yes != boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test67_boolean_equal_to_boolean:
+    input:             "boolean false == boolean 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test68_boolean_not_equal_to_boolean:
+    input:             "boolean false != boolean 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test69_boolean_equal_to_boolean:
+    input:             "boolean 0 == boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test70_boolean_not_equal_to_boolean:
+    input:             "boolean 0 != boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test71_boolean_equal_to_boolean:
+    input:             "boolean true == boolean 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test72_boolean_not_equal_to_boolean:
+    input:             "boolean true != boolean 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test73_boolean_equal_to_boolean:
+    input:             "boolean 1 == boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test74_boolean_not_equal_to_boolean:
+    input:             "boolean 1 != boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test75_boolean_equal_to_boolean:
+    input:             "boolean false == boolean True"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test76_boolean_not_equal_to_boolean:
+    input:             "boolean false != boolean True"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test77_boolean_equal_to_boolean:
+    input:             "boolean True == boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test78_boolean_not_equal_to_boolean:
+    input:             "boolean True != boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test79_boolean_equal_to_boolean:
+    input:             "boolean true == boolean False"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test80_boolean_not_equal_to_boolean:
+    input:             "boolean true != boolean False"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test81_boolean_equal_to_boolean:
+    input:             "boolean False == boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test82_boolean_not_equal_to_boolean:
+    input:             "boolean False != boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test83_boolean_equal_to_boolean:
+    input:             "boolean false == boolean yes"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test84_boolean_not_equal_to_boolean:
+    input:             "boolean false != boolean yes"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test85_boolean_equal_to_boolean:
+    input:             "boolean yes == boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test86_boolean_not_equal_to_boolean:
+    input:             "boolean yes != boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test87_boolean_equal_to_boolean:
+    input:             "boolean true == boolean no"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test88_boolean_not_equal_to_boolean:
+    input:             "boolean true != boolean no"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test89_boolean_equal_to_boolean:
+    input:             "boolean no == boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test90_boolean_not_equal_to_boolean:
+    input:             "boolean no != boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test91_boolean_equal_to_boolean:
+    input:             "boolean false == boolean 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test92_boolean_not_equal_to_boolean:
+    input:             "boolean false != boolean 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test93_boolean_equal_to_boolean:
+    input:             "boolean 1 == boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test94_boolean_not_equal_to_boolean:
+    input:             "boolean 1 != boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test95_boolean_equal_to_boolean:
+    input:             "boolean true == boolean 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test96_boolean_not_equal_to_boolean:
+    input:             "boolean true != boolean 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test97_boolean_equal_to_boolean:
+    input:             "boolean 0 == boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "boolean"
+
+test98_boolean_not_equal_to_boolean:
+    input:             "boolean 0 != boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "boolean"
+
+test99_boolean_equal_to_integer:
+    input:             "boolean false == integer 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "integer"
+
+test100_boolean_not_equal_to_integer:
+    input:             "boolean false != integer 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "integer"
+
+test101_integer_equal_to_boolean:
+    input:             "integer 0 == boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "boolean"
+
+test102_integer_not_equal_to_boolean:
+    input:             "integer 0 != boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "boolean"
+
+test103_boolean_equal_to_integer:
+    input:             "boolean true == integer 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "integer"
+
+test104_boolean_not_equal_to_integer:
+    input:             "boolean true != integer 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "integer"
+
+test105_integer_equal_to_boolean:
+    input:             "integer 0 == boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "boolean"
+
+test106_integer_not_equal_to_boolean:
+    input:             "integer 0 != boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "boolean"
+
+test107_boolean_equal_to_integer:
+    input:             "boolean false == integer 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "integer"
+
+test108_boolean_not_equal_to_integer:
+    input:             "boolean false != integer 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "integer"
+
+test109_integer_equal_to_boolean:
+    input:             "integer 1 == boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "boolean"
+
+test110_integer_not_equal_to_boolean:
+    input:             "integer 1 != boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "boolean"
+
+test111_boolean_equal_to_integer:
+    input:             "boolean true == integer 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "integer"
+
+test112_boolean_not_equal_to_integer:
+    input:             "boolean true != integer 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "integer"
+
+test113_integer_equal_to_boolean:
+    input:             "integer 1 == boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "boolean"
+
+test114_integer_not_equal_to_boolean:
+    input:             "integer 1 != boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "boolean"
+
+test115_boolean_equal_to_integer:
+    input:             "boolean false == integer -1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "integer"
+
+test116_boolean_not_equal_to_integer:
+    input:             "boolean false != integer -1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "integer"
+
+test117_integer_equal_to_boolean:
+    input:             "integer -1 == boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "boolean"
+
+test118_integer_not_equal_to_boolean:
+    input:             "integer -1 != boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "boolean"
+
+test119_boolean_equal_to_integer:
+    input:             "boolean true == integer -1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "integer"
+
+test120_boolean_not_equal_to_integer:
+    input:             "boolean true != integer -1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "integer"
+
+test121_integer_equal_to_boolean:
+    input:             "integer -1 == boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "boolean"
+
+test122_integer_not_equal_to_boolean:
+    input:             "integer -1 != boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "boolean"
+
+test123_boolean_equal_to_real:
+    input:             "boolean false == real 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "real"
+
+test124_boolean_not_equal_to_real:
+    input:             "boolean false != real 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "real"
+
+test125_real_equal_to_boolean:
+    input:             "real 0 == boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "boolean"
+
+test126_real_not_equal_to_boolean:
+    input:             "real 0 != boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "boolean"
+
+test127_boolean_equal_to_real:
+    input:             "boolean true == real 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "real"
+
+test128_boolean_not_equal_to_real:
+    input:             "boolean true != real 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "real"
+
+test129_real_equal_to_boolean:
+    input:             "real 0 == boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "boolean"
+
+test130_real_not_equal_to_boolean:
+    input:             "real 0 != boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "boolean"
+
+test131_boolean_equal_to_real:
+    input:             "boolean false == real 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "real"
+
+test132_boolean_not_equal_to_real:
+    input:             "boolean false != real 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "real"
+
+test133_real_equal_to_boolean:
+    input:             "real 1 == boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "boolean"
+
+test134_real_not_equal_to_boolean:
+    input:             "real 1 != boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "boolean"
+
+test135_boolean_equal_to_real:
+    input:             "boolean true == real 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "real"
+
+test136_boolean_not_equal_to_real:
+    input:             "boolean true != real 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "real"
+
+test137_real_equal_to_boolean:
+    input:             "real 1 == boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "boolean"
+
+test138_real_not_equal_to_boolean:
+    input:             "real 1 != boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "boolean"
+
+test139_boolean_equal_to_real:
+    input:             "boolean false == real -1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "real"
+
+test140_boolean_not_equal_to_real:
+    input:             "boolean false != real -1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "real"
+
+test141_real_equal_to_boolean:
+    input:             "real -1 == boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "boolean"
+
+test142_real_not_equal_to_boolean:
+    input:             "real -1 != boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "boolean"
+
+test143_boolean_equal_to_real:
+    input:             "boolean true == real -1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "real"
+
+test144_boolean_not_equal_to_real:
+    input:             "boolean true != real -1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "real"
+
+test145_real_equal_to_boolean:
+    input:             "real -1 == boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "boolean"
+
+test146_real_not_equal_to_boolean:
+    input:             "real -1 != boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "boolean"
+
+test147_boolean_equal_to_string:
+    input:             "boolean false == string false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "string"
+
+test148_boolean_not_equal_to_string:
+    input:             "boolean false != string false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "string"
+
+test149_string_equal_to_boolean:
+    input:             "string false == boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "boolean"
+
+test150_string_not_equal_to_boolean:
+    input:             "string false != boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "boolean"
+
+test151_boolean_equal_to_string:
+    input:             "boolean true == string true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "string"
+
+test152_boolean_not_equal_to_string:
+    input:             "boolean true != string true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "string"
+
+test153_string_equal_to_boolean:
+    input:             "string true == boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "boolean"
+
+test154_string_not_equal_to_boolean:
+    input:             "string true != boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "boolean"
+
+test155_boolean_equal_to_array:
+    input:             "boolean true == array i"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "array"
+
+test156_boolean_not_equal_to_array:
+    input:             "boolean true != array i"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "array"
+
+test157_array_equal_to_boolean:
+    input:             "array i == boolean true"
+    traces:            1
+    check:
+        result:        true
+        type0:         "array"
+        type1:         "boolean"
+
+test158_array_not_equal_to_boolean:
+    input:             "array i != boolean true"
+    traces:            1
+    check:
+        result:        false
+        type0:         "array"
+        type1:         "boolean"
+
+test159_boolean_equal_to_array:
+    input:             "boolean false == array j"
+    traces:            1
+    check:
+        result:        false
+        type0:         "boolean"
+        type1:         "array"
+
+test160_boolean_not_equal_to_array:
+    input:             "boolean false != array j"
+    traces:            1
+    check:
+        result:        true
+        type0:         "boolean"
+        type1:         "array"
+
+test161_array_equal_to_boolean:
+    input:             "array j == boolean false"
+    traces:            1
+    check:
+        result:        false
+        type0:         "array"
+        type1:         "boolean"
+
+test162_array_not_equal_to_boolean:
+    input:             "array j != boolean false"
+    traces:            1
+    check:
+        result:        true
+        type0:         "array"
+        type1:         "boolean"
+
+test163_integer_equal_to_integer:
+    input:             "integer 0 == integer 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "integer"
+
+test164_integer_not_equal_to_integer:
+    input:             "integer 0 != integer 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "integer"
+
+test165_integer_equal_to_integer:
+    input:             "integer 0 == integer 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "integer"
+
+test166_integer_not_equal_to_integer:
+    input:             "integer 0 != integer 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "integer"
+
+test167_integer_equal_to_integer:
+    input:             "integer 1 == integer 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "integer"
+
+test168_integer_not_equal_to_integer:
+    input:             "integer 1 != integer 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "integer"
+
+test169_integer_equal_to_integer:
+    input:             "integer -1 == integer 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "integer"
+
+test170_integer_not_equal_to_integer:
+    input:             "integer -1 != integer 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "integer"
+
+test171_integer_equal_to_integer:
+    input:             "integer 1 == integer -1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "integer"
+
+test172_integer_not_equal_to_integer:
+    input:             "integer 1 != integer -1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "integer"
+
+test173_integer_equal_to_integer:
+    input:             "integer -1 == integer 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "integer"
+
+test174_integer_not_equal_to_integer:
+    input:             "integer -1 != integer 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "integer"
+
+test175_integer_equal_to_integer:
+    input:             "integer 0 == integer -1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "integer"
+
+test176_integer_not_equal_to_integer:
+    input:             "integer 0 != integer -1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "integer"
+
+test177_integer_equal_to_real:
+    input:             "integer 0 == real 0.1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "real"
+
+test178_integer_not_equal_to_real:
+    input:             "integer 0 != real 0.1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "real"
+
+test179_real_equal_to_integer:
+    input:             "real 0.1 == integer 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "integer"
+
+test180_real_not_equal_to_integer:
+    input:             "real 0.1 != integer 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "integer"
+
+test181_integer_equal_to_real:
+    input:             "integer 0 == real 0.0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "real"
+
+test182_integer_not_equal_to_real:
+    input:             "integer 0 != real 0.0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "real"
+
+test183_real_equal_to_integer:
+    input:             "real 0.0 == integer 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "integer"
+
+test184_real_not_equal_to_integer:
+    input:             "real 0.0 != integer 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "integer"
+
+test185_integer_equal_to_real:
+    input:             "integer 1 == real 1.0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "real"
+
+test186_integer_not_equal_to_real:
+    input:             "integer 1 != real 1.0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "real"
+
+test187_real_equal_to_integer:
+    input:             "real 1.0 == integer 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "integer"
+
+test188_real_not_equal_to_integer:
+    input:             "real 1.0 != integer 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "integer"
+
+test189_integer_equal_to_real:
+    input:             "integer -1 == real -1.0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "real"
+
+test190_integer_not_equal_to_real:
+    input:             "integer -1 != real -1.0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "real"
+
+test191_real_equal_to_integer:
+    input:             "real -1.0 == integer -1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "integer"
+
+test192_real_not_equal_to_integer:
+    input:             "real -1.0 != integer -1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "integer"
+
+test193_integer_equal_to_real:
+    input:             "integer -1 == real -0.9"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "real"
+
+test194_integer_not_equal_to_real:
+    input:             "integer -1 != real -0.9"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "real"
+
+test195_real_equal_to_integer:
+    input:             "real -0.9 == integer -1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "integer"
+
+test196_real_not_equal_to_integer:
+    input:             "real -0.9 != integer -1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "integer"
+
+test197_integer_equal_to_string:
+    input:             "integer 0 == string 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "string"
+
+test198_integer_not_equal_to_string:
+    input:             "integer 0 != string 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "string"
+
+test199_string_equal_to_integer:
+    input:             "string 0 == integer 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "integer"
+
+test200_string_not_equal_to_integer:
+    input:             "string 0 != integer 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "integer"
+
+test201_integer_equal_to_string:
+    input:             "integer 10 == string 10"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "string"
+
+test202_integer_not_equal_to_string:
+    input:             "integer 10 != string 10"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "string"
+
+test203_string_equal_to_integer:
+    input:             "string 10 == integer 10"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "integer"
+
+test204_string_not_equal_to_integer:
+    input:             "string 10 != integer 10"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "integer"
+
+test205_integer_equal_to_string:
+    input:             "integer -10 == string -10"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "string"
+
+test206_integer_not_equal_to_string:
+    input:             "integer -10 != string -10"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "string"
+
+test207_string_equal_to_integer:
+    input:             "string -10 == integer -10"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "integer"
+
+test208_string_not_equal_to_integer:
+    input:             "string -10 != integer -10"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "integer"
+
+test209_integer_equal_to_string:
+    input:             "integer 0 == string 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "string"
+
+test210_integer_not_equal_to_string:
+    input:             "integer 0 != string 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "string"
+
+test211_string_equal_to_integer:
+    input:             "string 1 == integer 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "integer"
+
+test212_string_not_equal_to_integer:
+    input:             "string 1 != integer 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "integer"
+
+test213_integer_equal_to_string:
+    input:             "integer 10 == string 101"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "string"
+
+test214_integer_not_equal_to_string:
+    input:             "integer 10 != string 101"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "string"
+
+test215_string_equal_to_integer:
+    input:             "string 101 == integer 10"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "integer"
+
+test216_string_not_equal_to_integer:
+    input:             "string 101 != integer 10"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "integer"
+
+test217_integer_equal_to_string:
+    input:             "integer -10 == string -101"
+    traces:            1
+    check:
+        result:        false
+        type0:         "integer"
+        type1:         "string"
+
+test218_integer_not_equal_to_string:
+    input:             "integer -10 != string -101"
+    traces:            1
+    check:
+        result:        true
+        type0:         "integer"
+        type1:         "string"
+
+test219_string_equal_to_integer:
+    input:             "string -101 == integer -10"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "integer"
+
+test220_string_not_equal_to_integer:
+    input:             "string -101 != integer -10"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "integer"
+
+test221_integer_equal_to_array:
+    input:             "integer 0 == array i"
+    error:
+        - [ "std::bad_cast", 10, 36 ]
+
+test222_integer_not_equal_to_array:
+    input:             "integer 0 != array i"
+    error:
+        - [ "std::bad_cast", 12, 36 ]
+
+test223_real_equal_to_real:
+    input:             "real 0 == real 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "real"
+
+test224_real_not_equal_to_real:
+    input:             "real 0 != real 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "real"
+
+test225_real_equal_to_real:
+    input:             "real 0 == real 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "real"
+
+test226_real_not_equal_to_real:
+    input:             "real 0 != real 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "real"
+
+test227_real_equal_to_real:
+    input:             "real 1 == real 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "real"
+
+test228_real_not_equal_to_real:
+    input:             "real 1 != real 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "real"
+
+test229_real_equal_to_real:
+    input:             "real 0.0 == real 0.0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "real"
+
+test230_real_not_equal_to_real:
+    input:             "real 0.0 != real 0.0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "real"
+
+test231_real_equal_to_real:
+    input:             "real 0.0 == real 0.1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "real"
+
+test232_real_not_equal_to_real:
+    input:             "real 0.0 != real 0.1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "real"
+
+test233_real_equal_to_real:
+    input:             "real 0.1 == real 0.0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "real"
+
+test234_real_not_equal_to_real:
+    input:             "real 0.1 != real 0.0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "real"
+
+test235_real_equal_to_real:
+    input:             "real -3.14e5 == real -31400"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "real"
+
+test236_real_not_equal_to_real:
+    input:             "real -3.14e5 != real -31400"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "real"
+
+test237_real_equal_to_real:
+    input:             "real -31400 == real -3.14e5"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "real"
+
+test238_real_not_equal_to_real:
+    input:             "real -31400 != real -3.14e5"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "real"
+
+test239_real_equal_to_string:
+    input:             "real 0 == string 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "string"
+
+test240_real_not_equal_to_string:
+    input:             "real 0 != string 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "string"
+
+test241_string_equal_to_real:
+    input:             "string 1 == real 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "real"
+
+test242_string_not_equal_to_real:
+    input:             "string 1 != real 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "real"
+
+test243_real_equal_to_string:
+    input:             "real 1 == string 0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "string"
+
+test244_real_not_equal_to_string:
+    input:             "real 1 != string 0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "string"
+
+test245_string_equal_to_real:
+    input:             "string 0 == real 1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "real"
+
+test246_string_not_equal_to_real:
+    input:             "string 0 != real 1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "real"
+
+test247_real_equal_to_string:
+    input:             "real 0.0 == string 0.0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "string"
+
+test248_real_not_equal_to_string:
+    input:             "real 0.0 != string 0.0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "string"
+
+test249_string_equal_to_real:
+    input:             "string 0.0 == real 0.0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "real"
+
+test250_string_not_equal_to_real:
+    input:             "string 0.0 != real 0.0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "real"
+
+test251_real_equal_to_string:
+    input:             "real 1.234 == string 1.234"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "string"
+
+test252_real_not_equal_to_string:
+    input:             "real 1.234 != string 1.234"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "string"
+
+test253_string_equal_to_real:
+    input:             "string 1.234 == real 1.234"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "real"
+
+test254_string_not_equal_to_real:
+    input:             "string 1.234 != real 1.234"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "real"
+
+test255_real_equal_to_string:
+    input:             "real 0.1 == string 0.0"
+    traces:            1
+    check:
+        result:        false
+        type0:         "real"
+        type1:         "string"
+
+test256_real_not_equal_to_string:
+    input:             "real 0.1 != string 0.0"
+    traces:            1
+    check:
+        result:        true
+        type0:         "real"
+        type1:         "string"
+
+test257_string_equal_to_real:
+    input:             "string 0.0 == real 0.1"
+    traces:            1
+    check:
+        result:        false
+        type0:         "string"
+        type1:         "real"
+
+test258_string_not_equal_to_real:
+    input:             "string 0.0 != real 0.1"
+    traces:            1
+    check:
+        result:        true
+        type0:         "string"
+        type1:         "real"
+
+test259_real_equal_to_array:
+    input:             "real 0 == array i"
+    error:
+        - [ "std::bad_cast", 10, 36 ]
+
+test260_real_not_equal_to_array:
+    input:             "real 0 != array i"
+    error:
+        - [ "std::bad_cast", 12, 36 ]
+
+test261_array_equal_to_array:
+    input:             "array i == array j"
+    error:
+        - [ "operator '==': incomparable operands", 10, 36 ]
+
+test262_array_not_equal_to_array:
+    input:             "array i != array j"
+    error:
+        - [ "operator '!=': incomparable operands", 12, 36 ]
+

@@ -107,19 +107,33 @@ public:
 
 		xp::match_results<typename anta::iterator<M_>::type> m;
 		if (! xp::regex_search(E. second, C. second, m, m_pattern))
+		{
 			return;
+		}
 
 		anta::State<M_>* state = NULL;
 		for (Combinator& i = m_combinator; ! i. end(); ++ i)
 		{
 			if (i. pitch())
 			{
-				state = S. push(m[0]. first, m[0]. second);
+				if (state != NULL)
+				{
+					S. push(state);
+				}
+				state = S. spawn(m[0]. first, m[0]. second);
+				if (state == NULL)
+				{
+					return;
+				}
 			}
 			state -> ref(i. key(), S, true) = i. value();
 		}
 
-		if (state == NULL)
+		if (state != NULL)
+		{
+			S. push(state);
+		}
+		else
 		{
 			S. push(m[0]. first, m[0]. second);
 		}

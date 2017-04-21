@@ -4,6 +4,9 @@ script:
     - cogito2.ng
     - cogito3.ng
 
+config:
+    lr_threshold:      0
+
 test1:
     input:             (true and false) is false
     check:

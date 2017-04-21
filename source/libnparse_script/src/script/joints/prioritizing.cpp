@@ -82,7 +82,7 @@ class Operator: public IOperator
 		joints. reserve(pr);
 		for (int n = static_cast<int>(pr); n; -- n)
 		{
-			// @todo: folding needs optimization!
+			// @todo: folding of joint expressions requires optimization
 			joints. push_back(arg. staging. popJoint());
 		}
 

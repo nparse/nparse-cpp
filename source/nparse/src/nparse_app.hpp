@@ -77,6 +77,7 @@ private:
 #endif
 	std::string m_entry_point;
 	int m_entry_label;
+	long m_lr_threshold;
 #if defined(DEBUG_PRINT)
 	std::string m_debug_print;
 #endif

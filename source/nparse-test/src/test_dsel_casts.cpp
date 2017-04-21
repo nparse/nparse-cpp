@@ -299,12 +299,11 @@ const test_case test_case::entries[] = {
 TYPED_TEST_CASE_P(test_cast);
 
 //
-//	tests for left/right directed casts
+//	tests for directed left and right casts
 //
 #define D_CAST(u, v) this->d_cast(this->u, this->v)
-#define P_CAST(u, v) this->p_cast(this->u, this->v)
 
-TYPED_TEST_P(test_cast, directed_empty)
+TYPED_TEST_P(test_cast, directed_null)
 {
 	EXPECT_EQ( "null",		D_CAST(n, n) );
 	EXPECT_EQ( "null",		D_CAST(n, b) );
@@ -321,8 +320,8 @@ TYPED_TEST_P(test_cast, directed_boolean)
 	EXPECT_EQ( "boolean",	D_CAST(b, i) );
 	EXPECT_EQ( "boolean",	D_CAST(b, r) );
 	EXPECT_EQ( "boolean",	D_CAST(b, s1) );
-	ASSERT_THROW( D_CAST(b, s), std::bad_cast );
-	ASSERT_THROW( D_CAST(b, a), std::bad_cast );
+	EXPECT_THROW( D_CAST(b, s), std::bad_cast );
+	EXPECT_EQ( "boolean",	D_CAST(b, a) );
 }
 
 TYPED_TEST_P(test_cast, directed_integer)
@@ -332,8 +331,8 @@ TYPED_TEST_P(test_cast, directed_integer)
 	EXPECT_EQ( "integer",	D_CAST(i, i) );
 	EXPECT_EQ( "integer",	D_CAST(i, r) );
 	EXPECT_EQ( "integer",	D_CAST(i, s2) );
-	ASSERT_THROW( D_CAST(i, s), std::bad_cast );
-	ASSERT_THROW( D_CAST(i, a), std::bad_cast );
+	EXPECT_THROW( D_CAST(i, s), std::bad_cast );
+	EXPECT_THROW( D_CAST(i, a), std::bad_cast );
 }
 
 TYPED_TEST_P(test_cast, directed_real)
@@ -343,8 +342,8 @@ TYPED_TEST_P(test_cast, directed_real)
 	EXPECT_EQ( "real",		D_CAST(r, i) );
 	EXPECT_EQ( "real",		D_CAST(r, r) );
 	EXPECT_EQ( "real",		D_CAST(r, s3) );
-	ASSERT_THROW( D_CAST(r, s), std::bad_cast );
-	ASSERT_THROW( D_CAST(r, a), std::bad_cast );
+	EXPECT_THROW( D_CAST(r, s), std::bad_cast );
+	EXPECT_THROW( D_CAST(r, a), std::bad_cast );
 }
 
 TYPED_TEST_P(test_cast, directed_string)
@@ -359,86 +358,87 @@ TYPED_TEST_P(test_cast, directed_string)
 
 TYPED_TEST_P(test_cast, directed_array)
 {
-	EXPECT_EQ( "array",		D_CAST(a, n) );
-	EXPECT_EQ( "array",		D_CAST(a, b) );
-	EXPECT_EQ( "array",		D_CAST(a, i) );
-	EXPECT_EQ( "array",		D_CAST(a, r) );
-	EXPECT_EQ( "array",		D_CAST(a, s) );
+	EXPECT_THROW( D_CAST(a, n), std::bad_cast );
+	EXPECT_THROW( D_CAST(a, b), std::bad_cast );
+	EXPECT_THROW( D_CAST(a, i), std::bad_cast );
+	EXPECT_THROW( D_CAST(a, r), std::bad_cast );
+	EXPECT_THROW( D_CAST(a, s), std::bad_cast );
 	EXPECT_EQ( "array",		D_CAST(a, a) );
 }
 
 //
 //	tests for priority cast
 //
+#define P_CAST(u, v) this->p_cast(this->u, this->v)
 
-TYPED_TEST_P(test_cast, priority_empty)
+TYPED_TEST_P(test_cast, priority_null)
 {
 	EXPECT_EQ( "null",		P_CAST(n, n) );
-	EXPECT_EQ( "boolean",	P_CAST(n, b) );
+	EXPECT_THROW( P_CAST(n, a), std::bad_cast );
 	EXPECT_EQ( "integer",	P_CAST(n, i) );
 	EXPECT_EQ( "real",		P_CAST(n, r) );
+	EXPECT_EQ( "boolean",	P_CAST(n, b) );
 	EXPECT_EQ( "string",	P_CAST(n, s) );
-	EXPECT_EQ( "array",		P_CAST(n, a) );
 }
 
-TYPED_TEST_P(test_cast, priority_boolean)
+TYPED_TEST_P(test_cast, priority_array)
 {
-	EXPECT_EQ( "boolean",	P_CAST(b, n) );
-	EXPECT_EQ( "boolean",	P_CAST(b, b) );
-	EXPECT_EQ( "integer",	P_CAST(b, i) );
-	EXPECT_EQ( "real",		P_CAST(b, r) );
-	EXPECT_EQ( "string",	P_CAST(b, s) );
-	EXPECT_EQ( "array",		P_CAST(b, a) );
+	EXPECT_THROW( P_CAST(a, n), std::bad_cast );
+	EXPECT_EQ( "array",		P_CAST(a, a) );
+	EXPECT_THROW( P_CAST(a, i), std::bad_cast );
+	EXPECT_THROW( P_CAST(a, r), std::bad_cast );
+	EXPECT_EQ( "boolean",	P_CAST(a, b) );
+	EXPECT_EQ( "string",	P_CAST(a, s) );
 }
 
 TYPED_TEST_P(test_cast, priority_integer)
 {
 	EXPECT_EQ( "integer",	P_CAST(i, n) );
-	EXPECT_EQ( "integer",	P_CAST(i, b) );
+	EXPECT_THROW( P_CAST(i, a), std::bad_cast );
 	EXPECT_EQ( "integer",	P_CAST(i, i) );
 	EXPECT_EQ( "real",		P_CAST(i, r) );
+	EXPECT_EQ( "boolean",	P_CAST(i, b) );
 	EXPECT_EQ( "string",	P_CAST(i, s) );
-	EXPECT_EQ( "array",		P_CAST(i, a) );
 }
 
 TYPED_TEST_P(test_cast, priority_real)
 {
 	EXPECT_EQ( "real",		P_CAST(r, n) );
-	EXPECT_EQ( "real",		P_CAST(r, b) );
+	EXPECT_THROW( P_CAST(r, a), std::bad_cast );
 	EXPECT_EQ( "real",		P_CAST(r, i) );
 	EXPECT_EQ( "real",		P_CAST(r, r) );
+	EXPECT_EQ( "boolean",	P_CAST(r, b) );
 	EXPECT_EQ( "string",	P_CAST(r, s) );
-	EXPECT_EQ( "array",		P_CAST(r, a) );
+}
+
+TYPED_TEST_P(test_cast, priority_boolean)
+{
+	EXPECT_EQ( "boolean",	P_CAST(b, n) );
+	EXPECT_EQ( "boolean",   P_CAST(b, a) );
+	EXPECT_EQ( "boolean",	P_CAST(b, i) );
+	EXPECT_EQ( "boolean",	P_CAST(b, r) );
+	EXPECT_EQ( "boolean",	P_CAST(b, b) );
+	EXPECT_EQ( "string",	P_CAST(b, s) );
 }
 
 TYPED_TEST_P(test_cast, priority_string)
 {
 	EXPECT_EQ( "string",	P_CAST(s, n) );
-	EXPECT_EQ( "string",	P_CAST(s, b) );
+	EXPECT_EQ( "string",	P_CAST(s, a) );
 	EXPECT_EQ( "string",	P_CAST(s, i) );
 	EXPECT_EQ( "string",	P_CAST(s, r) );
+	EXPECT_EQ( "string",	P_CAST(s, b) );
 	EXPECT_EQ( "string",	P_CAST(s, s) );
-	EXPECT_EQ( "array",		P_CAST(s, a) );
-}
-
-TYPED_TEST_P(test_cast, priority_array)
-{
-	EXPECT_EQ( "array",		P_CAST(a, n) );
-	EXPECT_EQ( "array",		P_CAST(a, b) );
-	EXPECT_EQ( "array",		P_CAST(a, i) );
-	EXPECT_EQ( "array",		P_CAST(a, r) );
-	EXPECT_EQ( "array",		P_CAST(a, s) );
-	EXPECT_EQ( "array",		P_CAST(a, a) );
 }
 
 REGISTER_TYPED_TEST_CASE_P(test_cast,
-		directed_empty,
+		directed_null,
 		directed_boolean,
 		directed_integer,
 		directed_real,
 		directed_string,
 		directed_array,
-		priority_empty,
+		priority_null,
 		priority_boolean,
 		priority_integer,
 		priority_real,
@@ -447,12 +447,15 @@ REGISTER_TYPED_TEST_CASE_P(test_cast,
 );
 
 typedef ::testing::Types<
-	test_pair<M1, 0>, test_pair<M1, 1>, test_pair<M1, 2>, test_pair<M1, 3>, test_pair<M1, 4>,
-	test_pair<M1, 5>, test_pair<M1, 6>, test_pair<M1, 7>, test_pair<M1, 8>, test_pair<M1, 9>,
-	test_pair<M2, 0>, test_pair<M2, 1>, test_pair<M2, 2>, test_pair<M2, 3>, test_pair<M2, 4>,
-	test_pair<M2, 5>, test_pair<M2, 6>, test_pair<M2, 7>, test_pair<M2, 8>, test_pair<M2, 9>,
-	test_pair<M3, 0>, test_pair<M3, 1>, test_pair<M3, 2>, test_pair<M3, 3>, test_pair<M3, 4>,
-	test_pair<M3, 5>, test_pair<M3, 6>, test_pair<M3, 7>, test_pair<M3, 8>, test_pair<M3, 9>
+	test_pair<M1, 0>, test_pair<M1, 1>, test_pair<M1, 2>, test_pair<M1, 3>,
+	test_pair<M1, 4>, test_pair<M1, 5>, test_pair<M1, 6>, test_pair<M1, 7>,
+	test_pair<M1, 8>, test_pair<M1, 9>,
+	test_pair<M2, 0>, test_pair<M2, 1>, test_pair<M2, 2>, test_pair<M2, 3>,
+	test_pair<M2, 4>, test_pair<M2, 5>, test_pair<M2, 6>, test_pair<M2, 7>,
+	test_pair<M2, 8>, test_pair<M2, 9>,
+	test_pair<M3, 0>, test_pair<M3, 1>, test_pair<M3, 2>, test_pair<M3, 3>,
+	test_pair<M3, 4>, test_pair<M3, 5>, test_pair<M3, 6>, test_pair<M3, 7>,
+	test_pair<M3, 8>, test_pair<M3, 9>
 > Models;
 
 INSTANTIATE_TYPED_TEST_CASE_P(cast, test_cast, Models);

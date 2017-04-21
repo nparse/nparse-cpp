@@ -15,4 +15,8 @@ common-variable-operations {
     v11 = v10[_p];              // parametrized read access
     v12 = v9.x;                 // tokenized read access
     v13 = [v1, v2, v3, v8];     // list
+
+    for each (_k in self()) {
+        ref("${_k}_type") = typeof(ref(_k));
+    }
 };

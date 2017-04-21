@@ -1,0 +1,78 @@
+script:
+    - regex1.ng
+    - regex2.ng
+
+test01:
+    input:             "R1 omega"
+    traces:            1
+    forest:
+        - (S R1 (R1 omega))
+
+test02:
+    input:             "R1 12345"
+    traces:            0
+
+test03:
+    input:             "R2 omega"
+    traces:            0
+
+test04:
+    input:             "R2 12345"
+    traces:            1
+    forest:
+        - (S R2 (R2 12345))
+
+test05:
+    input:             "R3 omega"
+    traces:            0
+
+test06:
+    input:             "R3 12345"
+    traces:            0
+
+test07:
+    input:             "R3 omega = 12345"
+    traces:            1
+    forest:
+        - (S R3 (R3 omega = 12345))
+    check:
+        key:           omega
+        value:         12345
+
+test08:
+    input:             "R4 omega"
+    traces:            0
+
+test09:
+    input:             "R4 12345"
+    traces:            0
+
+test10:
+    input:             "R4 omega = 12345"
+    traces:            1
+    forest:
+        - (S R4 (R4 omega = 12345))
+    check:
+        key:           omega
+        value:         12345
+        pair:          null
+
+test11:
+    input:             "R5 omega = 12345"
+    traces:            1
+    forest:
+        - (S R5 (R5 omega = 12345))
+    check:
+        key:           omega
+        value:         12345
+        pair:          "omega = 12345"
+
+test12:
+    input:             "R6 omega = 12345"
+    traces:            1
+    forest:
+        - (S R6 (R6 (R4 omega = 12345)))
+    check:
+        key:           omega
+        value:         12345
+        pair:          "omega = 12345"

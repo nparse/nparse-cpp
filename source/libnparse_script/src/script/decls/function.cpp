@@ -82,7 +82,7 @@ public:
 
 	plugin::IPluggable* construct (void* a_address)
 	{
-		// @todo: This is a side effect of multiple inheritance.
+		// @todo: side effect of multiple inheritance
 		return this;
 	}
 

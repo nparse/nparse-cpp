@@ -34,8 +34,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define PLUGIN_LIST			\
 	operator_operand,		\
-	operator_subscripting,	\
-	operator_access,		\
+	operator_subscript,		\
 	operator_negation,		\
 	operator_inversion,		\
 	operator_definition,	\
@@ -61,7 +60,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	function_pass,			\
 	function_stop,			\
 	function_nth,			\
-	function_len
+	function_len,			\
+	function_typeof
 
 PLUGIN_STATIC_MODULE( PLUGIN_LIST )
 

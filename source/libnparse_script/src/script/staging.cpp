@@ -107,8 +107,7 @@ public:
 
 	const anta::Acceptor<NLG>& acceptor (const string_t& a_def)
 	{
-		// @todo: acceptor key (a_def) may depend on current path for cetrain
-		//		  types of acceptors
+		// @todo: acceptor key (a_def) depends on current path
 		const std::string& path = m_st. current_path();
 		acceptors_t::iterator found_at = m_acceptors. find(a_def);
 		if (found_at == m_acceptors. end())

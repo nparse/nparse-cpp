@@ -54,35 +54,65 @@ public:
 	result_type operator() (const Expr_& a_expr, Context_& a_context) const
 	{
 		Context_::isReader();
-		return util::priority_cast(
+		return (*this)(
 				proto::eval(proto::left(a_expr), a_context),
 				proto::eval(proto::right(a_expr), a_context),
-				*this);
+				NULL);
 	}
 
 public:
-	template <typename U_, typename V_>
-	bool operator() (U_, V_) const
+	result_type operator() (const aux::Variable<M_>& u,
+			const aux::Variable<M_>& v, void*) const
 	{
-		throw std::logic_error("operator '==': incomparable operands");
+		if (u. is_null()) return v. is_null();
+		else if (v. is_null()) return false;
+		else return util::priority_cast(u, v, *this);
 	}
 
-#if 1
-	// NOTE: Despite the null value is incomparable, two null values are still
-	//		 equivalent. This gives us the opportunity to compare values against
-	//		 NULL.
-	bool operator() (const typename aux::null<M_>::type&,
+	template <typename U_>
+	result_type operator() (const U_&, const typename aux::null<M_>::type&,
+			void*) const
+	{
+		return false;
+	}
+
+	template <typename V_>
+	result_type operator() (const typename aux::null<M_>::type&, const V_&,
+			void*) const
+	{
+		return false;
+	}
+
+	result_type operator() (const typename aux::null<M_>::type&,
+			const typename aux::null<M_>::type&, void*) const
+	{
+		return true;
+	}
+
+	template <typename U_, typename V_>
+	result_type operator() (const U_& u, const V_& v, void*) const
+	{
+		return util::priority_cast(u, v, *this);
+	}
+
+public:
+	result_type operator() (const typename aux::null<M_>::type&,
 			const typename aux::null<M_>::type&) const
 	{
 		return true;
 	}
-#endif
 
-	template <typename V_>
-	bool operator() (const V_& a_left, const V_& a_right,
-		typename boost::enable_if<comparable<M_, V_> >::type* a0 = NULL) const
+	template <typename U_>
+	result_type operator() (const U_& a_left, const U_& a_right,
+		typename boost::enable_if<comparable<M_, U_> >::type* a0 = NULL) const
 	{
 		return a_left == a_right;
+	}
+
+	template <typename U_, typename V_>
+	result_type operator() (U_, V_) const
+	{
+		throw std::logic_error("operator '==': incomparable operands");
 	}
 
 };

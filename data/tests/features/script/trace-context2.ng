@@ -1,0 +1,52 @@
+// This file contains definitions equivalent to those in `trace-context1.ng`,
+// but uses more verbose (archaic) syntax.
+
+/* ... */
+rule A := ^(?<arg>\w+);
+
+/* ... */
+procedure p() {
+    p = arg;
+};
+rule P1 := p1 $A {
+                res = p();
+            };
+
+/* ... */
+function f() {
+    f = arg;
+};
+rule F1 := f1 $A {
+                res = f();
+            };
+
+/* ... */
+rule F2 := f2 $A {
+                res = f(arg);
+            };
+
+/* ... */
+function g(arg) {
+    g = arg;
+};
+rule F3 := f3 $A {
+                res = g(arg);
+            };
+
+/* ... */
+function h() {
+    h = p();
+};
+rule F4 := f4 $A {
+                res = h();
+            };
+
+/* ... */
+rule S :=
+    (   <q:P1>
+    ||  <q:F1>
+    ||  <q:F2>
+    ||  <q:F3>
+    ||  <q:F4>
+    )
+    ^$;

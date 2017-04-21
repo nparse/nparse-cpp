@@ -42,8 +42,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ANTA_NDL_STACKING			// - push/pop operations on contexts
 #define ANTA_NDL_MUTABLE_ANCESTOR	// - context ancestor manipulation
 
-#include "_version.hpp"
-
 // [ contributed ]
 #include <plugin/plugin.hpp>
 #include <encode/encode.hpp>

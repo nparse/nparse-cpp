@@ -136,7 +136,7 @@ int Dictionary::load (const std::string& a_filename)
 	if (! file)
 		return -1;
 
-	// @todo: line-by-line loading doesn't work with comments, etc.
+	// @todo: line-by-line loading doesn't work with comments
 	int line_number = 0;
 	std::string line;
 	while (std::getline(file, line))

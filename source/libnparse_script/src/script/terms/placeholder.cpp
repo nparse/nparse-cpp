@@ -55,7 +55,6 @@ public:
 		{
 			const anta::range<NLG>::type& r = s -> get_range();
 			result_type(r. first, r. second). swap(res);
-			// @todo: res = res. as_type() should be res. make_type()
 			switch (m_type)
 			{
 			case 'b':
@@ -172,14 +171,13 @@ class Construct: public IConstruct
 
 	bool create_parametric (const hnd_arg_t& arg)
 	{
-		anta::range<SG>::type range = get_accepted_range(arg);
+		anta::range<SG>::type range = get_marked_range(arg);
 		assert(static_cast<char>(*range. first) == '$');
 
 		// Identify enforced type.
 		char type = static_cast<char>(*(++ range. first));
 
-		arg. staging. push(new ActionParametrized(
-					get_marked_range(arg), type, arg. staging));
+		arg. staging. push(new ActionParametrized(range, type, arg. staging));
 		return true;
 	}
 

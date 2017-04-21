@@ -604,6 +604,11 @@ public:
 		throw std::bad_cast();
 	}
 
+	Proxy<boolean<M_> > operator() (const Proxy<array<M_> >&) const
+	{
+		return true;
+	}
+
 };
 
 /**
@@ -752,24 +757,15 @@ template <typename M_>
 class as<Proxy<array<M_> > >: public boost::static_visitor<Proxy<array<M_> > >
 {
 public:
-	Proxy<array<M_> > operator() (const Proxy<null<M_> >&) const
+	template <typename S_>
+	Proxy<array<M_> > operator() (S_) const
 	{
-		return typename array<M_>::type();
+		throw std::bad_cast();
 	}
 
 	Proxy<array<M_> > operator() (const Proxy<array<M_> >& a_v) const
 	{
 		return a_v;
-	}
-
-	template <typename Wrapper_>
-	Proxy<array<M_> > operator() (const Proxy<Wrapper_>& a_t) const
-	{
-		static const typename ndl::context_key<M_>::type index =
-			typename ndl::context_key<M_>::type();
-		typename array<M_>::type r = typename array<M_>::type();
-		r -> ref(index) = a_t. value();
-		return r;
 	}
 
 };

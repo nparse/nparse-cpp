@@ -1,5 +1,5 @@
 /*
- * @file $/source/libnparse_runtime/src/operators/subscripting.cpp
+ * @file $/source/libnparse_runtime/src/operators/subscript.cpp
  *
 This file is a part of the "nParse" project -
         a general purpose parsing framework, version 0.1.8
@@ -26,7 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <algorithm>
 #include "_binary_action.hpp"
-#include "_binary_operator.hpp"
 #include <anta/sas/regex.hpp>
 #include "_priority.hpp"
 #include "../static.hpp"
@@ -35,7 +34,66 @@ namespace {
 
 typedef anta::aux::integer<NLG>::type int_t;
 
-class Action: public BinaryAction
+class ActionAccess: public LinkedAction
+{
+public:
+	// Overridden from IAction:
+
+	result_type evalVal (IEnvironment& a_env) const
+	{
+		// Evaluate object value.
+		result_type u = m_operand. evalVal(a_env);
+
+		// If the object is an array then the field represents its key.
+		if (u. is_array())
+		{
+			return u. as_array() -> val(m_field);
+		}
+
+		// Otherwise, access operator doesn't make much sence.
+		else
+		{
+			throw ex::runtime_error()
+				<< ex::function("operator . `access` [val]")
+				<< ex::message("cannot be used with this type");
+		}
+	}
+
+	result_type& evalRef (IEnvironment& a_env) const
+	{
+		// Evaluate object reference.
+		result_type& u = m_operand. evalRef(a_env);
+
+		// If the object is an array then the field represents its key.
+		if (u. is_array())
+		{
+			return u. as_array() -> ref(m_field);
+		}
+
+		// Otherwise, access operator doesn't make much sence.
+		else
+		{
+			throw ex::runtime_error()
+				<< ex::function("operator . `access` [ref]")
+				<< ex::message("cannot be used with this type");
+		}
+	}
+
+private:
+	const IEnvironment::key_type m_field;
+	action_pointer m_operand;
+
+public:
+	ActionAccess (const anta::range<SG>::type& a_range, IStaging& a_staging,
+			const string_t a_field):
+		LinkedAction (a_range), m_field (a_field)
+	{
+		m_operand = a_staging. pop();
+	}
+
+};
+
+class ActionSubscript: public BinaryAction
 {
 public:
 	// Overridden from IAction:
@@ -116,7 +174,7 @@ public:
 	}
 
 public:
-	Action (const anta::range<SG>::type& a_range, IStaging& a_staging):
+	ActionSubscript (const anta::range<SG>::type& a_range, IStaging& a_staging):
 		BinaryAction (a_range, a_staging)
 	{
 	}
@@ -172,35 +230,46 @@ private:
 
 };
 
-class Operator: public BinaryOperator
+class Operator: public IOperator
 {
-	bool push_substring (const hnd_arg_t& arg)
+	bool create_access (const hnd_arg_t& arg) const
+	{
+		arg. staging. push(new ActionAccess(get_marked_range(arg), arg. staging,
+					get_accepted_str(arg)));
+		return true;
+	}
+
+	bool create_subscript (const hnd_arg_t& arg) const
+	{
+		arg. staging. push(new ActionSubscript(get_marked_range(arg),
+					arg. staging));
+		return true;
+	}
+
+	bool create_substring (const hnd_arg_t& arg)
 	{
 		arg. staging. push(new ActionSubstring(get_marked_range(arg),
 					arg. staging));
 		return true;
 	}
 
-	anta::Label<SG> m_substring;
+	anta::Label<SG> m_access, m_subscript, m_substring;
 
 public:
-	Operator ():
-		BinaryOperator (PRIORITY_SUBSCRIPTING, "[]")
+	Operator ()
 	{
-		m_substring = hnd_t(this, &Operator::push_substring);
-	}
-
-public:
-	// Overridden from BinaryOperator:
-
-	IAction* create_action (const anta::range<SG>::type& a_range,
-			IStaging& a_staging) const
-	{
-		return new Action(a_range, a_staging);
+		m_access = hnd_t(this, &Operator::create_access);
+		m_subscript = hnd_t(this, &Operator::create_subscript);
+		m_substring = hnd_t(this, &Operator::create_substring);
 	}
 
 public:
 	// Overridden from IOperator:
+
+	int priority () const
+	{
+		return PRIORITY_SUBSCRIPT;
+	}
 
 	void deploy (level_t a_current, level_t a_previous, const levels_t& a_top)
 		const
@@ -208,10 +277,14 @@ public:
 		using namespace anta::ndl::terminals;
 		a_current =
 			a_previous
-		>  *(	re("\\s*\\[\\s*") * M0 > a_top. back()
-			>	(	re("\\s*]") * M1 * m_action
-				|	re("\\s*:\\s*")	> a_top. back()
+		>  *(	(	re("\\s*\\.\\s*") * M0
+				>	re("(?!\\d)[_\\w]+") * M1 * m_access
+				)
+			|	(	re("\\s*\\[\\s*") * M0 > a_top. back()
+				>	(	re("\\s*]") * M1 * m_subscript
+					|	re("\\s*:\\s*")	> a_top. back()
 						> re("\\s*]") * M1 * m_substring
+					)
 				)
 			);
 	}
@@ -220,4 +293,4 @@ public:
 
 } // namespace
 
-PLUGIN(Operator, operator_subscripting, nparse.script.operators.Subscripting)
+PLUGIN(Operator, operator_subscript, nparse.script.operators.Subscript)

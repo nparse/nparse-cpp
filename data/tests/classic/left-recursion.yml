@@ -1,5 +1,6 @@
 script:
-    - left-recursion.ng
+    - left-recursion1.ng
+    - left-recursion2.ng
 
 test1:
     input:             alpha

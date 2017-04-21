@@ -193,19 +193,33 @@ public:
 
 			const unsigned int at = index(&* buf, out - &* buf);
 			if (at == no_index())
+			{
 				continue;
+			}
 
 			anta::State<M_>* state = NULL;
 			for (Combinator i(m_dict[at]); ! i. end(); ++ i)
 			{
 				if (i. pitch())
 				{
-					state = S. push(E. second, j);
+					if (state != NULL)
+					{
+						S. push(state);
+					}
+					state = S. spawn(E. second, j);
+					if (state == NULL)
+					{
+						return;
+					}
 				}
 				state -> ref(i. key(), S, true) = i. value();
 			}
 
-			if (state == NULL)
+			if (state != NULL)
+			{
+				S. push(state);
+			}
+			else
 			{
 				S. push(E. second, j);
 			}

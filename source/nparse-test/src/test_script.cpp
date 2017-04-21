@@ -43,22 +43,29 @@ static char* static_trim (char* str)
 	char* end = NULL;
 
 	while (*beg == ' ')
+	{
 		++ beg;
+	}
 
 	str = beg;
 
 	while (*str)
 	{
 		if (*str != ' ')
+		{
 			end = NULL;
-		else
-		if (!end)
+		}
+		else if (!end)
+		{
 			end = str;
+		}
 		++ str;
 	}
 
 	if (end)
+	{
 		*end = 0;
+	}
 
 	return beg;
 }
@@ -107,30 +114,48 @@ void configure_parser (nparse::Parser& a_parser, const YAML::Node& a_common,
 		const YAML::Node& a_case)
 {
 	YAML::Node::const_iterator i;
-	if (a_common. IsDefined() && a_common. IsMap())
+	// Both common and case-specific config nodes are present.
+	if	(	a_common. IsDefined() && a_common. IsMap()
+		&&	a_case. IsDefined() && a_case. IsMap()
+		)
 	{
-		if (a_case. IsDefined() && a_case. IsMap())
+		for (i = a_common. begin(); i != a_common. end(); ++ i)
 		{
-			for (i = a_common. begin(); i != a_common. end(); ++ i)
+			if (a_case[i -> first]. IsDefined())
 			{
-				if (a_case[i -> first]. IsDefined())
-				{
-					continue;
-				}
-				configure_parser(a_parser, i);
+				continue;
 			}
-			for (i = a_case. begin(); i != a_case. end(); ++ i)
-			{
-				configure_parser(a_parser, i);
-			}
+			configure_parser(a_parser, i);
 		}
-		else
+		for (i = a_case. begin(); i != a_case. end(); ++ i)
 		{
-			for (i = a_common. begin(); i != a_common. end(); ++ i)
-			{
-				configure_parser(a_parser, i);
-			}
+			configure_parser(a_parser, i);
 		}
+	}
+	// Only common config node is present.
+	else if (a_common. IsDefined() && a_common. IsMap())
+	{
+		for (i = a_common. begin(); i != a_common. end(); ++ i)
+		{
+			configure_parser(a_parser, i);
+		}
+	}
+	// Only case-specific config node is present.
+	else if (a_case. IsDefined() && a_case. IsMap())
+	{
+		for (i = a_case. begin(); i != a_case. end(); ++ i)
+		{
+			configure_parser(a_parser, i);
+		}
+	}
+	// No config nodes are present - enforce defaults.
+	else
+	{
+		a_parser. set("grammar_pool", "16384");
+		a_parser. set("input_pool", "16384");
+		a_parser. set("input_swap", "");
+		a_parser. set("entry_point", "S");
+		a_parser. set("entry_label", "1");
 	}
 }
 
@@ -167,7 +192,7 @@ void validate_error (const char* a_script, const char* a_case,
 		nparse::Parser& a_parser, const YAML::Node& a_error)
 {
 	std::stringstream info;
-	info << "        Source: " << a_script;
+	info << "        Script: " << a_script;
 	if (a_case && a_case[0])
 	{
 		info << " @ " << a_case;
@@ -439,13 +464,12 @@ void validate_asts (const char* a_script, const char* a_case,
 
 		if (mode == 0)
 		{
-			std::cout << "--- " << *i << '\n';
+			std::cout << "--- " << *i << std::endl;
 			++ i;
 		}
-		else
-		if (mode == 1)
+		else if (mode == 1)
 		{
-			std::cout << "+++ " << *j << '\n';
+			std::cout << "+++ " << *j << std::endl;
 			++ j;
 		}
 	}
@@ -495,10 +519,13 @@ void process_check (const char* a_script, const char* a_case,
 /**
  *	Run a single test case on the given script.
  */
-void process_case (const char* a_script, const char* a_case,
-		nparse::Parser& a_parser, const YAML::Node& a_common,
-		const YAML::Node& a_test)
+void process_case (const char* a_config_name, const char* a_script,
+		const char* a_case, const YAML::Node& a_common,
+		const YAML::Node& a_test, nparse::Parser& a_parser)
 {
+	std::cout << a_config_name << " @ " << a_script << " @ " << a_case
+		<< std::endl;
+
 	std::stringstream info;
 	info << "  Source: " << a_script << " @ " << a_case;
 
@@ -575,23 +602,24 @@ void process_case (const char* a_script, const char* a_case,
 /**
  *	Run a series of test cases on the given script.
  */
-void process_script (const char* a_script, const YAML::Node& a_config)
+void process_source (const YAML::Node& a_config_data, const char* a_config_name,
+		const char* a_script)
 {
 	std::stringstream info;
-	info << "  Source: " << a_script;
+	info << "  Config: " << a_config_name << "\n  Script: " << a_script;
 
 	// Instantiate parser.
 	nparse::Parser parser;
 	ASSERT_EQ( nparse::Parser::stReady, parser. status() ) << info. str();
 
 	// Pre-configure parser.
-	configure_parser(parser, a_config[TAG_CONFIG], YAML::Node());
+	configure_parser(parser, a_config_data[TAG_CONFIG], YAML::Node());
 
 	// Load and compile grammar script.
 	parser. load(a_script);
 
 	// Validate syntax error report.
-	const YAML::Node& error = a_config[TAG_ERROR];
+	const YAML::Node& error = a_config_data[TAG_ERROR];
 	if (error. IsDefined())
 	{
 		info << "\n  Reason: emulating a syntax error";
@@ -612,19 +640,22 @@ void process_script (const char* a_script, const YAML::Node& a_config)
 	ASSERT_EQ( nparse::Parser::stSteady, parser. status() ) << info. str();
 
 	// Run through all test cases.
-	for (YAML::Node::const_iterator test_it = a_config. begin();
-			test_it != a_config. end(); ++ test_it)
+	for (YAML::Node::const_iterator test_it = a_config_data. begin();
+			test_it != a_config_data. end(); ++ test_it)
 	{
 		const std::string& case_ = test_it -> first. as<std::string>();
 		if (case_ == TAG_SCRIPT || case_ == TAG_CONFIG)
+		{
 			continue;
+		}
 
 		process_case(
+			a_config_name,
 			a_script,
 			case_. c_str(),
-			parser,
-			a_config[TAG_CONFIG],
-			test_it -> second
+			a_config_data[TAG_CONFIG],
+			test_it -> second,
+			parser
 		);
 
 		// Clear initial trace variables and reset internal parser state.
@@ -637,9 +668,8 @@ void process_script (const char* a_script, const YAML::Node& a_config)
 
 void TestBundle::SetUp ()
 {
-	const std::string config_name = GetParam(). path(). string();
-
-	m_config_data = YAML::LoadFile(config_name);
+	m_config_name = GetParam(). path(). string();
+	m_config_data = YAML::LoadFile(m_config_name);
 	ASSERT_EQ( YAML::NodeType::Map, get_node_type(m_config_data) );
 
 	const YAML::Node& script = m_config_data[TAG_SCRIPT];
@@ -657,7 +687,7 @@ void TestBundle::SetUp ()
 					script_it != script. end(); ++ script_it)
 			{
 				ASSERT_EQ( YAML::NodeType::Scalar, script_it -> Type() )
-					<< "node `" << config_name << ':' << TAG_SCRIPT << '['
+					<< "node `" << m_config_name << ':' << TAG_SCRIPT << '['
 					<< count++ << "]' does not represent a scalar value";
 				m_scripts. push_back(script_it -> as<std::string>());
 			}
@@ -665,13 +695,14 @@ void TestBundle::SetUp ()
 		break;
 
 	default:
-		FAIL() << "node `" << config_name << ':' << TAG_SCRIPT << "' must be"
+		FAIL() << "node `" << m_config_name << ':' << TAG_SCRIPT << "' must be"
 			" either a scalar value or a list";
 	}
 }
 
 void TestBundle::TearDown ()
 {
+	m_config_name. clear();
 	m_config_data. reset();
 	m_scripts. clear();
 }
@@ -682,9 +713,10 @@ TEST_P(TestBundle, execute)
 	for (scripts_t::const_iterator script_it = m_scripts. begin();
 			script_it != m_scripts. end(); ++ script_it)
 	{
-		process_script(
-			(GetParam(). path(). parent_path() / *script_it). c_str(),
-			m_config_data
+		process_source(
+			m_config_data,
+			m_config_name. c_str(),
+			(GetParam(). path(). parent_path() / *script_it). c_str()
 		);
 	}
 }

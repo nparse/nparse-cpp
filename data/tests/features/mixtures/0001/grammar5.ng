@@ -1,0 +1,3 @@
+S := {z: {x: "^(?'x'\d+)"}} alpha <T z x[0] == x[-1]> omega ^$ { result: rev(T.x) };
+T := '<' "$x" '>';
+function rev(arg) = arg[len(arg):0];

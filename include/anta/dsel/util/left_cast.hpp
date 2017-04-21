@@ -79,7 +79,7 @@ struct left_cast_functor<aux::Variable<M_>, aux::Variable<M_> >
 
 };
 
-struct left_cast_object
+struct left_cast_type
 {
 	template <typename Left_, typename Right_, typename F_>
 	typename F_::result_type operator() (const Left_& a_left,
@@ -90,7 +90,7 @@ struct left_cast_object
 
 };
 
-const left_cast_object left_cast = left_cast_object();
+const left_cast_type left_cast = left_cast_type();
 
 /******************************************************************************/
 

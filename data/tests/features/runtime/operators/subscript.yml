@@ -1,0 +1,23 @@
+script:
+    - subscript1.ng
+    - subscript2.ng
+
+test1:
+    config:
+        param:         alpha
+    input:             ""
+    check:
+        r1:            alpha
+        r2:            alpha
+        r3:            alpha
+        r4:            alpha
+
+test2:
+    config:
+        param:         102030405
+    input:             ""
+    check:
+        r1:            102030405
+        r2:            102030405
+        r3:            102030405
+        r4:            102030405
