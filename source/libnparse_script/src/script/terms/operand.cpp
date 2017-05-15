@@ -157,7 +157,7 @@ public:
 
 	plugin::IPluggable* construct (void* a_address)
 	{
-		// @todo: This is a side effect of multiple inheritance.
+		// @todo: side effect of multiple inheritance
 		return this;
 	}
 
@@ -224,7 +224,7 @@ class Construct: public IConstruct
 	bool create_string (const hnd_arg_t& arg)
 	{
 		const anta::range<SG>::type& range = get_accepted_range(arg);
-		if (*arg. state. get_range(). first == L'"')
+		if (*(range. first) == L'"')
 		{
 			arg. staging. push(new ActionString(range));
 		}

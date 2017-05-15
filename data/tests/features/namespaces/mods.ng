@@ -1,0 +1,11 @@
+namespace Gamma;
+
+S := $Alpha.S | $Beta.S;
+
+namespace Alpha;
+
+S := alpha;
+
+namespace Beta;
+
+S := beta;

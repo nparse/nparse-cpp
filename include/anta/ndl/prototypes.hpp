@@ -38,6 +38,7 @@ namespace anta {
  *	1. Allow Processor to act as an instance of trace context.
  *	2. Provide member functions for handling trace variables.
  *	3. Make extended Processor a creator/holder of trace contexts.
+ *	4. Supply Processor with the ability to track left recursion depth.
  *
  * 	NOTE: The third template parameter which equals to meta::false_ here implies
  *		  that this base class specialization is applied to extended models.
@@ -54,6 +55,57 @@ public:
 	typedef typename ndl::context_key<M_>::type key_type;
 	typedef typename ndl::context_value<M_>::type value_type;
 	/**	@} */
+
+	/**
+	 *	The default constructor.
+	 */
+	Base ():
+		m_lr_threshold (0)
+	{
+	}
+
+	/**
+	 *	Set maximum allowed left recursion depth.
+	 *
+	 *	@param	a_lr_threshold
+	 *		Maximum number of single node entries for each source position
+	 */
+	void set_lr_threshold (const uint_t a_lr_threshold)
+	{
+		m_lr_threshold = a_lr_threshold;
+	}
+
+	/**
+	 *	Ensure that maximum allowed left recursion depth has not been reached
+	 *	yet for this combination of target node and position.
+	 */
+	bool test_lr (const Arc<M_>* a_arc,
+			const typename iterator<M_>::type& a_position)
+	{
+		if (m_lr_threshold > 0 && a_arc -> get_type() == atExtend)
+		{
+			const lr_key_type lrk(&(a_arc -> get_target()), a_position);
+			typename lr_table_type::iterator lri = m_lr_table. find(lrk);
+			if (lri == m_lr_table. end())
+			{
+				m_lr_table. insert(typename lr_table_type::value_type(lrk, 0));
+			}
+			else if (++ (lri -> second) > m_lr_threshold)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 *	Reset the processor.
+	 */
+	void reset ()
+	{
+		ndl::ContextOwner<M_>::reset();
+		m_lr_table. clear();
+	}
 
 	/**
 	 *	Get a mutable reference to the current state.
@@ -90,6 +142,18 @@ public:
 
 protected:
 	State<M_>* m_state; /**< current state pointer */
+
+private:
+	uint_t m_lr_threshold; /**< maximum allowed left recursion depth */
+
+	typedef std::pair<
+				const Node<M_>*,
+				const typename iterator<M_>::type
+			> lr_key_type;
+
+	typedef boost::unordered_map<lr_key_type, uint_t> lr_table_type;
+
+	lr_table_type m_lr_table; /**< left recursion depth tracking table */
 
 };
 

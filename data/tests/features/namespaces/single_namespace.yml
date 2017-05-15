@@ -1,0 +1,18 @@
+script:
+    - single_namespace1.ng
+
+test1:
+    input:             alpha
+    traces:            1
+    forest:
+        - "(S (modNS.T (modNS.U alpha)))"
+
+test2:
+    input:             beta
+    traces:            1
+    forest:
+        - "(S (modNS.T (modNS.V beta)))"
+
+test3:
+    input:             gamma
+    traces:            0

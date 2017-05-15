@@ -1,0 +1,5 @@
+namespace Foo;
+import mods.ng;
+
+// Demonstraces how single module `mods` can define multiple namespaces `Alpha`, `Beta` and `Gamma`.
+S := $Gamma.S ^$;

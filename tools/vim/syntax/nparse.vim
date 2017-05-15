@@ -43,7 +43,7 @@ hi              ngFuncArg1          ctermfg=green
 hi              ngFuncArg2          ctermfg=darkgray
 
 " block
-syn cluster     ngAction            contains=ngOperator,ngOperand,ngNumber,ngString,ngList,ngKeyword,ngComment
+syn cluster     ngAction            contains=ngOperator,ngOperand,ngNumber,ngString1,ngString2,ngList,ngKeyword,ngComment
 syn match       ngOperator          "/\(\*\|/\)\@!" contained
 syn match       ngOperator          "[*%=#?:!|&^~,.<>]" contained
 syn match       ngOperator          "[-+]\([[:digit:]]\)\@!" contained
@@ -51,16 +51,17 @@ syn keyword     ngOperand           null true false boolean integer real string 
 syn match       ngOperand           "\$[bifdrs]\?[[:digit:]]*\>" contained
 syn match       ngNumber            "\([-+]\|\<\)\d\+\(\.\d\+\)\?\([eE][-+]\?\d\+\)\?\>" contained
 syn match       ngNumber            "\([-+]\|\<\)0[xX][0-9a-fA-F]\+\>" contained
-syn region      ngString            start=`'` end=`'` skip=`\\'` contained
-syn region      ngString            start=`"` end=`"` skip=`\\"` contained
-syn match       ngStrPlaceholder    "$\@<!$\(\$\|{[_[:alnum:]]*}\|[_[:alnum:]]*\)" contained containedin=ngString
-syn match       ngStrWhitespace     "[[:space:]]\+" contained containedin=ngString
+syn region      ngString1           start=`'` end=`'` skip=`\(\\\\\|\\'\)` contained
+syn region      ngString2           start=`"` end=`"` skip=`\(\\\\\|\\"\)` contained
+syn match       ngStrPlaceholder    "$\@<!$\(\$\|{[_[:alnum:]]*}\|[_[:alnum:]]*\)" contained containedin=ngString2
+syn match       ngStrWhitespace     "[[:space:]]\+" contained containedin=ngString1,ngString2
 syn region      ngList              start="\([_[:alnum:])\]][[:space:]]*\)\@<!\[" end="\]" contained contains=ngList
 syn keyword     ngKeyword           if else ifelse for each foreach in do while switch case default break continue return push pop contained
 hi              ngOperator          ctermfg=darkgreen
 hi              ngOperand           ctermfg=yellow
 hi              ngNumber            ctermfg=yellow
-hi              ngString            ctermfg=brown
+hi              ngString1           ctermfg=brown
+hi              ngString2           ctermfg=brown
 hi              ngStrPlaceholder    ctermfg=brown cterm=bold
 hi              ngStrWhitespace     ctermfg=black cterm=underline
 hi              ngList              ctermfg=darkcyan
@@ -73,7 +74,7 @@ hi              ngEntity            ctermfg=white
 hi              ngEntityName        ctermfg=lightgreen cterm=bold
 
 " entity (rule or node)
-syn region      ngEntityDef         start="\(:=\|:\|{\)" end="\(;\)\@=" contains=ngFuncBody,ngString nextgroup=ngDelimiter skipwhite skipempty
+syn region      ngEntityDef         start="\(:=\|:\|{\)" end="\(;\)\@=" contains=ngFuncBody,ngString1,ngString2 nextgroup=ngDelimiter skipwhite skipempty
 syn match       ngGrRegExp          "\^[^;[:space:]]\+" contained containedin=ngEntityDef
 syn match       ngGrAssign          ":[[:alpha:]][_[:alnum:]]*" contained containedin=ngEntityDef
 syn match       ngGrReference       "\$:\?[-._[:alnum:]]\+" contained containedin=ngEntityDef

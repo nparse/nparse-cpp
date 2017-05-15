@@ -1,0 +1,24 @@
+S {
+    // escape characters in expansible string
+	a = "\\\n\"\\" ;
+    // escape characters in static string
+	b = '\\\t\'\\' ;
+    // unicode characters in expansible string
+	c = "\\\u61\u6c\u70\u68\u61" ;
+	// unicode characters in static string
+	d = '\u006f' + '\u006d' + '\u0065' + '\u0067' + '\u0061\\' ;
+	// substitution in expansible string
+    e = "<${c}>" ;
+    // static string do not allow substitutions
+    f = '<$c>' ;
+    // reverse substring
+    c_rev = c [ len ( c ) : 0 ] ;
+    // regular substring
+    d_sub1 = d [ 1 : 5 ] ; // mega
+    d_sub2 = d [ 1 : 5 ] [ 2 : 4 ]
+           + d [ 1 : 5 ] [ 0 : 2 ] ; // game
+    d_sub3 = d [ 1 : -1 ] ; // mega
+    d_sub4 = d [ -1 : 1 ] ; // agem
+    c_sub1 = c [ 3 ] ; // p
+    c_sub2 = c [ 3 : 3 ] ; // ''
+};

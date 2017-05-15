@@ -50,10 +50,10 @@ public:
 
 	result_type evalVal (IEnvironment& a_env) const
 	{
-		if (m_left. evalVal(a_env). as_boolean())
-			return result_type(m_right. evalVal(a_env). as_boolean());
-		else
-			return result_type(false);
+		const result_type left = m_left. evalVal(a_env);
+		return	left. as_boolean()
+				?	m_right. evalVal(a_env)
+				:	left;
 	}
 
 public:
@@ -72,10 +72,10 @@ public:
 
 	result_type evalVal (IEnvironment& a_env) const
 	{
-		if (m_left. evalVal(a_env). as_boolean())
-			return result_type(true);
-		else
-			return result_type(m_right. evalVal(a_env). as_boolean());
+		const result_type left = m_left. evalVal(a_env);
+		return	left. as_boolean()
+				?	left
+				:	m_right. evalVal(a_env);
 	}
 
 public:
@@ -115,10 +115,9 @@ public:
 
 	result_type evalVal (IEnvironment& a_env) const
 	{
-		if (m_left. evalVal(a_env). as_boolean())
-			return result_type(m_right. evalVal(a_env). as_boolean());
-		else
-			return result_type(true);
+		return	m_left. evalVal(a_env). as_boolean()
+				?	m_right. evalVal(a_env)
+				:	result_type(true);
 	}
 
 public:
@@ -166,8 +165,8 @@ public:
 			a_previous
 		>  *(	re("\\s*&&\\s*") * M0 > a_previous > pass * M1 * m_and
 			|	re("\\s*\\|\\|\\s*") * M0 > a_previous > pass * M1 * m_or
-			|	re("\\s*\\^\\s*") * M0 > a_previous > pass * M1 * m_xor
-			|	re("\\s*~\\s*") * M0 > a_previous > pass * M1 * m_implies
+			|	re("\\s*\\^\\^\\s*") * M0 > a_previous > pass * M1 * m_xor
+			|	re("\\s*->\\s*") * M0 > a_previous > pass * M1 * m_implies
 			);
 	}
 

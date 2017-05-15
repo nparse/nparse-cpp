@@ -107,9 +107,8 @@ string_t Tokenizer::decode (const iterator_t& a_begin, const iterator_t& a_end)
 
 	// Prepare a regular expression object that will search for escape sequences
 	// within the token definition.
-	// @todo: get rid of temporary string objects and regex
-	buf << string_t("(?<!\\\\)\\\\(u([0-9a-f]{2,4})|[") << *a_begin
-		<< string_t("\\\\tnr])");
+	// @todo: tokenizer regex won't work if string_t is narrow
+	buf << L"\\\\(\\\\|u([0-9a-f]{2,4})|[" << *a_begin << L"tnr])";
 	const boost::basic_regex<string_t::value_type> escape_sq(buf. str());
 
 	// Clean up temporary string buffer.

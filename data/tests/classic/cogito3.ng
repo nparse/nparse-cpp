@@ -25,7 +25,5 @@ F := { n = lrc(n); } (
     ||  if $T ,? then $F
 );
 
-S := (
-       $T:P { result = "it is true, that \"$P\""; }
-    || $F:P { result = "it is not true, that \"$P\""; }
-    ) ^$;
+S :=    $T:P ^$ { result: "it is true, that \"$P\"" }
+    ||  $F:P ^$ { result: "it is not true, that \"$P\"" };

@@ -105,18 +105,17 @@ class Operator: public IOperator
 {
 	bool jump (const hnd_arg_t& arg)
 	{
-		// Instantiate acceptor.
+		const anta::range<SG>::type& range = get_accepted_range(arg);
+		// Instantiate the acceptor.
 		const anta::Acceptor<NLG>* acceptor;
-		if (*arg. state. get_range(). first == L'"')
+		if (*(range. first) == L'"')
 		{
-			acceptor =& arg. staging. acceptor(new MetaAcceptor(
-				get_accepted_range(arg), arg. staging));
+			acceptor =& arg. staging. acceptor(
+					new MetaAcceptor(range, arg. staging));
 		}
 		else
 		{
-			// Get the definition of the acceptor.
-			const string_t def = Tokenizer::decode(get_accepted_range(arg));
-			acceptor =& arg. staging. acceptor(def);
+			acceptor =& arg. staging. acceptor(Tokenizer::decode(range));
 		}
 		// Define transition label.
 		static const anta::Label<NLG> label(true);
@@ -132,7 +131,8 @@ class Operator: public IOperator
 	bool call1 (const hnd_arg_t& arg)
 	{
 		// Get the name of the callee subnetwork entry point.
-		const string_t name = Tokenizer::decode(get_accepted_range(arg));
+		const anta::range<SG>::type& range = get_accepted_range(arg);
+		const string_t name = Tokenizer::decode(range);
 		// Create a new joint of appropriate type (call).
 		IStaging::joint_pointer joint( arg. staging. cluster(name) );
 		// Push the new joint into the LL stack.
@@ -145,7 +145,8 @@ class Operator: public IOperator
 	bool call2 (const hnd_arg_t& arg)
 	{
 		// Get the name of the callee subnetwork entry point.
-		const string_t name = Tokenizer::decode(get_accepted_range(arg));
+		const anta::range<SG>::type& range = get_accepted_range(arg);
+		const string_t name = Tokenizer::decode(range);
 		// Create a new joint of appropriate compound type.
 		IStaging::joint_pointer joint(
 			anta::ndl::JointCall<NLG>(arg. staging. cluster(name))

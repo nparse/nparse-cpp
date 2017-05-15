@@ -82,7 +82,7 @@ public:
 					p0 = p; // chop off opening spaces
 					state = m_cc. is_quote(*p) ? 3 : 2;
 				}
-				else if (! m_accept_spaces)
+				else if (! m_skip_spaces)
 				{
 					return;
 				}
@@ -121,14 +121,14 @@ public:
 	}
 
 public:
-	Token (const Class_& a_cc = Class_(), const bool a_accept_spaces = true):
-		m_cc (a_cc), m_accept_spaces (a_accept_spaces)
+	Token (const Class_& a_cc = Class_(), const bool a_skip_spaces = true):
+		m_cc (a_cc), m_skip_spaces (a_skip_spaces)
 	{
 	}
 
 private:
 	Class_ m_cc;
-	bool m_accept_spaces;
+	bool m_skip_spaces;
 
 };
 
@@ -212,10 +212,10 @@ template <typename Class_>
 struct token_config
 {
 	const Class_& cc;
-	bool accept_spaces;
+	bool skip_spaces;
 
-	token_config (const Class_& a_cc, const bool a_accept_spaces):
-		cc (a_cc), accept_spaces (a_accept_spaces)
+	token_config (const Class_& a_cc, const bool a_skip_spaces):
+		cc (a_cc), skip_spaces (a_skip_spaces)
 	{
 	}
 
@@ -230,7 +230,7 @@ struct eval_terminal<M_, token_config<Class_> >
 	result_type operator() (const Expr_& a_expr, Rule<M_>& a_rule) const
 	{
 		const token_config<Class_>& cfg = proto::value(a_expr);
-		return a_rule(sas::Token<M_, Class_>(cfg. cc, cfg. accept_spaces));
+		return a_rule(sas::Token<M_, Class_>(cfg. cc, cfg. skip_spaces));
 	}
 
 };
@@ -246,10 +246,10 @@ using namespace detail;
 
 template <typename Class_>
 typename proto::terminal<token_config<Class_> >::type token (
-		const Class_& a_cc = Class_(), const bool a_accept_spaces = true)
+		const Class_& a_cc = Class_(), const bool a_skip_spaces = true)
 {
 	const typename proto::terminal<token_config<Class_> >::type res =
-		{ token_config<Class_>(a_cc, a_accept_spaces) };
+		{ token_config<Class_>(a_cc, a_skip_spaces) };
 	return res;
 }
 

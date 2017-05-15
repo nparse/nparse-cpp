@@ -6,19 +6,32 @@ config:
 
 test1:
     config:
-        entry_point: common-variable-operations
-    input:      ""
+        entry_point:   common-variable-operations
+    input:             ""
     check:
-        v1:     true
-        v2:     false
-        v3:     123
-        v4:     -123
-        v5:     2.000000e-05
-        v6:     -1.600000e+08
-        v7:     ""
-        v8:     hello
-        v9:     "{z: 123, y: false, x: true}"
-        v10:    "{v3: 123, v2: false, v1: true}"
-        v11:    false
-        v12:    true
-        v13:    "{3: hello, 2: 123, 1: false, 0: true}"
+        v1:            true
+        v2:            false
+        v3:            123
+        v4:            -123
+        v5:            2.000000e-05
+        v6:            -1.600000e+08
+        v7:            ""
+        v8:            hello
+        v9:            "{z: 123, y: false, x: true}"
+        v10:           "{v3: 123, v2: false, v1: true}"
+        v11:           false
+        v12:           true
+        v13:           "{3: hello, 2: 123, 1: false, 0: true}"
+        v1_type:       boolean
+        v2_type:       boolean
+        v3_type:       integer
+        v4_type:       integer
+        v5_type:       real
+        v6_type:       real
+        v7_type:       string
+        v8_type:       string
+        v9_type:       array
+        v10_type:      array
+        v11_type:      boolean
+        v12_type:      boolean
+        v13_type:      array

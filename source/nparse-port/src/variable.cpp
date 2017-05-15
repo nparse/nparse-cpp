@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace nparse {
 
-// @todo: This template is generic enough to be moved somewhere outside.
+// @todo: lister<Keys_> is generic enough to be used elsewhere
 template <typename Keys_>
 class lister:
 	public std::iterator<std::output_iterator_tag, void, void, void, void>

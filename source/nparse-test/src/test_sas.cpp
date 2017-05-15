@@ -171,7 +171,7 @@ TEST_F(test_sas, regex1)
 	EXPECT_EQ( item(3, 0, 1), spec[3] );
 }
 
-//TODO: Fix test_sas.regex2 (RegEx<M> doesn't search by default)
+// @todo: fix test_sas.regex2 (RegEx<M> doesn't search by default)
 //TEST_F(test_sas, regex2)
 //{
 //	sas::RegEx<M1> acc("(fgh|GMT|hi)");

@@ -1,0 +1,15 @@
+T := null | boolean | integer | real | string | array;
+V := ^[^\s]+;
+S := $T:t0 $V:v0? ('=='|'!='):op $T:t1 $V:v1? ^$
+     {
+        value0 = (v0 == null) ? null : call(t0, v0);
+        value1 = (v1 == null) ? null : call(t1, v1);
+        type0 = typeof(value0);
+        type1 = typeof(value1);
+        switch (op) {
+        case '==': result = (value0 == value1);
+                   break;
+        case '!=': result = (value0 != value1);
+                   break;
+        }
+     };

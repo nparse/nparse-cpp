@@ -1,0 +1,29 @@
+script:
+    - 0001/grammar1.ng
+    - 0001/grammar2.ng
+    - 0001/grammar3.ng
+    - 0001/grammar4.ng
+    - 0001/grammar5.ng
+    - 0001/grammar6.ng
+    - 0001/grammar7.ng
+    - 0001/grammar8.ng
+
+test1:
+    input:             "alpha<12345>omega"
+    traces:            0
+
+test2:
+    input:             "alpha<12341>omega"
+    traces:            1
+    forest:
+        - (S alpha (T < 12341 >) omega)
+    check:
+        result:        14321
+
+test3:
+    input:             "alpha<59875>omega"
+    traces:            1
+    forest:
+        - (S alpha (T < 59875 >) omega)
+    check:
+        result:        57895

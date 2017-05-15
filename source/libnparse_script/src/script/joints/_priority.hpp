@@ -31,9 +31,9 @@ enum operator_priority
 {
 	PRIORITY_OPERAND 		= 0,		// acceptor, $Node, $:Node, (X), _, #
 	PRIORITY_FUNCTOR		= 100,		// <res:X {pre} post>, [ X ]
-	PRIORITY_PREFIX			= 200,		// & X, ! X
-	PRIORITY_POSTFIX		= 300,		// X +, X *, X ?, X :y, X *123
-	PRIORITY_ALTERNATION_LC	= 400,		// X | Y
+	PRIORITY_ALTERNATION_LC	= 200,		// X | Y
+	PRIORITY_PREFIX			= 300,		// & X, ! X
+	PRIORITY_POSTFIX		= 400,		// X +, X *, X ?, X :y, X *123
 	PRIORITY_COMPOSITION	= 500,		// X ^ Y, X / Y, X % Y
 	PRIORITY_SEQUENCING		= 600,		// X Y
 	PRIORITY_CONDITIONAL	= 700,		// X <? Y, X ?> Y

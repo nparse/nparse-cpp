@@ -31,6 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <boost/lexical_cast.hpp>
 #include <plugin/static.hpp>
 #include <util/free.hpp>
+#include <nparse/_version.hpp>
 #include "nparse_app.hpp"
 #include "tracer_nlg.hpp"
 #include "serializer.hpp"
@@ -225,6 +226,9 @@ bool nParseApp::configure (const int argc, char** argv)
 		("entry-label,E",		po::value<int>()
 									-> default_value(1),
 								"Set entry arc [label]")
+		("lr-threshold,r",		po::value<long>()
+									-> default_value(64),
+								"Set or disable LR [threshold]")
 #if defined(DEBUG_PRINT)
 		("debug-print,d",		po::value<std::string>()
 									-> default_value("")
@@ -239,10 +243,10 @@ bool nParseApp::configure (const int argc, char** argv)
 									-> default_value(
 								"%i\\t%j\\t%label\\t%node\\t%text\\t%list\\n"),
 								"Set trace format using placeholders:\n"
-								"  \\t	   tab\n"
-								"  \\n	   line break\n"
-								"  %i	  trace number\n"
-								"  %j	  state number\n"
+								"  \\t     tab\n"
+								"  \\n     line break\n"
+								"  %i     trace number\n"
+								"  %j     state number\n"
 								"  %label transition label\n"
 								"  %type  transition type\n"
 								"  %node  target node name\n"
@@ -462,6 +466,7 @@ bool nParseApp::configure (const int argc, char** argv)
 #endif
 	m_entry_point = vm["entry-point"]. as<std::string>();
 	m_entry_label = vm["entry-label"]. as<int>();
+	m_lr_threshold = vm["lr-threshold"]. as<long>();
 #if defined(DEBUG_PRINT)
 	m_debug_print = vm["debug-print"]. as<std::string>();
 #endif
@@ -643,6 +648,12 @@ int nParseApp::parse_input_text ()
 	// Create processor and link it to the compiled grammar's entry point.
 	anta::Processor<NLG> processor(m_staging -> cluster(m_entry_point),
 			m_entry_label);
+#if defined(DEBUG_PRINT)
+	if (! m_debug_print. empty())
+	{
+		processor. get_observer(). link(open_file(m_debug_print));
+	}
+#endif
 #if defined(NPARSE_SWAP_FILE)
 	if (! m_input_swap. empty())
 	{
@@ -650,12 +661,7 @@ int nParseApp::parse_input_text ()
 	}
 #endif
 	processor. set_capacity(m_input_pool);
-#if defined(DEBUG_PRINT)
-	if (! m_debug_print. empty())
-	{
-		processor. get_observer(). link(open_file(m_debug_print));
-	}
-#endif
+	processor. set_lr_threshold(m_lr_threshold);
 
 	// Create tracer and link it to the processor.
 	TracerNLG tracer(processor);

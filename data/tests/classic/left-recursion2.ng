@@ -1,0 +1,10 @@
+/*
+ * Since version 0.1.9 there's no need to use recursive counter, it just works.
+ */
+
+// direct left-recursive rule of form X -> X Y | Y
+X := $X $Y || $Y;
+Y := ^\w+;
+
+// root rule
+S := <X> ^$;

@@ -32,7 +32,7 @@ namespace {
 
 using namespace nparse;
 
-// @todo: can we avoid argument list copying?
+// @todo: can copying of argument list be avoided in call() function?
 class Function: public IFunction
 {
 public:
@@ -48,6 +48,7 @@ public:
 				<< ex::message("invalid argument count");
 		}
 
+		// (argument list copying)
 		const arguments_type args(a_arguments. begin() + 1, a_arguments. end());
 		return instantiate(a_env, a_arguments). evalVal(a_env, args);
 	}
@@ -62,6 +63,7 @@ public:
 				<< ex::message("invalid argument count");
 		}
 
+		// (argument list copying)
 		const arguments_type args(a_arguments. begin() + 1, a_arguments. end());
 		return instantiate(a_env, a_arguments). evalRef(a_env, args);
 	}

@@ -1,0 +1,20 @@
+script:
+    - string1.ng
+    - string2.ng
+
+test1:
+    input:             ""
+    check:
+        a:             "\\\n\"\\"
+        b:             "\\\t'\\"
+        c:             \alpha
+        d:             omega\
+        e:             <\alpha>
+        f:             <$c>
+        c_rev:         ahpla\
+        d_sub1:        mega
+        d_sub2:        game
+        d_sub3:        mega
+        d_sub4:        agem
+        c_sub1:        p
+        c_sub2:        ""

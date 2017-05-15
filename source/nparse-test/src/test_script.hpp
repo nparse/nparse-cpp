@@ -27,6 +27,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef SRC_TEST_SCRIPT_HPP_
 #define SRC_TEST_SCRIPT_HPP_
 
+#include <string>
+#include <vector>
+#include <ostream>
 #include <boost/filesystem.hpp>
 #include <gtest/gtest.h>
 #include <yaml-cpp/yaml.h>
@@ -39,6 +42,7 @@ protected:
 	void SetUp ();
 	void TearDown ();
 
+	std::string m_config_name;
 	YAML::Node m_config_data;
 	typedef std::vector<std::string> scripts_t;
 	scripts_t m_scripts;

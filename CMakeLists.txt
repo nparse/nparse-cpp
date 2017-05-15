@@ -10,12 +10,13 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/utils/cmake)
 project(nParse)
 set(NPARSE_MAJOR 0)
 set(NPARSE_MINOR 1)
-set(NPARSE_PATCH 8)
-add_definitions(-DNPARSE_CMPH)
+set(NPARSE_PATCH 9)
 
 #
 #   Build configuration.
 #
+
+add_definitions(-DNPARSE_CMPH)
 
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -91,16 +92,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS} -std=c++03")
 #   Determine build number.
 #
 
-set(NPARSE_BUILD_FILE ${CMAKE_SOURCE_DIR}/build/index)
+set(BUILD_NUMBER_FILE ${CMAKE_SOURCE_DIR}/.build-number)
 
-if(EXISTS ${NPARSE_BUILD_FILE})
-    file(READ ${NPARSE_BUILD_FILE} NPARSE_BUILD)
+if(EXISTS ${BUILD_NUMBER_FILE})
+    file(READ ${BUILD_NUMBER_FILE} BUILD_NUMBER)
 else()
-    set(NPARSE_BUILD 0)
+    set(BUILD_NUMBER 0)
 endif()
 
-math(EXPR NPARSE_BUILD 1+${NPARSE_BUILD})
-file(WRITE ${NPARSE_BUILD_FILE} ${NPARSE_BUILD})
+math(EXPR BUILD_NUMBER 1+${BUILD_NUMBER})
+file(WRITE ${BUILD_NUMBER_FILE} ${BUILD_NUMBER})
 
 #
 #   Compute derivative version-dependent constants
@@ -121,13 +122,17 @@ file(
     "#define NPARSE_MINOR         ${NPARSE_MINOR}\n"
     "#define NPARSE_PATCH         ${NPARSE_PATCH}\n"
     "\n"
-    "#define NPARSE_VERSION_STR\\\n"
-    "           \"${CMAKE_PROJECT_NAME} ${NPARSE_MAJOR}.${NPARSE_MINOR}.${NPARSE_PATCH}\"\\\n"
-    "           \" ${CMAKE_BUILD_TYPE} #${NPARSE_BUILD} \" BOOST_COMPILER\\\n"
-    "           \" ${CMAKE_SYSTEM}\"\n"
-    "\n"
-    "#define NPARSE_VERSION_TAG  \"${NPARSE_MAJOR}.${NPARSE_MINOR}.${NPARSE_PATCH}\"\n"
     "#define NPARSE_VERSION       ${NPARSE_VERSION}\n"
+    "#define NPARSE_VERSION_TAG   \"${NPARSE_MAJOR}.${NPARSE_MINOR}.${NPARSE_PATCH}\"\n"
+    "\n"
+    "#define NPARSE_STR_(x) #x\n"
+    "#define NPARSE_STR(x) NPARSE_STR_(x)\n"
+    "\n"
+    "#define NPARSE_VERSION_STR  \\\n"
+    "        \"nParse \" NPARSE_VERSION_TAG \" build ${BUILD_NUMBER} (${CMAKE_BUILD_TYPE})\\n\"  \\\n"
+    "        \"built with \" BOOST_COMPILER \"\\n\"  \\\n"
+    "        \"on ${CMAKE_SYSTEM}\\n\"  \\\n"
+    "        \"using C++Boost version \" NPARSE_STR(BOOST_VERSION)\n"
     "\n"
     "#endif /* NPARSE__VERSION_HPP_ */\n"
 )
@@ -210,7 +215,7 @@ enable_testing()
 #   Intallation & packaging.
 #
 
-install(DIRECTORY ./include/nparse-port DESTINATION ./include)
+install(DIRECTORY ./include/nparse-port DESTINATION include)
 
 set(CPACK_GENERATOR                     "TGZ")
 set(CPACK_PACKAGE_NAME                  ${CMAKE_PROJECT_NAME})
@@ -223,5 +228,7 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER     "Alex Kudinov <alex.s.kudinov@gmail.com>
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE       "https://nparse.com")
 
 include(CPack)
-set(CPACK_INSTALL_CMAKE_PROJECTS    "bin;${CMAKE_PROJECT_NAME};nparse;/")
-set(CPACK_INSTALL_CMAKE_PROJECTS    "${CPACK_INSTALL_CMAKE_PROJECTS};lib;${CMAKE_PROJECT_NAME};nparse-port;/")
+set(CPACK_INSTALL_CMAKE_PROJECTS
+    "bin;${CMAKE_PROJECT_NAME};nparse;/"
+    "lib;${CMAKE_PROJECT_NAME};nparse-port;/"
+)

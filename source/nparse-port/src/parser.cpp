@@ -30,9 +30,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <boost/scoped_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <nparse/nparse.hpp>
+#include <nparse/_version.hpp>
+#include <nparse-port/parser.hpp>
 #include <anta/_aux/tracer.hpp>
 #include <plugin/static.hpp>
-#include <nparse-port/parser.hpp>
 #include "variable_data.hpp"
 #include "named_property.hpp"
 
@@ -56,6 +57,7 @@ struct ParserData
 	std::string input_swap;
 	std::string entry_point;
 	long entry_label;
+	long lr_threshold;
 
 	// initial values of trace variables
 	typedef std::map<
@@ -85,6 +87,7 @@ struct ParserData
 		input_pool (16 << 10),		// [ kB ]
 		entry_point ("S"),
 		entry_label (1),
+		lr_threshold (64),
 		// stats
 		iteration_count (0),
 		shift (0),
@@ -97,6 +100,7 @@ struct ParserData
 			("input_swap", input_swap)
 			("entry_point", entry_point)
 			("entry_label", entry_label)
+			("lr_threshold", lr_threshold)
 			(init); // fallback
 		staging = staging_factory -> createInstance();
 	}
@@ -112,6 +116,7 @@ struct ParserData
 		}
 #endif
 		processor -> set_capacity(input_pool << 10);
+		processor -> set_lr_threshold(lr_threshold);
 		tracer. reset(new anta::aux::Tracer<NLG>(*processor));
 	}
 
@@ -497,7 +502,8 @@ void Parser::reset ()
 		return;
 
 	case stRunning:
-		break; // @todo: throw critical exception
+		// @todo: throw critical exception if parser gets reset while running
+		break;
 
 	case stLogicError:
 	case stSyntaxError:
@@ -651,7 +657,7 @@ void Parser::set (const char* a_variable, const double a_value)
 
 void Parser::set (const char* a_variable, const char* a_value)
 {
-	m_ -> config[ a_variable ] = a_value;
+	m_ -> config[ a_variable ] = a_value ? a_value : "";
 }
 
 void Parser::clear ()

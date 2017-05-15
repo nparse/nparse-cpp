@@ -1,0 +1,6 @@
+S := alpha <qq:T conf("^(?'x'\d+)") test(x)> omega ^$ {end();};
+T := '<' "$x" '>';
+rev(arg) = arg[len(arg):0];
+test(arg) = arg[0] == arg[-1];
+conf(arg) = {x: arg};
+proc end() { result = rev(qq.x); };

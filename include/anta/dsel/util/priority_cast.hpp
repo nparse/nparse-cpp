@@ -34,28 +34,34 @@ namespace anta { namespace dsel { namespace util {
 namespace mpl = boost::mpl;
 
 /**
+ *	The priority<Type_, M_> metafunction defines a list of type priorities for
+ *	binary operators that require both arguments to be of the same type, but
+ *	also allow implicit type casting. If argument types are different then the
+ *	argument which's type has lower priority gets converted to the type of the
+ *	other argument.
  *
  *	@{ */
 
-template <typename T_, typename M_ = model<> >
+template <typename Type_, typename M_ = model<> >
 struct priority: mpl::int_<9> {};
 
 #define ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY(TYPE, P) \
 	template <typename M_> \
 	struct priority<typename TYPE<M_>::type, M_>: mpl::int_<P> {};
 ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY(aux::null,		0)
-ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY(aux::boolean,		1)
+ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY(aux::array,		1)
 ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY(aux::integer,		2)
 ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY(aux::real,		3)
-ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY(string,			4)
-ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY(aux::array,		5)
+ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY(aux::boolean,		4)
+ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY(string,			5)
 ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY(aux::Variable,	6)
 #undef ANTA_DSEL_UTIL_PRIORITY_CAST_DECLARE_PRIORITY
 
 /**	@} */
 
 /**
- *
+ *	probe<M_>(var) is a helper tool used to extract type priority from dynamic
+ *	values at runtime.
  *	@{ */
 
 template <typename M_>
@@ -81,7 +87,8 @@ inline typename probe_functor<M_>::result_type probe (
 /**	@} */
 
 /**
- *
+ *	choose<U_, V_>::type is a metafunction that, given two types, returns the
+ *	one that has greater priority.
  */
 template <typename U_, typename V_>
 struct choose
@@ -93,10 +100,15 @@ struct choose
 
 /******************************************************************************/
 
+/**
+ *	priority_cast_functor<L, R, Greater(L, R)> is a functor that delegates call
+ *	either to left_cast or right_cast depending on which of the two given types
+ *	has higher priority according to priority<Type_, M_> metafunction.
+ *	@{ */
 template <typename Left_, typename Right_, typename Greater_>
 struct priority_cast_functor;
 
-// (operands are of the same type)
+// (both operands are of the same type)
 template <typename Left_>
 struct priority_cast_functor<Left_, Left_, Left_>
 {
@@ -135,7 +147,7 @@ struct priority_cast_functor<Left_, Right_, Right_>
 
 };
 
-// (the type priority of the right operand cannot be determined on compile time)
+// (type priority of the right operand cannot be determined at compile time)
 template <typename M_, typename Left_>
 struct priority_cast_functor<Left_, aux::Variable<M_>, aux::Variable<M_> >
 {
@@ -150,7 +162,7 @@ struct priority_cast_functor<Left_, aux::Variable<M_>, aux::Variable<M_> >
 
 };
 
-// (the type priority of the left operand cannot be determined on compile time)
+// (type priority of the left operand cannot be determined at compile time)
 template <typename M_, typename Right_>
 struct priority_cast_functor<aux::Variable<M_>, Right_, aux::Variable<M_> >
 {
@@ -165,8 +177,7 @@ struct priority_cast_functor<aux::Variable<M_>, Right_, aux::Variable<M_> >
 
 };
 
-// (none of the type priorities of any of the operands cannot be determined on
-// compile time)
+// (type priority of neither one of operands can be determined at compile time)
 template <typename M_>
 struct priority_cast_functor<aux::Variable<M_>, aux::Variable<M_>,
 	  aux::Variable<M_> >
@@ -181,8 +192,13 @@ struct priority_cast_functor<aux::Variable<M_>, aux::Variable<M_>,
 	}
 
 };
+/**	@} */
 
-struct priority_cast_object
+/**
+ *	priority_cast_type and priority_cast are a convenience type and its instance
+ *	respectively used to simplify priority_cast_functor invocation syntax.
+ *	@{ */
+struct priority_cast_type
 {
 	template <typename Left_, typename Right_, typename F_>
 	typename F_::result_type operator() (const Left_& a_left,
@@ -194,7 +210,8 @@ struct priority_cast_object
 
 };
 
-const priority_cast_object priority_cast = priority_cast_object();
+const priority_cast_type priority_cast = priority_cast_type();
+/**	@} */
 
 /******************************************************************************/
 

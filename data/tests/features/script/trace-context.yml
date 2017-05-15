@@ -1,0 +1,53 @@
+script:
+    - trace-context1.ng
+    - trace-context2.ng
+
+test_A:
+    config:
+        entry_point:   A
+    input:             a1b2c3d4
+    traces:            1
+    forest:
+        - (A a1b2c3d4)
+    check:
+        arg:           a1b2c3d4
+
+test_P1:
+    input:             p1 a1b2c3d4
+    traces:            1
+    forest:
+        - (S (P1 p1 (A a1b2c3d4)))
+    check:
+        q.res:         a1b2c3d4
+
+test_F1:
+    input:             f1 a1b2c3d4
+    traces:            1
+    forest:
+        - (S (F1 f1 (A a1b2c3d4)))
+    check:
+        q.res:         null
+
+test_F2:
+    input:             f2 a1b2c3d4
+    traces:            1
+    forest:
+        - (S (F2 f2 (A a1b2c3d4)))
+    check:
+        q.res:         null
+
+test_F3:
+    input:             f3 a1b2c3d4
+    traces:            1
+    forest:
+        - (S (F3 f3 (A a1b2c3d4)))
+    check:
+        q.res:         a1b2c3d4
+
+test_F4:
+    input:             f4 a1b2c3d4
+    traces:            1
+    forest:
+        - (S (F4 f4 (A a1b2c3d4)))
+    check:
+        q.res:         a1b2c3d4

@@ -1,0 +1,21 @@
+script:
+    - multiple_namespaces1.ng
+
+config:
+    entry:             Foo.S
+
+test1:
+    input:             alpha
+    traces:            1
+    forest:
+        - "(Foo.S (Gamma.S (Alpha.S alpha)))"
+
+test2:
+    input:             beta
+    traces:            1
+    forest:
+        - "(Foo.S (Gamma.S (Beta.S beta)))"
+
+test3:
+    input:             gamma
+    traces:            0

@@ -1,0 +1,6 @@
+import mod1.ng;
+import mod2.ng;
+import mod3.ng;
+
+// Demonstraces how single namespace `modNS` can be defined by multiple modules `mod1`, `mod2` and `mod3`.
+S := $modNS.T ^$;

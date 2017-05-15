@@ -109,6 +109,17 @@ public:
 	}
 
 protected:
+	/**
+	 *	Ensure that maximum allowed left recursion depth has not been reached
+	 *	yet for this combination of target node and position.
+	 */
+	bool test_lr (const Arc<M_>* a_arc,
+			const typename iterator<M_>::type& a_position)
+	{
+		return true;
+	}
+
+protected:
 	State<M_>* m_state; /**< current state pointer */
 
 };
@@ -246,7 +257,9 @@ public:
 	State<M_>* spawn (const typename iterator<M_>::type& a_from,
 		const typename iterator<M_>::type& a_to)
 	{
-		return new(*this) StateCommon<M_>(m_state, m_arc, a_from, a_to);
+		return Base<Processor<M_>, M_>::test_lr(m_arc, a_from)
+			?  new(*this) StateCommon<M_>(m_state, m_arc, a_from, a_to)
+			:  NULL;
 	}
 
 	/**
@@ -254,22 +267,24 @@ public:
 	 *
 	 *	@param	a_descendant
 	 *		Descendant state pointer
-	 *	@return
-	 *		Same descendant state pointer (convenience)
 	 */
-	State<M_>* push (State<M_>* a_descendant)
+	void push (State<M_>* a_descendant)
 	{
-		if (a_descendant -> get_arc(). get_target(). get_entanglement() == 0)
+		if (a_descendant == NULL)
 		{
-			m_queue. push_back(a_descendant);
-			m_observer. notify(evPUSH, a_descendant);
+			// This happens when left recursion depth for target node reaches
+			// maxinum allowed depth.
 		}
-		else
+		else if (a_descendant -> get_arc(). get_target(). get_entanglement())
 		{
 			m_deferred. push_back(a_descendant);
 			m_observer. notify(evDEFER, a_descendant);
 		}
-		return a_descendant;
+		else
+		{
+			m_queue. push_back(a_descendant);
+			m_observer. notify(evPUSH, a_descendant);
+		}
 	}
 
 	/**
@@ -280,17 +295,15 @@ public:
 	 *		Iterator pointing to the beginning of the source range (inclusive)
 	 *	@param	a_to
 	 *		Iterator pointing to the end of the source range (exclusive)
-	 *	@return
-	 *		Descendant state pointer
 	 */
-	State<M_>* push (const typename iterator<M_>::type& a_from,
+	void push (const typename iterator<M_>::type& a_from,
 		const typename iterator<M_>::type& a_to)
 	{
 		// NOTE: The generation of new states implemented as two separate steps,
 		//		 namely spawn and push, provides acceptors with the crucially
 		//		 important ability to interact with descendant states before
 		//		 they get added to the processing queue.
-		return push(spawn(a_from, a_to));
+		push(spawn(a_from, a_to));
 	}
 
 private:
@@ -590,7 +603,7 @@ uint_t Processor<M_>::run0 ()
 		while (m_state -> get_bunch(). get(m_arc))
 		{
 			// Generate next portion of descendant states for the current arc
-			// and the current position in the analyzed context.
+			// and the current position in the source.
 			m_arc -> get_acceptor(). accept(m_C, m_state -> get_range(), *this);
 
 			// If the current arc implies an invocation or an assertion then the
