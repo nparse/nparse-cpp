@@ -1,6 +1,7 @@
 script:
     - calculator1.ng
     - calculator2.ng
+    - calculator2a.ng
 
 config:
     eps:               1.0e-9

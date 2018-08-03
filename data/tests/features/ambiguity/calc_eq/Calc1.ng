@@ -1,0 +1,17 @@
+S := <x:L3> '=' <y:L3> { x.res ?= y.res;
+                         stop(x.exp == y.exp);
+                         guess = x.exp + ' = ' + y.exp;
+                       }
+     ^$;
+
+L3 := $L2 || <a:L2> '+' | '?' <b:L3> { res = a.res + b.res;
+                                       exp = a.exp + ' + ' + b.exp;
+                                     };
+
+L2 := $L1 || <a:L1> '*' | '?' <b:L2> { res = a.res * b.res;
+                                       exp = a.exp + ' * ' + b.exp;
+                                     };
+
+L1 := ^\d+ { res = integer($);
+             exp = $;
+           };
