@@ -84,15 +84,51 @@ public:
 	{
 		if (m_lr_threshold > 0 && a_arc -> get_type() == atExtend)
 		{
+			// Create key for positional check.
 			const lr_key_type lrk(&(a_arc -> get_target()), a_position);
-			typename lr_table_type::iterator lri = m_lr_table. find(lrk);
-			if (lri == m_lr_table. end())
+
+			// This loop verifies the possibility of left recursive invocation.
+			const State<M_>* p = m_state;
+			while (p != NULL)
 			{
-				m_lr_table. insert(typename lr_table_type::value_type(lrk, 0));
+				// Get the callee node for this level.
+				const State<M_>* callee = p -> get_callee();
+
+				// If there's no callee then we're on the surface and hence left
+				// recursion is impossible.
+				if (callee == NULL)
+				{
+					p = NULL;
+					break;
+				}
+
+				// Check if this node has been invoked already (excluding this
+				// invocation).
+				if (callee != m_state &&
+						&(callee -> get_arc(). get_target()) == lrk. first)
+				{
+					// At this point positional left recursion check becomes
+					// feasible.
+					break;
+				}
+
+				// Raise up to the caller level.
+				p = callee -> get_ancestor();
 			}
-			else if (++ (lri -> second) > m_lr_threshold)
+
+			// If recursive invocation is detected, perform the positional check.
+			if (p != NULL)
 			{
-				return false;
+				typename lr_table_type::iterator lri = m_lr_table. find(lrk);
+				if (lri == m_lr_table. end())
+				{
+					m_lr_table. insert(
+							typename lr_table_type::value_type(lrk, 0));
+				}
+				else if (++ (lri -> second) > m_lr_threshold)
+				{
+					return false;
+				}
 			}
 		}
 		return true;
