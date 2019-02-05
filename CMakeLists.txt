@@ -156,7 +156,7 @@ find_package(
         filesystem
         iostreams
         program_options
-        python
+        python27
         regex
         system
 )
@@ -188,8 +188,10 @@ else()
     message("!! nParse: swap file for state pool is disabled")
 endif()
 
-if(Boost_PYTHON_FOUND STREQUAL "ON" AND PYTHONLIBS_FOUND)
+if(Boost_PYTHON27_FOUND STREQUAL "ON" AND PYTHONLIBS_FOUND)
     include_directories(${PYTHON_INCLUDE_DIRS})
+else()
+    message("!! nParse: building without Python support")
 endif()
 
 #

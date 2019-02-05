@@ -19,14 +19,14 @@ else()
 endif()
 
 target_link_libraries(nparse-port
-    nparse_script
-    nparse_factory
-    nparse_runtime
-    ${Boost_PYTHON_LIBRARY}
+    ${PYTHON_LIBRARIES}
+    ${Boost_PYTHON27_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
-    ${PYTHON_LIBRARIES}
+    nparse_script
+    nparse_factory
+    nparse_runtime
 )
 
 set_target_properties(nparse-port PROPERTIES
